@@ -1,0 +1,2 @@
+export * from './lib/seed-common-lib.service';
+export * from './lib/seed-common-lib.component';
