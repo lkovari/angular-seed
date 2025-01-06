@@ -40,3 +40,14 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Angular workspace files to ignore
+node_modules/
+dist/
+tmp/
+out-tsc/
+coverage/
+package-lock.json
+
+# Environment files
+src/environments/*.ts
