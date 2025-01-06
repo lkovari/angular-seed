@@ -3,6 +3,9 @@
 - Tailwind
 - Scss
 - global error handling
+  - error-handler.service
+  - error-http.interceptor
+  - error-notification.service
 - separated core and shared
 - standalone environment
 - workspace architecture
