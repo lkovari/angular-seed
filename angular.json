@@ -17,7 +17,10 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/seed-app",
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
             "index": "projects/seed-app/src/index.html",
             "browser": "projects/seed-app/src/main.ts",
             "polyfills": [

@@ -6,7 +6,11 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "build-lib": "ng build seed-common-lib --configuration production",
+    "build-app": "ng build --project seed-app --configuration production --aot --base-href /angular-seed/",
+    "gitbuild": "npm run build-lib && npm run build-app",
+    "gitdeploy": "gh-pages -d dist"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +31,7 @@
     "@angular/cli": "^19.0.6",
     "@angular/compiler-cli": "^19.0.0",
     "@types/jasmine": "~5.1.0",
+    "gh-pages": "^6.3.0",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
