@@ -11,6 +11,9 @@
 - workspace architecture
 - seed-common-library
 - seed-app
+  - css grid layout
+  - separated and parametrized header, left sidebar, footer, "boody" components
+  - generate side menu from jsod menu descriptor
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
 
