@@ -226,7 +226,9 @@
         </defs>
       </svg>
       <h1>Hello, this is an Angular {{ title }}</h1>
-      <p>tailwind, Scss, ESlint, Prettier, standalone, modern angular 🎉</p>
+      <p class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-400">
+        styled with tailwind, Scss, ESlint, Prettier, standalone, modern angular 🎉
+      </p>
     </div>
     <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
@@ -332,5 +334,7 @@
 <!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
-
+      <div class="fgrid place-items-center h-screen text-magenta-500">
+        <lib-seed-common-lib></lib-seed-common-lib>
+      </div>
 <router-outlet />

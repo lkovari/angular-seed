@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import * as angular from '@angular/forms';
 
 @Component({
   selector: 'lib-seed-common-lib',
+  templateUrl: './lib-seed-common-lib.component.html',
+  styleUrl: './lib-seed-common-lib.component.scss',
   imports: [],
-  template: `
-    <p>
-      seed-common-lib works!
-    </p>
-  `,
-  styles: ``
 })
-export class SeedCommonLibComponent {
+export class SeedCommonLibComponent implements OnInit {
+  angularVersion!: string;
 
+  ngOnInit(): void {
+    this.angularVersion = angular.VERSION.full;
+  }
 }
