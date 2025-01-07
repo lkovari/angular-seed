@@ -13,7 +13,6 @@
 
   aside {
     display: block;
-    //min-width: 8rem;
     width: 8rem;
   }
 
@@ -75,6 +74,7 @@ aside {
 main {
   grid-area: main;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 footer {
