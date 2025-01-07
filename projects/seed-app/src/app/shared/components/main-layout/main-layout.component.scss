@@ -7,8 +7,9 @@
     'header header'
     'sidebar-left main'
     'footer footer';
-  height: 100vh;
-  gap: 0;
+    height: 100vh;
+    overflow: hidden;
+    gap: 0;
 
   aside {
     display: block;
