@@ -1,0 +1,17 @@
+<div class="layout-container" [ngClass]="{ 'aside-show': !sidebarVisible }">
+  <header class="bg-surface-brand-strong text-neutral-inverted">
+    <app-header (onSidebarVisibleChange)="toggleSidebar($event)"></app-header>
+  </header>
+  <aside
+    [ngClass]="sidebarVisible ? 'aside-show' : 'aside-hide'"
+    class="bg-surface-brand-strong text-neutral-inverted"
+  >
+    <app-left-side-menu [menuItems]="menuItems"></app-left-side-menu>
+  </aside>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+  <footer>
+    <app-footer></app-footer>
+  </footer>
+</div>

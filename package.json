@@ -10,7 +10,9 @@
     "build-lib": "ng build seed-common-lib --configuration production",
     "build-app": "ng build --project seed-app --configuration production --aot --base-href /angular-seed/",
     "gitbuild": "npm run build-lib && npm run build-app",
-    "gitdeploy": "gh-pages -d dist"
+    "gitdeploy": "gh-pages -d dist",
+    "lint": "ng lint",
+    "format": "prettier --write \"**/*.{ts,html,css,scss}\""
   },
   "private": true,
   "dependencies": {
@@ -30,10 +32,21 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.0.6",
+    "@angular-eslint/builder": "19.0.2",
+    "@angular-eslint/eslint-plugin": "19.0.2",
+    "@angular-eslint/eslint-plugin-template": "19.0.2",
+    "@angular-eslint/schematics": "19.0.2",
+    "@angular-eslint/template-parser": "19.0.2",
     "@angular/cli": "^19.0.6",
     "@angular/compiler-cli": "^19.0.0",
     "@types/jasmine": "~5.1.0",
+    "@typescript-eslint/eslint-plugin": "7.11.0",
+    "@typescript-eslint/parser": "7.11.0",
+    "angular-eslint": "19.0.2",
     "autoprefixer": "^10.4.20",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "gh-pages": "^6.3.0",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
@@ -43,7 +56,9 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^19.0.0",
     "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.6.2"
+    "typescript": "~5.6.2",
+    "typescript-eslint": "8.18.0"
   }
 }

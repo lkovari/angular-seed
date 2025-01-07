@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SeedCommonLibComponent } from './seed-common-lib.component';
+import { AngularVersionComponent } from './angular-version.component';
 
-describe('SeedCommonLibComponent', () => {
-  let component: SeedCommonLibComponent;
-  let fixture: ComponentFixture<SeedCommonLibComponent>;
+describe('AngularVersionComponent', () => {
+  let component: AngularVersionComponent;
+  let fixture: ComponentFixture<AngularVersionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SeedCommonLibComponent],
+      imports: [AngularVersionComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SeedCommonLibComponent);
+    fixture = TestBed.createComponent(AngularVersionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

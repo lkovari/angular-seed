@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import * as angular from '@angular/forms';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'lib-seed-common-lib',
@@ -7,10 +6,4 @@ import * as angular from '@angular/forms';
   styleUrl: './lib-seed-common-lib.component.scss',
   imports: [],
 })
-export class SeedCommonLibComponent implements OnInit {
-  angularVersion!: string;
-
-  ngOnInit(): void {
-    this.angularVersion = angular.VERSION.full;
-  }
-}
+export class SeedCommonLibComponent {}

@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SeedCommonLibComponent } from './seed-common-lib.component';
+import { HeaderComponent } from './header.component';
 
-describe('SeedCommonLibComponent', () => {
-  let component: SeedCommonLibComponent;
-  let fixture: ComponentFixture<SeedCommonLibComponent>;
+describe('HeaderComponent', () => {
+  let component: HeaderComponent;
+  let fixture: ComponentFixture<HeaderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SeedCommonLibComponent],
+      imports: [HeaderComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SeedCommonLibComponent);
+    fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

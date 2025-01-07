@@ -1,0 +1,26 @@
+.header-align {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-content: space-between;
+  align-items: flex-start;
+}
+
+.hamburger-align {
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}
+
+.tittle-text-align {
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}
+
+.tools-align {
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}

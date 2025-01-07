@@ -1,0 +1,15 @@
+{
+  "extends": "../../.eslintrc.json",
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["projects/seed-common-lib/tsconfig.*?.json"]
+      },
+      "rules": {
+        // TODO LK: Add specific rules for seed-common-lib here if needed
+      }
+    }
+  ]
+}

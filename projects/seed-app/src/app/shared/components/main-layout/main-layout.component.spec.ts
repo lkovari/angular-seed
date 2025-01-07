@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SeedCommonLibComponent } from './seed-common-lib.component';
+import { MainLayoutComponent } from './main-layout.component';
 
-describe('SeedCommonLibComponent', () => {
-  let component: SeedCommonLibComponent;
-  let fixture: ComponentFixture<SeedCommonLibComponent>;
+describe('MainLayoutComponent', () => {
+  let component: MainLayoutComponent;
+  let fixture: ComponentFixture<MainLayoutComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SeedCommonLibComponent],
+      imports: [MainLayoutComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SeedCommonLibComponent);
+    fixture = TestBed.createComponent(MainLayoutComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

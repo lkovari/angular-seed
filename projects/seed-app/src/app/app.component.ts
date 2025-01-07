@@ -1,12 +1,11 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { SeedCommonLibComponent } from '../../../seed-common-lib/src/public-api';
-
+import { Component, OnInit } from '@angular/core';
+import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
+import { SeedCommonLibComponent } from '../../../seed-common-lib/src/lib/seed-common-lib.component';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SeedCommonLibComponent],
+  imports: [MainLayoutComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'seed-app';
