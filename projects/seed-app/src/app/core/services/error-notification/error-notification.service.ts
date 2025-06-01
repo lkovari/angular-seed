@@ -11,7 +11,7 @@ export class ErrorNotificationService {
 
   readonly currentErrorEntries = this.errorSource.asReadonly();
 
-  constructor() { }
+  constructor() {}
 
   resetErrors(): void {
     this.errorSource.set([]);
@@ -25,8 +25,8 @@ export class ErrorNotificationService {
     const status = error.status || 'No status available';
     const errorEntry: ErrorEntry = { timestamp, message, stack, route, status };
 
-    this.errorSource.update(errors => [...errors, errorEntry]);
+    this.errorSource.update((errors) => [...errors, errorEntry]);
     console.log(`Errors: ${this.errorSource.length}`);
-    return errorEntry
+    return errorEntry;
   }
 }

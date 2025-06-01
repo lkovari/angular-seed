@@ -30,7 +30,7 @@ export class HeaderComponent implements OnDestroy {
     this.onSidebarVisibleChange.emit(this._sidebarVisible());
   });
 
-  constructor() { }
+  constructor() {}
 
   toggleSidebar(): void {
     this._sidebarVisible.update((value) => !value);

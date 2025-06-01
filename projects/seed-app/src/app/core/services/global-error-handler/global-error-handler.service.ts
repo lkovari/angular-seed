@@ -3,12 +3,12 @@ import { ErrorNotificationService } from '../error-notification/error-notificati
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GlobalErrorHandlerService implements ErrorHandler {
   // private readonly zone = inject(NgZone);
 
-  constructor(private errorNotification: ErrorNotificationService) { }
+  constructor(private errorNotification: ErrorNotificationService) {}
 
   handleError(error: any): void {
     const derivedError = error.rejection ? error.rejection : error;
