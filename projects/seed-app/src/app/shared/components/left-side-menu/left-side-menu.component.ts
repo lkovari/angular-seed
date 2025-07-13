@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MenuItem } from '../../models/menu/menu-item.interface';
 import { RouterLink } from '@angular/router';
 
@@ -10,4 +10,5 @@ import { RouterLink } from '@angular/router';
 })
 export class LeftSideMenuComponent {
   menuItems = input<MenuItem[]>([]);
+  menuItemSelected = output<void>();
 }

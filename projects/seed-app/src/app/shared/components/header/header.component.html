@@ -1,21 +1,20 @@
+<div class="bg-surface-brand-strong text-neutral-inverted border-b border-gray-300 dark:border-gray-600 h-16">
+  <div class="flex items-center justify-between h-full">
 
+    <div class="flex flex-row gap-1 items-center pl-2">
+      <div class="hamburger-fixed md:hidden">
+        <button id="hamburger" class="btn btn-link text-xl" aria-label="Toggle Sidebar" (click)="toggleSidebar()">
+          &#9776;
+        </button>
+      </div>
 
-<div class="bg-surface-brand-strong text-neutral-inverted border-b border-gray-300 dark:border-gray-600">
-  <div class="flex items-center justify-between ">
-
-    <div class="flex flex-row gap-1 items-center">
-      <button id="hamburger" class="btn btn-link block md:hidden text-xl" aria-label="Toggle Sidebar"
-        (click)="toggleSidebar()">
-        &#9776;
-      </button>
-      
     </div>
 
-    <div class="text-lg font-semibold text-purple-500 whitespace-nowrap">
-      LK. seed-app
+    <div class="text-lg font-semibold whitespace-nowrap">
+      LKővári's seed app
     </div>
 
-    <div class="text-xs whitespace-nowrap">
+    <div class="text-xs whitespace-nowrap pr-2">
       <span class="text-xs whitespace-nowrap">{{ lastUpdateDate | date:'MM/dd/yyyy HH:mm' }}</span>
     </div>
 

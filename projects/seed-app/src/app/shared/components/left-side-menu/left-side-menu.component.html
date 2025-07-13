@@ -1,23 +1,16 @@
-<div
-  class="bg-surface-brand-strong text-neutral-inverted border-r border-gray-300 dark:border-gray-600"
->
-  <nav class="flex flex-col items-center">
-    <ul>
+<div class="bg-surface-brand-strong text-neutral-inverted flex flex-row p-5">
+  <nav class="flex flex-col items-start w-full">
+    <ul class="w-full">
       @for (menuItem of menuItems(); track $index) {
-        <li class="my-2">
-          <a
-            class="row-align flex items-center space-x-2"
-            [routerLink]="menuItem.routerLink"
-          >
-            <div class="icon-align">
-              <i [class]="menuItem.icon"></i>
-            </div>
-            <div class="menu-label-align">
-              {{ menuItem.label }}
-            </div>
-          </a>
-        </li>
+      <li class="my-2 w-full">
+        <a class="flex items-center space-x-4 w-full cursor-pointer" [routerLink]="menuItem.routerLink"
+          (click)="menuItemSelected.emit()">
+          <i [class]="menuItem.icon"></i>
+          <span class="whitespace-nowrap">{{ menuItem.label }}</span>
+        </a>
+      </li>
       }
     </ul>
   </nav>
+  <div class="border-l border-gray-300 dark:border-gray-600 h-full ml-4"></div>
 </div>

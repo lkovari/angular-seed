@@ -1,9 +1,12 @@
 {
   "name": "seed-common-lib",
   "version": "0.0.1",
+  "scripts": {
+    "build": "ng build seed-common-lib"
+  },
   "peerDependencies": {
-    "@angular/common": "^19.0.0",
-    "@angular/core": "^19.0.0"
+    "@angular/common": "^20.0.0",
+    "@angular/core": "^20.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

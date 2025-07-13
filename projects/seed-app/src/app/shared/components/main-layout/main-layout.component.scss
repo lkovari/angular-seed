@@ -1,19 +1,19 @@
 .layout-container {
   display: grid;
-  grid-template-columns: 0.75fr 5fr;
+  grid-template-columns: 0.55fr 7fr;
   grid-template-rows: auto 1fr auto;
 
   grid-template-areas:
     'header header'
     'sidebar-left main'
     'footer footer';
-    height: 100vh;
-    overflow: hidden;
-    gap: 0;
+  height: 100vh;
+  overflow: hidden;
+  gap: 0;
 
   aside {
     display: block;
-    width: 8rem;
+    width: 100%;
   }
 
   @media only screen and (max-width: 768px) {
@@ -54,14 +54,13 @@
 
   aside {
     display: block;
-    //min-width: 8rem;
     width: 8rem;
   }
 }
 
 header {
   grid-area: header;
-  padding: 1rem;
+  padding: 0rem;
   text-align: center;
   font-size: 24px;
 }
@@ -69,18 +68,21 @@ header {
 aside {
   grid-area: sidebar-left;
   padding: 1rem;
+  background: linear-gradient(135deg, #fbfbfc 0%, #d1d9e6 100%);
 }
 
 main {
   grid-area: main;
   padding: 2rem;
+  padding-top: 2.5rem;
   overflow-y: auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 footer {
   grid-area: footer;
-  padding-top: 0.5rem;
   text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 body,
@@ -89,8 +91,55 @@ html {
   height: 100%;
 }
 
-@media only screen and (max-width: 768px) {
-  aside {
-    display: none;
-  }
+
+
+.overlay {
+  height: auto;
+  max-height: calc(100vh - 4rem);
+  width: 0;
+  max-width: 190px;
+  min-width: 180px;
+  position: fixed;
+  z-index: 1001;
+  top: 4rem;
+  left: 1rem;
+  overflow-x: hidden;
+  transition: width 0.5s, opacity 0.5s;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 0.65rem;
+  border: 1px solid #86b7f0;
+}
+
+.overlay[style*="width: 100%"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay-content {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.overlay a:hover,
+.overlay a:focus {
+  color: #f1f1f1;
+}
+
+.overlay .closebtn {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 60px;
 }

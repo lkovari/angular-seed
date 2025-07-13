@@ -12,3 +12,16 @@
   flex: 0 1 auto;
   align-self: auto;
 }
+
+.hamburger-fixed {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .hamburger-fixed {
+    display: none;
+  }
+}
