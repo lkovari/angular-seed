@@ -10,12 +10,15 @@
 - standalone environment
 - workspace architecture
 - seed-common-library
+
 - seed-app
   - css grid layout
   - separated and parametrized header, left sidebar, footer, "boody" components
   - generate side menu from jsod menu descriptor
+  - implement token interceptor to handle access and refresh token
+  - include to http interceptor the corelation id to follow api calls
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6. but it Upgraded to 20.0.0
 
 ## Development server
 
