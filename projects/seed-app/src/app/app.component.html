@@ -1,1 +1,90 @@
-<app-main-layout></app-main-layout>
+<app-main-layout 
+  [showErrorIndicator]="showErrorIndicator()" 
+  [errorCount]="errorHistory().length"
+  (onErrorIndicatorClick)="openErrorHistoryModal()">
+</app-main-layout>
+
+<!-- Error Testing Modal -->
+@if (showErrorModal()) {
+  <div class="modal-overlay" (click)="closeErrorModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Error Testing Panel</h2>
+        <button class="close-btn" (click)="closeErrorModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <lib-generate-errors></lib-generate-errors>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Error History Modal -->
+@if (showErrorHistoryModal()) {
+  <div class="modal-overlay" (click)="closeErrorHistoryModal()">
+    <div class="modal-container error-history-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Error History ({{ errorHistory().length }})</h2>
+        <div class="header-actions">
+          <button class="clear-btn" (click)="clearErrorHistory()">Clear All</button>
+          <button class="close-btn" (click)="closeErrorHistoryModal()" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        @if (errorHistory().length === 0) {
+          <div class="empty-state">
+            <p>No errors recorded</p>
+          </div>
+        } @else {
+          <div class="error-list">
+            @for (error of errorHistory(); track error.id) {
+              <div class="error-item">
+                <div class="error-header">
+                  <span class="error-type" [class]="'type-' + error.type">{{ error.type }}</span>
+                  <span class="error-time">{{ formatTimestamp(error.timestamp) }}</span>
+                </div>
+                <div class="error-message">
+                  @if (error.httpStatus) {
+                    <span class="http-status-badge">{{ error.httpStatus }}</span>
+                  }
+                  {{ error.message }}
+                </div>
+                @if (error.route) {
+                  <div class="error-meta">
+                    <strong>Route:</strong> {{ error.route }}
+                  </div>
+                }
+                @if (error.httpStatus) {
+                  <div class="error-meta">
+                    <strong>Status:</strong> {{ error.httpStatus }} {{ getStatusText(error.httpStatus) }}
+                  </div>
+                }
+                @if (error.errorContext?.errorType) {
+                  <div class="error-meta">
+                    <strong>Type:</strong> {{ error.errorContext?.errorType }}
+                  </div>
+                }
+                @if (error.callStack && error.callStack.length > 0) {
+                  <details class="call-stack">
+                    <summary>Call Stack ({{ error.callStack.length }} frames)</summary>
+                    <pre>{{ error.callStack.join('\n') }}</pre>
+                  </details>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

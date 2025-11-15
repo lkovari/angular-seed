@@ -32,9 +32,7 @@
             },
             "index": "projects/seed-app/src/index.html",
             "browser": "projects/seed-app/src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "projects/seed-app/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -149,6 +147,41 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "projects/seed-common-lib/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "global-error-handler-lib": {
+      "projectType": "library",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/global-error-handler-lib",
+      "sourceRoot": "projects/global-error-handler-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/global-error-handler-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/global-error-handler-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/global-error-handler-lib/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

@@ -8,7 +8,7 @@ import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/l
   styleUrl: './footer.component.scss',
 })
 export class FooterComponent {
-  developers = ['László Kővári', 'Developer 1', 'Developer 2', 'Developer 3'];
+  developers = ['László Kővári', 'Developer #1', 'Developer #2', 'Developer #3'];
 
   developerOrders = [[1, 2, 3, 4], [2, 3, 4, 1], [3, 4, 1, 2], [4, 1, 2, 3]];
 

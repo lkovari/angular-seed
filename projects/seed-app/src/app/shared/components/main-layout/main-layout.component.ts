@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, input, output } from '@angular/core';
 import { MenuItem } from '../../models/menu/menu-item.interface';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 import { CommonModule } from '@angular/common';
@@ -22,6 +22,11 @@ export class MainLayoutComponent {
   sidebarVisible: boolean = true;
   private _isMobileView = signal(false);
   private resizeListener!: () => void;
+  
+  // Error indicator inputs/outputs
+  showErrorIndicator = input<boolean>(false);
+  errorCount = input<number>(0);
+  onErrorIndicatorClick = output<void>();
 
   menuItems: MenuItem[] = [
     {

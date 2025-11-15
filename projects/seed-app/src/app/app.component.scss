@@ -1,0 +1,261 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  width: 100%;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+  }
+
+  &:active {
+    background: #e5e7eb;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+// Error History Modal
+.error-history-modal {
+  max-width: 900px;
+  max-height: 80vh;
+
+  .modal-header {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+}
+
+.clear-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #dc2626;
+  }
+
+  &:active {
+    background: #b91c1c;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+
+  p {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+}
+
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.error-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+
+  .error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-type {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+
+    &.type-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    &.type-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    &.type-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    &.type-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+  }
+
+  .error-time {
+    color: #6b7280;
+    font-size: 0.625rem;
+  }
+
+  .error-message {
+    color: #1f2937;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .http-status-badge {
+      display: inline-block;
+      background: #3b82f6;
+      color: white;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.625rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+  }
+
+  .error-meta {
+    color: #6b7280;
+    font-size: 0.625rem;
+    margin-bottom: 0.25rem;
+
+    strong {
+      color: #374151;
+    }
+  }
+
+  .call-stack {
+    margin-top: 0.5rem;
+    
+    summary {
+      cursor: pointer;
+      color: #3b82f6;
+      font-weight: 500;
+      font-size: 0.625rem;
+      padding: 0.25rem 0;
+      user-select: none;
+
+      &:hover {
+        color: #2563eb;
+      }
+    }
+
+    pre {
+      margin-top: 0.5rem;
+      background: #1f2937;
+      color: #f3f4f6;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.625rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+}

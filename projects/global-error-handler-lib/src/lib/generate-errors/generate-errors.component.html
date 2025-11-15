@@ -1,0 +1,76 @@
+<div class="error-test-container">
+  <section class="error-section">
+    <h3>JavaScript Errors</h3>
+    <div class="button-grid">
+      <button (click)="throwSimpleError()" class="error-btn">
+        Simple Error
+      </button>
+      <button (click)="throwTypeError()" class="error-btn">
+        TypeError
+      </button>
+      <button (click)="throwReferenceError()" class="error-btn">
+        ReferenceError
+      </button>
+      <button (click)="throwAsyncError()" class="error-btn">
+        Async Error
+      </button>
+      <button (click)="throwPromiseError()" class="error-btn">
+        Promise Error
+      </button>
+      <button (click)="throwTimeoutError()" class="error-btn">
+        Timeout Error
+      </button>
+    </div>
+  </section>
+
+  <section class="error-section">
+    <h3>HTTP Errors</h3>
+    <div class="button-grid">
+      <button (click)="triggerHttp404()" class="http-btn">
+        HTTP 404
+      </button>
+      <button (click)="triggerHttp500()" class="http-btn">
+        HTTP 500
+      </button>
+      <button (click)="triggerHttp401()" class="http-btn">
+        HTTP 401
+      </button>
+      <button (click)="triggerHttp402()" class="http-btn">
+        HTTP 402
+      </button>
+      <button (click)="triggerHttp403()" class="http-btn">
+        HTTP 403
+      </button>
+      <button (click)="triggerNetworkError()" class="http-btn">
+        Network Error
+      </button>
+    </div>
+  </section>
+
+  <section class="error-section">
+    <h3>Notifications</h3>
+    <div class="button-grid">
+      <button (click)="triggerCustomNotification()" class="notification-btn error">
+        Error Notification
+      </button>
+      <button (click)="triggerWarningNotification()" class="notification-btn warning">
+        Warning Notification
+      </button>
+      <button (click)="triggerInfoNotification()" class="notification-btn info">
+        Info Notification
+      </button>
+      <button (click)="triggerSuccessNotification()" class="notification-btn success">
+        Success Notification
+      </button>
+    </div>
+  </section>
+
+  <section class="error-section">
+    <h3>Advanced Testing</h3>
+    <div class="button-grid">
+      <button (click)="throwErrorWithCallStack()" class="advanced-btn">
+        Error with Call Stack
+      </button>
+    </div>
+  </section>
+</div>

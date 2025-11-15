@@ -1,6 +1,11 @@
 <div class="layout-container">
   <header class="bg-surface-brand-strong text-neutral-inverted">
-    <app-header (onSidebarVisibleChange)="toggleSidebar()"></app-header>
+    <app-header 
+      (onSidebarVisibleChange)="toggleSidebar()"
+      [showErrorIndicator]="showErrorIndicator()"
+      [errorCount]="errorCount()"
+      (onErrorIndicatorClick)="onErrorIndicatorClick.emit()">
+    </app-header>
   </header>
   @if (!isMobileView()) {
   <aside>

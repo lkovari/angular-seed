@@ -15,6 +15,9 @@
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "paths": {
+      "global-error-handler-lib": [
+        "./dist/global-error-handler-lib"
+      ],
       "seed-common-lib": [
         "./dist/seed-common-lib"
       ]
@@ -28,5 +31,13 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [
+    {
+      "path": "./projects/global-error-handler-lib/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/global-error-handler-lib/tsconfig.spec.json"
+    }
+  ]
 }
