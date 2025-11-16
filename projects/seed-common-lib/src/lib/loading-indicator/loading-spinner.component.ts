@@ -3,7 +3,6 @@ import { LoadingIndicatorService } from './loading-indicator.service';
 
 @Component({
   selector: 'lib-loading-spinner',
-  standalone: true,
   template: `
     @if (loadingService.isLoading()) {
       <div class="loading-overlay">

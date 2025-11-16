@@ -4,7 +4,6 @@ import { LoadingIndicatorService } from '../loading-indicator/loading-indicator.
 
 @Component({
   selector: 'lib-wait-spinner-test',
-  standalone: true,
   templateUrl: './wait-spinner-test.component.html',
   styleUrl: './wait-spinner-test.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -58,7 +58,7 @@ A modern Angular 20 seed project with comprehensive error handling, workspace ar
 
 ### Modern Angular Practices
 - **Standalone components** - No NgModules
-- **Simplified filenames** - No `.component`, `.service` suffixes
+- **TODO: Simplified filenames** - No `.component`, `.service` suffixes
 - **OnPush change detection** - Optimized performance
 - **Control flow syntax** - `@if`, `@for` instead of `*ngIf`, `*ngFor`
 - **Zoneless change detection** - `provideZonelessChangeDetection()`
