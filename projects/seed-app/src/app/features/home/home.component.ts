@@ -12,9 +12,13 @@ export class HomeComponent implements OnInit {
   readmeContent = signal<string>('Loading README...');
 
   ngOnInit(): void {
-    this.http.get('/README.md', { responseType: 'text' }).subscribe({
+    // Use relative path that works with base href
+    this.http.get('README.md', { responseType: 'text' }).subscribe({
       next: (content) => this.readmeContent.set(content),
-      error: () => this.readmeContent.set('Failed to load README.md')
+      error: (err) => {
+        console.error('Failed to load README.md:', err);
+        this.readmeContent.set('Failed to load README.md');
+      }
     });
   }
 }
