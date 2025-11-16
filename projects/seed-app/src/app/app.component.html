@@ -10,18 +10,18 @@
 
 <!-- Error Testing Modal -->
 @if (showErrorModal()) {
-  <div class="modal-overlay" (click)="closeErrorModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Error Testing Panel</h2>
-        <button class="close-btn" (click)="closeErrorModal()" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 animate-fade-in" (click)="closeErrorModal()">
+    <div class="bg-white rounded-md shadow-lg max-w-[600px] w-full max-h-[70vh] flex flex-col animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-800 m-0">Error Testing Panel</h2>
+        <button class="bg-transparent border-none cursor-pointer p-1 rounded hover:bg-gray-100 active:bg-gray-200 transition-all" (click)="closeErrorModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="overflow-y-auto flex-1 p-0">
         <lib-generate-errors></lib-generate-errors>
       </div>
     </div>
@@ -30,65 +30,73 @@
 
 <!-- Error History Modal -->
 @if (showErrorHistoryModal()) {
-  <div class="modal-overlay" (click)="closeErrorHistoryModal()">
-    <div class="modal-container error-history-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Error History ({{ errorHistory().length }})</h2>
-        <div class="header-actions">
-          <button class="clear-btn" (click)="clearErrorHistory()">Clear All</button>
-          <button class="close-btn" (click)="closeErrorHistoryModal()" aria-label="Close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 animate-fade-in" (click)="closeErrorHistoryModal()">
+    <div class="bg-white rounded-md shadow-lg max-w-[900px] w-full max-h-[80vh] flex flex-col animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-800 m-0">Error History ({{ errorHistory().length }})</h2>
+        <div class="flex gap-2">
+          <button class="bg-red-500 text-white border-none px-3 py-1.5 rounded text-xs font-medium cursor-pointer hover:bg-red-600 active:bg-red-700 transition-all" (click)="clearErrorHistory()">Clear All</button>
+          <button class="bg-transparent border-none cursor-pointer p-1 rounded hover:bg-gray-100 active:bg-gray-200 transition-all" (click)="closeErrorHistoryModal()" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
       </div>
-      <div class="modal-body">
+      <div class="overflow-y-auto flex-1 p-4">
         @if (errorHistory().length === 0) {
-          <div class="empty-state">
-            <p>No errors recorded</p>
+          <div class="text-center py-12 px-4 text-gray-500">
+            <p class="text-sm m-0">No errors recorded</p>
           </div>
         } @else {
-          <div class="error-list">
+          <div class="flex flex-col gap-3">
             @for (error of errorHistory(); track error.id) {
-              <div class="error-item">
-                <div class="error-header">
-                  <div class="error-header-left">
-                    <span class="error-type" [class]="'type-' + error.type">{{ error.type }}</span>
-                    <span class="error-time">{{ formatTimestamp(error.timestamp) }}</span>
+              <div class="bg-gray-50 border border-gray-200 rounded-md p-3 text-xs">
+                <div class="mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase" 
+                          [class.bg-red-100]="error.type === 'error'" 
+                          [class.text-red-800]="error.type === 'error'"
+                          [class.bg-yellow-100]="error.type === 'warning'"
+                          [class.text-yellow-800]="error.type === 'warning'"
+                          [class.bg-blue-100]="error.type === 'info'"
+                          [class.text-blue-800]="error.type === 'info'"
+                          [class.bg-green-100]="error.type === 'success'"
+                          [class.text-green-800]="error.type === 'success'">{{ error.type }}</span>
+                    <span class="text-gray-500 text-[10px] font-medium">{{ formatTimestamp(error.timestamp) }}</span>
                   </div>
                 </div>
-                <div class="error-message">
+                <div class="text-gray-800 font-medium mb-2 leading-snug flex items-center gap-2 flex-wrap">
                   @if (error.httpStatus) {
-                    <span class="http-status-badge">{{ error.httpStatus }}</span>
+                    <span class="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold">{{ error.httpStatus }}</span>
                   }
                   {{ error.message }}
                 </div>
                 @if (error.route) {
-                  <div class="error-meta">
-                    <strong>Route:</strong> {{ error.route }}
+                  <div class="text-gray-500 text-[10px] mb-1">
+                    <strong class="text-gray-700">Route:</strong> {{ error.route }}
                   </div>
                 }
                 @if (error.httpStatus) {
-                  <div class="error-meta">
-                    <strong>Status:</strong> {{ error.httpStatus }} {{ getStatusText(error.httpStatus) }}
+                  <div class="text-gray-500 text-[10px] mb-1">
+                    <strong class="text-gray-700">Status:</strong> {{ error.httpStatus }} {{ getStatusText(error.httpStatus) }}
                   </div>
                 }
                 @if (error.errorContext) {
-                  <details class="error-context">
-                    <summary>Error Context</summary>
-                    <pre>{{ formatContext(error.errorContext) }}</pre>
+                  <details class="mt-2">
+                    <summary class="cursor-pointer text-purple-600 font-medium text-[10px] py-1 select-none hover:text-purple-700">Error Context</summary>
+                    <pre class="mt-2 bg-gray-50 text-gray-800 p-2 rounded text-[10px] leading-relaxed overflow-x-auto border border-gray-200">{{ formatContext(error.errorContext) }}</pre>
                   </details>
                 }
                 @if (error.callStack && error.callStack.length > 0) {
-                  <details class="call-stack" open>
-                    <summary>Call Stack ({{ error.callStack.length }} frames)</summary>
-                    <div class="call-stack-list">
+                  <details class="mt-2" open>
+                    <summary class="cursor-pointer text-blue-600 font-medium text-[10px] py-1 select-none hover:text-blue-700">Call Stack ({{ error.callStack.length }} frames)</summary>
+                    <div class="mt-2 bg-blue-50 p-2 rounded max-h-[300px] overflow-y-auto border border-blue-200">
                       @for (frame of error.callStack; track $index) {
-                        <div class="stack-frame">
-                          <span class="frame-number">{{ $index + 1 }}.</span>
-                          <span class="frame-content">{{ frame }}</span>
+                        <div class="flex gap-2 py-1 text-[10px] leading-snug text-blue-600 border-b border-blue-200 last:border-b-0">
+                          <span class="text-blue-600 font-semibold min-w-[1.5rem] flex-shrink-0">{{ $index + 1 }}.</span>
+                          <span class="text-blue-600 break-all font-mono">{{ frame }}</span>
                         </div>
                       }
                     </div>

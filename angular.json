@@ -39,6 +39,11 @@
               {
                 "glob": "**/*",
                 "input": "projects/seed-app/public"
+              },
+              {
+                "glob": "README.md",
+                "input": ".",
+                "output": "/"
               }
             ],
             "styles": [
