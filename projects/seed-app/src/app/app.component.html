@@ -2,6 +2,12 @@
   [errorCount]="errorHistory().length"
   (onErrorIndicatorClick)="openErrorHistoryModal()" />
 
+<!-- Loading Spinner -->
+<lib-loading-spinner />
+
+<!-- Wait Spinner Test -->
+<lib-wait-spinner-test />
+
 <!-- Error Testing Modal -->
 @if (showErrorModal()) {
   <div class="modal-overlay" (click)="closeErrorModal()">

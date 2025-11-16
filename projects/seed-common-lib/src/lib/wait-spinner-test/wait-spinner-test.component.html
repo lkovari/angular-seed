@@ -1,0 +1,41 @@
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Wait Spinner Test</h3>
+        <button class="close-btn" (click)="closeModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="test-section">
+          <h4>HTTP Interceptor Test</h4>
+          <p class="description">Simulates HTTP GET call that returns after 4 seconds</p>
+          <button class="test-btn primary" (click)="simulateHttpCall()" [disabled]="httpCallDisabled()">
+            Show Wait Spinner (4s)
+          </button>
+        </div>
+
+        <div class="test-section">
+          <h4>Manual Control Test</h4>
+          <p class="description">Manually show/hide spinner for 3 seconds</p>
+          <button class="test-btn secondary" (click)="testManualSpinner()" [disabled]="manualSpinnerDisabled()">
+            Manual Spinner (3s)
+          </button>
+        </div>
+
+        <div class="test-section">
+          <h4>Multiple Concurrent HTTP. Calls</h4>
+          <p class="description">Tests reference counting with 3 concurrent calls (2s, 3s, 4s)</p>
+          <button class="test-btn tertiary" (click)="testMultipleCalls()" [disabled]="multipleCallsDisabled()">
+            Multiple Calls Test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

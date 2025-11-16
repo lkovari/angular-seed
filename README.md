@@ -39,6 +39,15 @@ A modern Angular 20 seed project with comprehensive error handling, workspace ar
 - ✅ Error testing modal (press **Ctrl+Shift+E** or **Cmd+Shift+E**)
 - ✅ 18 different error scenarios for testing
 
+### Loading Indicator System (`seed-common-lib`)
+- ✅ Reference counting for multiple concurrent HTTP requests
+- ✅ Signal-based reactive state management
+- ✅ Automatic HTTP interceptor integration
+- ✅ Manual control when needed
+- ✅ Customizable loading adapters
+- ✅ Testing modal (press **Ctrl+Shift+W** or **Cmd+Shift+W**)
+- ✅ Console logging for debugging reference counts
+
 ### Seed App Features
 - CSS Grid layout
 - Separated and parametrized components (header, sidebar, footer)
@@ -99,6 +108,15 @@ Press **Ctrl+Shift+E** (Windows/Linux) or **Cmd+Shift+E** (Mac) to open the erro
 - Custom notifications
 
 When errors occur, an orange warning indicator appears in the header showing the error count. Click it to view the error history with full details including call stacks, routes, and HTTP status codes.
+
+### Loading Spinner Testing
+
+Press **Ctrl+Shift+W** (Windows/Linux) or **Cmd+Shift+W** (Mac) to open the loading spinner test modal. This allows you to test:
+- **HTTP Interceptor Test**: Simulates a 4-second HTTP call with automatic spinner
+- **Manual Control Test**: Manually shows/hides spinner for 3 seconds
+- **Multiple Concurrent Calls**: Tests reference counting with 3 concurrent HTTP calls (2s, 3s, 4s)
+
+Open the browser console to see detailed reference count logs (`>>>RefCount #N`) showing how the system tracks multiple concurrent operations.
 
 ## Code scaffolding
 
@@ -255,9 +273,62 @@ export const appConfig: ApplicationConfig = {
 
 Shared common library for reusable components and utilities.
 
+**Features:**
+- Loading indicator system with reference counting
+- HTTP interceptor for automatic loading state
+- Signal-based reactive state management
+- Customizable loading adapters
+- Testing component for loading scenarios
+
+**Usage:**
+```typescript
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { loadingInterceptor, LoadingSpinnerComponent } from 'seed-common-lib';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient(withInterceptors([loadingInterceptor]))
+  ]
+};
+
+@Component({
+  imports: [LoadingSpinnerComponent],
+  template: `<lib-loading-spinner />`
+})
+export class AppComponent {}
+```
+
+**Technical Details:**
+
+The loading indicator uses a reference counting mechanism to handle multiple concurrent HTTP requests:
+
+1. **Initial State**: `refCount = 0`, spinner hidden
+2. **First Request Starts**: `refCount = 1`, spinner shows
+3. **Second Request Starts**: `refCount = 2`, spinner stays visible
+4. **First Request Completes**: `refCount = 1`, spinner stays visible
+5. **Second Request Completes**: `refCount = 0`, spinner hides
+
+This ensures the spinner remains visible until ALL operations complete. The system logs reference count changes to the console as `>>>RefCount #N` for debugging.
+
+**Manual Control:**
+```typescript
+import { LoadingIndicatorService } from 'seed-common-lib';
+
+export class MyComponent {
+  private loadingService = inject(LoadingIndicatorService);
+
+  performAction(): void {
+    this.loadingService.showWaitSpinner();
+    // Do work
+    this.loadingService.hideWaitSpinner();
+  }
+}
+```
+
 ### Keyboard Shortcuts
 
 - **Ctrl+Shift+E** (Windows/Linux) or **Cmd+Shift+E** (Mac) - Open error testing modal
+- **Ctrl+Shift+W** (Windows/Linux) or **Cmd+Shift+W** (Mac) - Open loading spinner test modal
 
 ## Troubleshooting
 

@@ -13,26 +13,21 @@ export class GenerateErrorsComponent {
   private http = inject(HttpClient);
   private notificationService = inject(ErrorNotificationService);
 
-  // 1. Throw a simple JavaScript error
   throwSimpleError(): void {
     throw new Error('This is a simple JavaScript error for testing');
   }
 
-  // 2. Throw a TypeError
   throwTypeError(): void {
     const obj: any = null;
-    obj.someMethod(); // This will throw TypeError
+    obj.someMethod();
   }
 
-  // 3. Throw a ReferenceError
   throwReferenceError(): void {
     // @ts-ignore
     nonExistentVariable.toString();
   }
 
-  // 4. Throw an async error
   throwAsyncError(): void {
-    // Call async function without await to let it throw unhandled
     this.asyncErrorFunction();
   }
 
@@ -41,7 +36,6 @@ export class GenerateErrorsComponent {
     throw new Error('This is an async error');
   }
 
-  // 5. Trigger HTTP 404 error
   triggerHttp404(): void {
     this.http.get('/api/non-existent-endpoint').subscribe({
       next: () => console.log('Success'),
@@ -49,43 +43,34 @@ export class GenerateErrorsComponent {
     });
   }
 
-  // 6. Trigger HTTP 500 error
   triggerHttp500(): void {
-    // Use httpbin.org which has proper CORS headers
     this.http.get('https://httpbin.org/status/500').subscribe({
       next: () => console.log('Success'),
       error: (err) => console.error('HTTP 500 Error caught:', err)
     });
   }
 
-  // 7. Trigger HTTP 401 Unauthorized
   triggerHttp401(): void {
-    // Use httpbin.org which has proper CORS headers
     this.http.get('https://httpbin.org/status/401').subscribe({
       next: () => console.log('Success'),
       error: (err) => console.error('HTTP 401 Error caught:', err)
     });
   }
 
-  // 8. Trigger HTTP 402 Payment Required
   triggerHttp402(): void {
-    // Use httpbin.org which has proper CORS headers
     this.http.get('https://httpbin.org/status/402').subscribe({
       next: () => console.log('Success'),
       error: (err) => console.error('HTTP 402 Error caught:', err)
     });
   }
 
-  // 9. Trigger HTTP 403 Forbidden
   triggerHttp403(): void {
-    // Use httpbin.org which has proper CORS headers
     this.http.get('https://httpbin.org/status/403').subscribe({
       next: () => console.log('Success'),
       error: (err) => console.error('HTTP 403 Error caught:', err)
     });
   }
 
-  // 11. Trigger network error (CORS or connection issue)
   triggerNetworkError(): void {
     this.http.get('https://invalid-domain-that-does-not-exist-12345.com/api').subscribe({
       next: () => console.log('Success'),
@@ -93,41 +78,32 @@ export class GenerateErrorsComponent {
     });
   }
 
-  // 12. Throw error in Promise
   throwPromiseError(): void {
-    // Create unhandled promise rejection
     Promise.reject(new Error('This is a rejected Promise error'));
-    // Note: This will be caught by window.addEventListener('unhandledrejection')
   }
 
-  // 13. Throw error in setTimeout
   throwTimeoutError(): void {
     setTimeout(() => {
       throw new Error('This is an error thrown in setTimeout');
     }, 100);
   }
 
-  // 14. Trigger custom notification
   triggerCustomNotification(): void {
     this.notificationService.showError('This is a custom error notification', 5000);
   }
 
-  // 15. Trigger warning notification
   triggerWarningNotification(): void {
     this.notificationService.showWarning('This is a warning notification', 4000);
   }
 
-  // 16. Trigger info notification
   triggerInfoNotification(): void {
     this.notificationService.showInfo('This is an info notification', 3000);
   }
 
-  // 17. Trigger success notification
   triggerSuccessNotification(): void {
     this.notificationService.showSuccess('This is a success notification', 3000);
   }
 
-  // 18. Throw error with call stack
   throwErrorWithCallStack(): void {
     try {
       this.deepNestedFunction();

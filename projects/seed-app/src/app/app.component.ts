@@ -1,16 +1,22 @@
-import { Component, HostListener, signal, ChangeDetectionStrategy, inject, effect } from '@angular/core';
+import { Component, HostListener, signal, ChangeDetectionStrategy, inject, effect, viewChild } from '@angular/core';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 import { GenerateErrorsComponent, ErrorNotificationService, ErrorNotification } from 'global-error-handler-lib';
+import { LoadingSpinnerComponent, LoadingIndicatorService, WaitSpinnerTestComponent } from 'seed-common-lib';
+// import { CustomLoadingAdapter } from './shared/adapters/custom-loading';
 
 @Component({
   selector: 'app-root',
-  imports: [MainLayoutComponent, GenerateErrorsComponent],
+  imports: [MainLayoutComponent, GenerateErrorsComponent, LoadingSpinnerComponent, WaitSpinnerTestComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   private errorNotificationService = inject(ErrorNotificationService);
+  private loadingService = inject(LoadingIndicatorService);
+  
+  // ViewChild for wait spinner test component
+  waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
   
   title = 'seed-app';
   showErrorModal = signal(false);
@@ -28,6 +34,9 @@ export class AppComponent {
         this.showIndicatorTemporarily();
       }
     });
+
+    // Optional: Set custom loading adapter
+    // this.loadingService.setAdapter(new CustomLoadingAdapter());
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -36,6 +45,19 @@ export class AppComponent {
     if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'e') {
       event.preventDefault();
       this.toggleErrorModal();
+    }
+    
+    // Check for Ctrl+Shift+W (or Cmd+Shift+W on Mac) - W for Wait Spinner
+    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'w') {
+      event.preventDefault();
+      this.openWaitSpinnerTest();
+    }
+  }
+
+  openWaitSpinnerTest(): void {
+    const testComponent = this.waitSpinnerTest();
+    if (testComponent) {
+      testComponent.openModal();
     }
   }
 
