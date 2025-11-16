@@ -4,12 +4,12 @@ A comprehensive loading indicator system with HTTP interceptor, reference counti
 
 ## Features
 
-- ✅ **HTTP Interceptor Based** - Automatically shows/hides for HTTP requests
-- ✅ **Reference Counting** - Handles multiple concurrent requests
-- ✅ **Customizable Display** - Use adapter pattern for custom spinners
-- ✅ **Manual Control** - `showWaitSpinner()` and `hideWaitSpinner()` methods
-- ✅ **Signal-Based** - Reactive `isLoading` signal
-- ✅ **Default Spinner** - Built-in spinner if no adapter is set
+- **HTTP Interceptor Based** - Automatically shows/hides for HTTP requests
+- **Reference Counting** - Handles multiple concurrent requests
+- **Customizable Display** - Use adapter pattern for custom spinners
+- **Manual Control** - `showWaitSpinner()` and `hideWaitSpinner()` methods
+- **Signal-Based** - Reactive `isLoading` signal
+- **Default Spinner** - Built-in spinner if no adapter is set
 
 ## Installation
 
