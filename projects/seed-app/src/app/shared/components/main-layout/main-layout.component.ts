@@ -32,7 +32,7 @@ export class MainLayoutComponent {
     {
       label: 'Home',
       icon: 'pi pi-home',
-      routerLink: '/home',
+      routerLink: '/',
     },
     {
       label: 'Feature A',
