@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/lib/angular-version.component';
+import { AngularVersionComponent } from 'seed-common-lib';
 
 @Component({
   selector: 'app-footer',
