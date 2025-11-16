@@ -1,8 +1,6 @@
-<app-main-layout 
-  [showErrorIndicator]="showErrorIndicator()" 
+<app-main-layout [showErrorIndicator]="showErrorIndicator()" 
   [errorCount]="errorHistory().length"
-  (onErrorIndicatorClick)="openErrorHistoryModal()">
-</app-main-layout>
+  (onErrorIndicatorClick)="openErrorHistoryModal()" />
 
 <!-- Error Testing Modal -->
 @if (showErrorModal()) {
