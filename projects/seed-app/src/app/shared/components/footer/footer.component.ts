@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/lib/angular-version.component';
 
 @Component({
@@ -8,6 +8,8 @@ import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/l
   styleUrl: './footer.component.scss',
 })
 export class FooterComponent {
+  private cdr = inject(ChangeDetectorRef);
+
   developers = ['László Kővári', 'Developer #1', 'Developer #2', 'Developer #3'];
 
   developerOrders = [[1, 2, 3, 4], [2, 3, 4, 1], [3, 4, 1, 2], [4, 1, 2, 3]];
@@ -16,7 +18,10 @@ export class FooterComponent {
   currentDeveloperOrder = '';
   private intervalId: any;
 
-  constructor(private cdr: ChangeDetectorRef) { }
+  /** Inserted by Angular inject() migration for backwards compatibility */
+  constructor(...args: unknown[]);
+
+  constructor() { }
 
   ngOnInit(): void {
     this.currentDeveloperOrder = this.getDeveloperOrder();

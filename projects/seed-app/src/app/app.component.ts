@@ -98,4 +98,14 @@ export class AppComponent {
     };
     return statusTexts[status] || '';
   }
+
+  formatContext(context: any): string {
+    // Create a clean copy without the originalError (too verbose)
+    const cleanContext = {
+      url: context.url,
+      userAgent: context.userAgent,
+      errorType: context.errorType
+    };
+    return JSON.stringify(cleanContext, null, 2);
+  }
 }

@@ -50,8 +50,10 @@
             @for (error of errorHistory(); track error.id) {
               <div class="error-item">
                 <div class="error-header">
-                  <span class="error-type" [class]="'type-' + error.type">{{ error.type }}</span>
-                  <span class="error-time">{{ formatTimestamp(error.timestamp) }}</span>
+                  <div class="error-header-left">
+                    <span class="error-type" [class]="'type-' + error.type">{{ error.type }}</span>
+                    <span class="error-time">{{ formatTimestamp(error.timestamp) }}</span>
+                  </div>
                 </div>
                 <div class="error-message">
                   @if (error.httpStatus) {
@@ -69,15 +71,23 @@
                     <strong>Status:</strong> {{ error.httpStatus }} {{ getStatusText(error.httpStatus) }}
                   </div>
                 }
-                @if (error.errorContext?.errorType) {
-                  <div class="error-meta">
-                    <strong>Type:</strong> {{ error.errorContext?.errorType }}
-                  </div>
+                @if (error.errorContext) {
+                  <details class="error-context">
+                    <summary>Error Context</summary>
+                    <pre>{{ formatContext(error.errorContext) }}</pre>
+                  </details>
                 }
                 @if (error.callStack && error.callStack.length > 0) {
-                  <details class="call-stack">
+                  <details class="call-stack" open>
                     <summary>Call Stack ({{ error.callStack.length }} frames)</summary>
-                    <pre>{{ error.callStack.join('\n') }}</pre>
+                    <div class="call-stack-list">
+                      @for (frame of error.callStack; track $index) {
+                        <div class="stack-frame">
+                          <span class="frame-number">{{ $index + 1 }}.</span>
+                          <span class="frame-content">{{ frame }}</span>
+                        </div>
+                      }
+                    </div>
                   </details>
                 }
               </div>

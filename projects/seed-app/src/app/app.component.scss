@@ -157,10 +157,13 @@
   font-size: 0.75rem;
 
   .error-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 0.5rem;
+  }
+
+  .error-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .error-type {
@@ -195,6 +198,7 @@
   .error-time {
     color: #6b7280;
     font-size: 0.625rem;
+    font-weight: 500;
   }
 
   .error-message {
@@ -229,6 +233,35 @@
     }
   }
 
+  .error-context {
+    margin-top: 0.5rem;
+    
+    summary {
+      cursor: pointer;
+      color: #8b5cf6;
+      font-weight: 500;
+      font-size: 0.625rem;
+      padding: 0.25rem 0;
+      user-select: none;
+
+      &:hover {
+        color: #7c3aed;
+      }
+    }
+
+    pre {
+      margin-top: 0.5rem;
+      background: #f9fafb;
+      color: #1f2937;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.625rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+    }
+  }
+
   .call-stack {
     margin-top: 0.5rem;
     
@@ -245,17 +278,40 @@
       }
     }
 
-    pre {
+    .call-stack-list {
       margin-top: 0.5rem;
       background: #1f2937;
-      color: #f3f4f6;
       padding: 0.5rem;
       border-radius: 0.25rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .stack-frame {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
       font-size: 0.625rem;
       line-height: 1.4;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
+      color: #f3f4f6;
+      border-bottom: 1px solid #374151;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .frame-number {
+        color: #60a5fa;
+        font-weight: 600;
+        min-width: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .frame-content {
+        color: #f3f4f6;
+        word-break: break-all;
+        font-family: 'Courier New', monospace;
+      }
     }
   }
 }
