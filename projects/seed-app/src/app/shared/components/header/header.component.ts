@@ -13,7 +13,7 @@ import {
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  lastUpdateDate = new Date('11/16/2025 10:58 PM');
+  lastUpdateDate = new Date('11/16/2025 10:12 PM');
   onSidebarVisibleChange = output<void>();
   
   // Inputs from parent
