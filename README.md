@@ -12,6 +12,8 @@ A modern Angular 20 seed project with comprehensive error handling, workspace ar
 - **Standalone Components** - No NgModules, modern Angular architecture
 - **Signals** - Reactive state management
 - **Vite** - Fast development server and build tool
+- **Vitest** - Modern, fast unit testing framework (replaced Karma/Jasmine)
+- **ESLint** - Code linting and quality enforcement
 
 ## Project Structure
 
@@ -118,6 +120,53 @@ Press **Ctrl+Shift+W** (Windows/Linux) or **Cmd+Shift+W** (Mac) to open the load
 
 Open the browser console to see detailed reference count logs (`>>>RefCount #N`) showing how the system tracks multiple concurrent operations.
 
+## Code Quality
+
+### Linting
+
+This project uses ESLint for code quality and consistency. All lint errors have been fixed and the codebase follows strict TypeScript and Angular best practices.
+
+#### Run Linting
+
+To lint all projects:
+
+```bash
+npm run lint:all
+```
+
+To lint individual projects:
+
+```bash
+npm run lint:seed-app
+npm run lint:seed-common-lib
+npm run lint:global-error-handler-lib
+```
+
+#### Code Formatting
+
+The project uses Prettier for consistent code formatting. To format all files:
+
+```bash
+npm run format
+```
+
+#### Lint Status
+
+All lint errors have been fixed. The codebase now uses:
+- Strict TypeScript types (`unknown` instead of `any` where appropriate)
+- Proper type guards for safe property access
+- Angular style guide compliance (output naming, lifecycle hooks)
+- No unused imports or variables
+- Consistent code formatting
+
+### Type Safety Improvements
+
+The codebase has been refactored for better type safety:
+- Replaced `any` types with `unknown` in error handling
+- Added type guards for safe property access
+- Improved type safety in error handlers and interceptors
+- All type errors resolved
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
@@ -170,6 +219,20 @@ npm run build-app
 
 This builds the seed-app with production optimizations and AOT compilation.
 
+To build individual libraries:
+
+```bash
+# Build seed-common-lib in production mode
+npm run build:seed-common-lib
+
+# Build global-error-handler-lib in production mode
+npm run build:global-error-handler-lib
+
+# Build libraries in development mode
+npm run build:seed-common-lib:dev
+npm run build:global-error-handler-lib:dev
+```
+
 To build the project for development:
 
 ```bash
@@ -193,25 +256,55 @@ ng build
 
 ## Running Tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+This project uses [Vitest](https://vitest.dev/) for modern, fast unit testing. Vitest provides:
+- **Fast execution** - Runs tests in parallel with minimal overhead
+- **Modern ESM support** - Native ES modules support
+- **Great DX** - Built-in watch mode, coverage, and UI
+- **TypeScript first** - Zero-config TypeScript support
+
+### Run All Tests
+
+To execute all unit tests:
 
 ```bash
 npm test
 ```
 
-Or using Angular CLI directly:
+Or run tests in watch mode (automatically re-runs on file changes):
 
 ```bash
-ng test
+npm run test:watch
 ```
+
+### Run Tests with UI
+
+For an interactive test interface:
+
+```bash
+npm run test:ui
+```
+
+### Run Tests with Coverage
+
+To generate code coverage reports:
+
+```bash
+npm run test:coverage
+```
+
+### Run Tests for Specific Projects
 
 To run tests for a specific project:
 
 ```bash
-ng test seed-app
-ng test seed-common-lib
-ng test global-error-handler-lib
+npm run test:seed-app
+npm run test:seed-common-lib
+npm run test:global-error-handler-lib
 ```
+
+### Test Status
+
+All tests are passing and have been fixed to work with Vitest. The migration from Karma/Jasmine to Vitest is complete.
 
 ## Running end-to-end tests
 
