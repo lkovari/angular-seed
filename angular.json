@@ -90,27 +90,6 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "projects/seed-app/tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "projects/seed-app/public"
-              }
-            ],
-            "styles": [
-              "projects/seed-app/src/styles.scss"
-            ],
-            "scripts": []
-          }
-        }
       }
     },
     "seed-common-lib": {
@@ -148,16 +127,6 @@
           },
           "defaultConfiguration": "production"
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "tsConfig": "projects/seed-common-lib/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
-          }
-        }
       }
     },
     "global-error-handler-lib": {
@@ -171,6 +140,15 @@
       "sourceRoot": "projects/global-error-handler-lib/src",
       "prefix": "lib",
       "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/global-error-handler-lib/**/*.ts",
+              "projects/global-error-handler-lib/**/*.html"
+            ]
+          }
+        },
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
@@ -182,16 +160,6 @@
             }
           },
           "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "tsConfig": "projects/global-error-handler-lib/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
-          }
         }
       }
     }

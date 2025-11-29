@@ -55,7 +55,8 @@
 }
 
 @keyframes pulseIcon {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 2px 4px rgba(249, 115, 22, 0.3));
     opacity: 1;
   }

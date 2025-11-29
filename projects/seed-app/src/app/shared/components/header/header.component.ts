@@ -1,10 +1,5 @@
 import { DatePipe } from '@angular/common';
-import {
-  Component,
-  output,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, output, input } from '@angular/core';
 
 @Component({
   selector: 'app-header',
@@ -13,19 +8,19 @@ import {
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  lastUpdateDate = new Date('11/16/2025 10:12 PM');
-  onSidebarVisibleChange = output<void>();
-  
+  lastUpdateDate = new Date('11/29/2025 01:17 PM');
+  sidebarVisibleChange = output<void>();
+
   // Inputs from parent
   showErrorIndicator = input<boolean>(false);
   errorCount = input<number>(0);
-  onErrorIndicatorClick = output<void>();
+  errorIndicatorClick = output<void>();
 
   toggleSidebar(): void {
-    this.onSidebarVisibleChange.emit();
+    this.sidebarVisibleChange.emit();
   }
 
   handleErrorIndicatorClick(): void {
-    this.onErrorIndicatorClick.emit();
+    this.errorIndicatorClick.emit();
   }
 }

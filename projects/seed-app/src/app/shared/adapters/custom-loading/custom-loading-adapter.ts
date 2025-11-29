@@ -1,4 +1,4 @@
-import { LoadingIndicatorAdapter } from 'seed-common-lib';
+import { LoadingIndicatorAdapter } from '../../../../../../seed-common-lib/src/public-api';
 
 /**
  * Custom loading adapter that uses external HTML and SCSS files
@@ -13,7 +13,7 @@ export class CustomLoadingAdapter implements LoadingIndicatorAdapter {
       // Create container
       this.containerElement = document.createElement('div');
       this.containerElement.id = 'custom-loading-container';
-      
+
       // Set the HTML content from custom-loading.html
       this.containerElement.innerHTML = `
         <div class="custom-loading-overlay">
@@ -21,10 +21,10 @@ export class CustomLoadingAdapter implements LoadingIndicatorAdapter {
           <div class="custom-loading-text">Loading...</div>
         </div>
       `;
-      
+
       // Inject the styles from custom-loading.scss
       this.injectStyles();
-      
+
       document.body.appendChild(this.containerElement);
     }
   }
@@ -41,7 +41,7 @@ export class CustomLoadingAdapter implements LoadingIndicatorAdapter {
     if (!document.getElementById('custom-loading-styles')) {
       const styleElement = document.createElement('style');
       styleElement.id = 'custom-loading-styles';
-      
+
       // Styles from custom-loading.scss
       styleElement.textContent = `
         .custom-loading-overlay {
@@ -85,7 +85,7 @@ export class CustomLoadingAdapter implements LoadingIndicatorAdapter {
           to { opacity: 1; }
         }
       `;
-      
+
       document.head.appendChild(styleElement);
     }
   }

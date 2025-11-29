@@ -1,13 +1,18 @@
-<div class="bg-surface-brand-strong text-neutral-inverted border-b border-gray-300 dark:border-gray-600 h-16">
+<div
+  class="bg-surface-brand-strong text-neutral-inverted border-b border-gray-300 dark:border-gray-600 h-16"
+>
   <div class="flex items-center justify-between h-full">
-
     <div class="flex flex-row gap-1 items-center pl-2">
       <div class="hamburger-fixed md:hidden">
-        <button id="hamburger" class="btn btn-link text-xl" aria-label="Toggle Sidebar" (click)="toggleSidebar()">
+        <button
+          id="hamburger"
+          class="btn btn-link text-xl"
+          aria-label="Toggle Sidebar"
+          (click)="toggleSidebar()"
+        >
           &#9776;
         </button>
       </div>
-
     </div>
 
     <div class="text-lg font-semibold whitespace-nowrap">
@@ -16,17 +21,33 @@
 
     <div class="flex items-center gap-3 pr-2">
       @if (showErrorIndicator() && errorCount() > 0) {
-        <div class="error-indicator-header" (click)="handleErrorIndicatorClick()">
+        <div
+          class="error-indicator-header"
+          (click)="handleErrorIndicatorClick()"
+        >
           <sup class="error-count-superscript">{{ errorCount() }}</sup>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            ></path>
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
         </div>
       }
-      <span class="text-xs whitespace-nowrap">{{ lastUpdateDate | date:'MM/dd/yyyy HH:mm' }}</span>
+      <span class="text-xs whitespace-nowrap">{{
+        lastUpdateDate | date: 'MM/dd/yyyy HH:mm'
+      }}</span>
     </div>
-
   </div>
 </div>

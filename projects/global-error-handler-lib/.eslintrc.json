@@ -1,0 +1,16 @@
+{
+  "extends": "../../.eslintrc.json",
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["projects/global-error-handler-lib/tsconfig.*?.json"]
+      },
+      "rules": {
+        // Add specific rules for global-error-handler-lib here if needed
+      }
+    }
+  ]
+}
+

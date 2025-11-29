@@ -6,7 +6,7 @@ export interface LoadingIndicatorAdapter {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoadingIndicatorService {
   private refCount = signal(0);

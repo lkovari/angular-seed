@@ -4,10 +4,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   selector: 'app-not-found',
   imports: [],
   templateUrl: './not-found.component.html',
-  styleUrl: './not-found.component.scss'
+  styleUrl: './not-found.component.scss',
 })
 export class NotFoundComponent implements OnInit, OnDestroy {
-
   ngOnInit(): void {
     console.log('NotFoundComponent initialized');
   }
@@ -15,4 +14,4 @@ export class NotFoundComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     console.log('NotFoundComponent destroyed');
   }
-} 
+}

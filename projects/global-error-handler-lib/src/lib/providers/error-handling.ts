@@ -1,19 +1,9 @@
-import { 
-  ErrorHandler, 
-  Provider, 
-  importProvidersFrom,
-  EnvironmentProviders
-} from '@angular/core';
-import { 
-  provideHttpClient, 
-  withInterceptors,
-  HTTP_INTERCEPTORS 
-} from '@angular/common/http';
+import { ErrorHandler, Provider, EnvironmentProviders } from '@angular/core';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 // Import our custom error handling services
 import { GlobalErrorHandler } from '../global-error-handler';
 import { httpErrorInterceptor } from '../interceptors/http-error';
-import { ErrorNotificationService } from '../services/error-notification';
 
 export interface ErrorHandlingConfig {
   enableGlobalHandler: boolean;
@@ -31,7 +21,7 @@ const DEFAULT_CONFIG: ErrorHandlingConfig = {
   enableGlobalHandler: true,
   enableHttpInterceptor: true,
   enableNotifications: true,
-  production: false
+  production: false,
 };
 
 /**
@@ -39,7 +29,7 @@ const DEFAULT_CONFIG: ErrorHandlingConfig = {
  * This should be used in your app.config.ts
  */
 export function provideErrorHandling(
-  config: Partial<ErrorHandlingConfig> = {}
+  config: Partial<ErrorHandlingConfig> = {},
 ): Array<Provider | EnvironmentProviders> {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
   const providers: Array<Provider | EnvironmentProviders> = [];
@@ -48,17 +38,13 @@ export function provideErrorHandling(
   if (finalConfig.enableGlobalHandler) {
     providers.push({
       provide: ErrorHandler,
-      useClass: GlobalErrorHandler
+      useClass: GlobalErrorHandler,
     });
   }
 
   // HTTP Error Interceptor
   if (finalConfig.enableHttpInterceptor) {
-    providers.push(
-      provideHttpClient(
-        withInterceptors([httpErrorInterceptor])
-      )
-    );
+    providers.push(provideHttpClient(withInterceptors([httpErrorInterceptor])));
   }
 
   // Error Notification Service (automatically provided via providedIn: 'root')
@@ -71,12 +57,14 @@ export function provideErrorHandling(
  * Simplified provider for basic error handling
  * Includes global error handler and HTTP interceptor with default settings
  */
-export function provideBasicErrorHandling(): Array<Provider | EnvironmentProviders> {
+export function provideBasicErrorHandling(): Array<
+  Provider | EnvironmentProviders
+> {
   return provideErrorHandling({
     enableGlobalHandler: true,
     enableHttpInterceptor: true,
     enableNotifications: true,
-    production: false
+    production: false,
   });
 }
 
@@ -84,13 +72,13 @@ export function provideBasicErrorHandling(): Array<Provider | EnvironmentProvide
  * Production-ready error handling with monitoring integration
  */
 export function provideProductionErrorHandling(
-  monitoringConfig?: ErrorHandlingConfig['monitoringConfig']
+  monitoringConfig?: ErrorHandlingConfig['monitoringConfig'],
 ): Array<Provider | EnvironmentProviders> {
   return provideErrorHandling({
     enableGlobalHandler: true,
     enableHttpInterceptor: true,
     enableNotifications: true,
     production: true,
-    monitoringConfig
+    monitoringConfig,
   });
 }

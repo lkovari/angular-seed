@@ -4,12 +4,25 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "types": []
+    "types": [],
+    "paths": {
+      "global-error-handler-lib": [
+        "../global-error-handler-lib/src/public-api.ts"
+      ],
+      "seed-common-lib": [
+        "../seed-common-lib/src/public-api.ts"
+      ]
+    }
   },
   "files": [
     "src/main.ts"
   ],
   "include": [
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
   ]
 }

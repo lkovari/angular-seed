@@ -1,8 +1,8 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwError, of, timer } from 'rxjs';
-import { catchError, retry, switchMap } from 'rxjs/operators';
+import { throwError, timer } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import { ErrorNotificationService } from '../services/error-notification';
 
 export interface RetryConfig {
@@ -12,51 +12,61 @@ export interface RetryConfig {
   retryCondition?: (error: HttpErrorResponse) => boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxAttempts: 1, // Reduced from 3 to 1 for faster error display
-  delay: 500,     // Reduced from 1000 to 500ms
+  delay: 500, // Reduced from 1000 to 500ms
   backoff: 2,
   retryCondition: (error: HttpErrorResponse) => {
     // Only retry on network errors (status 0), not on 5xx errors for testing
     return error.status === 0;
-  }
+  },
 };
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const notificationService = inject(ErrorNotificationService);
-  
+
   return next(req).pipe(
     // No retry for testing - errors show immediately
     // retryWithBackoff(DEFAULT_RETRY_CONFIG),
-    
+
     // Global error handling
     catchError((error: HttpErrorResponse) => {
       handleHttpError(error, router, notificationService);
       return throwError(() => error);
-    })
+    }),
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function retryWithBackoff(config: RetryConfig) {
-  return (source: any) => source.pipe(
-    retry({
-      count: config.maxAttempts,
-      delay: (error: HttpErrorResponse, attempt: number) => {
-        if (!config.retryCondition || !config.retryCondition(error)) {
-          return throwError(() => error);
-        }
-        
-        const delayTime = config.delay * Math.pow(config.backoff, attempt - 1);
-        console.log(`Retrying HTTP request in ${delayTime}ms (attempt ${attempt}/${config.maxAttempts})`);
-        
-        return timer(delayTime);
-      }
-    })
-  );
+  return (source: import('rxjs').Observable<unknown>) =>
+    source.pipe(
+      retry({
+        count: config.maxAttempts,
+        delay: (error: HttpErrorResponse, attempt: number) => {
+          if (!config.retryCondition || !config.retryCondition(error)) {
+            return throwError(() => error);
+          }
+
+          const delayTime =
+            config.delay * Math.pow(config.backoff, attempt - 1);
+          console.log(
+            `Retrying HTTP request in ${delayTime}ms (attempt ${attempt}/${config.maxAttempts})`,
+          );
+
+          return timer(delayTime);
+        },
+      }),
+    );
 }
 
-function handleHttpError(error: HttpErrorResponse, router: Router, notificationService: ErrorNotificationService): void {
+function handleHttpError(
+  error: HttpErrorResponse,
+  router: Router,
+  notificationService: ErrorNotificationService,
+): void {
   // Log the error details
   console.group('🌐 HTTP Error Interceptor');
   console.error('HTTP Error:', {
@@ -64,7 +74,7 @@ function handleHttpError(error: HttpErrorResponse, router: Router, notificationS
     statusText: error.statusText,
     url: error.url,
     message: error.message,
-    error: error.error
+    error: error.error,
   });
   console.groupEnd();
 
@@ -122,22 +132,26 @@ function getHttpErrorMessage(error: HttpErrorResponse): string {
   }
 }
 
-function handleUnauthorized(router: Router): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function handleUnauthorized(_router: Router): void {
   // Clear authentication tokens
   localStorage.removeItem('token');
   sessionStorage.removeItem('token');
-  
+
   // Only redirect if login route exists
-  // router.navigate(['/login'], { 
-  //   queryParams: { returnUrl: router.url } 
+  // router.navigate(['/login'], {
+  //   queryParams: { returnUrl: router.url }
   // });
   console.warn('401 Unauthorized - would redirect to login if route exists');
 }
 
-function handleForbidden(router: Router): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function handleForbidden(_router: Router): void {
   // Only redirect if unauthorized route exists
   // router.navigate(['/unauthorized']);
-  console.warn('403 Forbidden - would redirect to unauthorized page if route exists');
+  console.warn(
+    '403 Forbidden - would redirect to unauthorized page if route exists',
+  );
 }
 
 function handleNotFound(error: HttpErrorResponse): void {

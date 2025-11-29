@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { GenerateErrorsComponent } from './generate-errors.component';
 
@@ -8,9 +9,9 @@ describe('GenerateErrorsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GenerateErrorsComponent]
-    })
-    .compileComponents();
+      imports: [GenerateErrorsComponent],
+      providers: [provideHttpClient()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GenerateErrorsComponent);
     component = fixture.componentInstance;

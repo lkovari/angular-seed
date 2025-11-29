@@ -3,8 +3,8 @@ export interface MenuItem {
   label: string;
   icon?: string;
   url?: string;
-  routerLink?: any;
-  style?: { [klass: string]: any } | null | undefined;
-  iconStyle?: { [klass: string]: any } | null | undefined;
+  routerLink?: string | string[];
+  style?: { [klass: string]: unknown } | null | undefined;
+  iconStyle?: { [klass: string]: unknown } | null | undefined;
   children?: MenuItem[];
 }

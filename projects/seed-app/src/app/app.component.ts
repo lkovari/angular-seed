@@ -1,30 +1,50 @@
-import { Component, HostListener, signal, ChangeDetectionStrategy, inject, effect, viewChild } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  signal,
+  ChangeDetectionStrategy,
+  inject,
+  effect,
+  viewChild,
+} from '@angular/core';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
-import { GenerateErrorsComponent, ErrorNotificationService, ErrorNotification } from 'global-error-handler-lib';
-import { LoadingSpinnerComponent, LoadingIndicatorService, WaitSpinnerTestComponent } from 'seed-common-lib';
+import {
+  GenerateErrorsComponent,
+  ErrorNotificationService,
+} from '../../../global-error-handler-lib/src/public-api';
+import {
+  LoadingSpinnerComponent,
+  LoadingIndicatorService,
+  WaitSpinnerTestComponent,
+} from '../../../seed-common-lib/src/public-api';
 // import { CustomLoadingAdapter } from './shared/adapters/custom-loading';
 
 @Component({
   selector: 'app-root',
-  imports: [MainLayoutComponent, GenerateErrorsComponent, LoadingSpinnerComponent, WaitSpinnerTestComponent],
+  imports: [
+    MainLayoutComponent,
+    GenerateErrorsComponent,
+    LoadingSpinnerComponent,
+    WaitSpinnerTestComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   private errorNotificationService = inject(ErrorNotificationService);
   private loadingService = inject(LoadingIndicatorService);
-  
+
   // ViewChild for wait spinner test component
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
-  
+
   title = 'seed-app';
   showErrorModal = signal(false);
   showErrorHistoryModal = signal(false);
   showErrorIndicator = signal(false);
   errorHistory = this.errorNotificationService.errorHistorySignal;
-  
-  private indicatorTimeout: any;
+
+  private indicatorTimeout: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     // Watch for new errors in history
@@ -42,13 +62,21 @@ export class AppComponent {
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
     // Check for Ctrl+Shift+E (or Cmd+Shift+E on Mac) - E for Errors
-    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'e') {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      event.shiftKey &&
+      event.key.toLowerCase() === 'e'
+    ) {
       event.preventDefault();
       this.toggleErrorModal();
     }
-    
+
     // Check for Ctrl+Shift+W (or Cmd+Shift+W on Mac) - W for Wait Spinner
-    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'w') {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      event.shiftKey &&
+      event.key.toLowerCase() === 'w'
+    ) {
       event.preventDefault();
       this.openWaitSpinnerTest();
     }
@@ -57,12 +85,12 @@ export class AppComponent {
   openWaitSpinnerTest(): void {
     const testComponent = this.waitSpinnerTest();
     if (testComponent) {
-      testComponent.openModal();
+      (testComponent as WaitSpinnerTestComponent).openModal();
     }
   }
 
   toggleErrorModal(): void {
-    this.showErrorModal.update(value => !value);
+    this.showErrorModal.update((value) => !value);
   }
 
   closeErrorModal(): void {
@@ -116,17 +144,17 @@ export class AppComponent {
       500: 'Internal Server Error',
       502: 'Bad Gateway',
       503: 'Service Unavailable',
-      504: 'Gateway Timeout'
+      504: 'Gateway Timeout',
     };
     return statusTexts[status] || '';
   }
 
-  formatContext(context: any): string {
+  formatContext(context: Record<string, unknown>): string {
     // Create a clean copy without the originalError (too verbose)
     const cleanContext = {
-      url: context.url,
-      userAgent: context.userAgent,
-      errorType: context.errorType
+      url: context['url'],
+      userAgent: context['userAgent'],
+      errorType: context['errorType'],
     };
     return JSON.stringify(cleanContext, null, 2);
   }

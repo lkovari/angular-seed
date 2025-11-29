@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
   selector: 'app-home',
   imports: [],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   private http = inject(HttpClient);
@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load README.md:', err);
         this.readmeContent.set('Failed to load README.md');
-      }
+      },
     });
   }
 }

@@ -91,8 +91,6 @@ html {
   height: 100%;
 }
 
-
-
 .overlay {
   height: auto;
   max-height: calc(100vh - 4rem);
@@ -104,7 +102,9 @@ html {
   top: 4rem;
   left: 1rem;
   overflow-x: hidden;
-  transition: width 0.5s, opacity 0.5s;
+  transition:
+    width 0.5s,
+    opacity 0.5s;
   background: #fff;
   opacity: 0;
   pointer-events: none;
@@ -112,7 +112,7 @@ html {
   border: 1px solid #86b7f0;
 }
 
-.overlay[style*="width: 100%"] {
+.overlay[style*='width: 100%'] {
   opacity: 1;
   pointer-events: auto;
 }

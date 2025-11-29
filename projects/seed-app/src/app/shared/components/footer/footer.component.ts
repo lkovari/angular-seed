@@ -1,5 +1,11 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { AngularVersionComponent } from 'seed-common-lib';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
+import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/public-api';
 
 @Component({
   selector: 'app-footer',
@@ -7,21 +13,26 @@ import { AngularVersionComponent } from 'seed-common-lib';
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
 })
-export class FooterComponent {
+export class FooterComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
-  developers = ['László Kővári', 'Developer #1', 'Developer #2', 'Developer #3'];
+  developers = [
+    'László Kővári',
+    'Developer #1',
+    'Developer #2',
+    'Developer #3',
+  ];
 
-  developerOrders = [[1, 2, 3, 4], [2, 3, 4, 1], [3, 4, 1, 2], [4, 1, 2, 3]];
+  developerOrders = [
+    [1, 2, 3, 4],
+    [2, 3, 4, 1],
+    [3, 4, 1, 2],
+    [4, 1, 2, 3],
+  ];
 
   private previousIndex: number | null = null;
   currentDeveloperOrder = '';
-  private intervalId: any;
-
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
-
-  constructor() { }
+  private intervalId: ReturnType<typeof setInterval> | undefined;
 
   ngOnInit(): void {
     this.currentDeveloperOrder = this.getDeveloperOrder();
@@ -44,7 +55,7 @@ export class FooterComponent {
     } while (idx === this.previousIndex);
     this.previousIndex = idx;
     const order = this.developerOrders[idx];
-    return order.map(i => this.developers[i - 1]).join(', ');
+    return order.map((i) => this.developers[i - 1]).join(', ');
   }
 
   onAnimationEnd(): void {

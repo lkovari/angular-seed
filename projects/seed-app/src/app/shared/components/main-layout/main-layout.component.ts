@@ -1,4 +1,11 @@
-import { Component, signal, input, output } from '@angular/core';
+import {
+  Component,
+  signal,
+  input,
+  output,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
 import { MenuItem } from '../../models/menu/menu-item.interface';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 import { CommonModule } from '@angular/common';
@@ -18,15 +25,15 @@ import { FooterComponent } from '../footer/footer.component';
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   sidebarVisible: boolean = true;
   private _isMobileView = signal(false);
   private resizeListener!: () => void;
-  
+
   // Error indicator inputs/outputs
   showErrorIndicator = input<boolean>(false);
   errorCount = input<number>(0);
-  onErrorIndicatorClick = output<void>();
+  errorIndicatorClick = output<void>();
 
   menuItems: MenuItem[] = [
     {
@@ -76,9 +83,9 @@ export class MainLayoutComponent {
   }
 
   openNav() {
-    const navi = document.getElementById("navi");
+    const navi = document.getElementById('navi');
     if (navi) {
-      navi.style.width = "100%";
+      navi.style.width = '100%';
     }
   }
 
