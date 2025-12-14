@@ -1,2 +1,9 @@
 {
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.useAliasesForRenames": false,
+  "files.associations": {
+    "*.spec.ts": "typescript"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on"
 }

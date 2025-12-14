@@ -10,7 +10,8 @@ export default defineConfig({
   plugins: [
     angular({
       jit: true,
-      tsconfig: resolve(__dirname, './tsconfig.json'),
+      tsconfig: resolve(__dirname, './tsconfig.vitest.json'),
+      workspaceRoot: __dirname,
     }),
   ],
   test: {
@@ -18,6 +19,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['projects/**/*.spec.ts', 'projects/**/*.test.ts'],
+    exclude: ['node_modules', 'dist', '**/*.d.ts', '**/out-tsc/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'text-summary'],

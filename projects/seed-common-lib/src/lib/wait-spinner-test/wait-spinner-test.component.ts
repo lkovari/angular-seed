@@ -26,19 +26,19 @@ export class WaitSpinnerTestComponent {
     if (this.httpCallDisabled()) return;
 
     this.httpCallDisabled.set(true);
-    console.log('🔄 Starting simulated HTTP call...');
-    console.log('📊 Current ref count:', this.loadingService.getRefCount());
+    console.warn('🔄 Starting simulated HTTP call...');
+    console.warn('📊 Current ref count:', this.loadingService.getRefCount());
 
     this.http.get('https://httpbin.org/delay/4').subscribe({
       next: (response) => {
-        console.log('✅ HTTP call completed successfully');
-        console.log('📊 Final ref count:', this.loadingService.getRefCount());
-        console.log('Response:', response);
+        console.warn('✅ HTTP call completed successfully');
+        console.warn('📊 Final ref count:', this.loadingService.getRefCount());
+        console.warn('Response:', response);
         this.httpCallDisabled.set(false);
       },
       error: (error) => {
         console.error('❌ HTTP call failed:', error);
-        console.log('📊 Final ref count:', this.loadingService.getRefCount());
+        console.warn('📊 Final ref count:', this.loadingService.getRefCount());
         this.httpCallDisabled.set(false);
       },
     });
@@ -48,13 +48,13 @@ export class WaitSpinnerTestComponent {
     if (this.manualSpinnerDisabled()) return;
 
     this.manualSpinnerDisabled.set(true);
-    console.log('🔄 Manual spinner test...');
+    console.warn('🔄 Manual spinner test...');
     this.loadingService.showWaitSpinner();
-    console.log('📊 Ref count after show:', this.loadingService.getRefCount());
+    console.warn('📊 Ref count after show:', this.loadingService.getRefCount());
 
     setTimeout(() => {
       this.loadingService.hideWaitSpinner();
-      console.log(
+      console.warn(
         '📊 Ref count after hide:',
         this.loadingService.getRefCount(),
       );
@@ -66,7 +66,7 @@ export class WaitSpinnerTestComponent {
     if (this.multipleCallsDisabled()) return;
 
     this.multipleCallsDisabled.set(true);
-    console.log('🔄 Starting 3 concurrent HTTP calls...');
+    console.warn('🔄 Starting 3 concurrent HTTP calls...');
 
     let completedCalls = 0;
     const totalCalls = 3;
@@ -93,7 +93,7 @@ export class WaitSpinnerTestComponent {
       error: () => checkComplete(),
     });
 
-    console.log('📊 Initial ref count:', this.loadingService.getRefCount());
+    console.warn('📊 Initial ref count:', this.loadingService.getRefCount());
   }
 
   openModal(): void {

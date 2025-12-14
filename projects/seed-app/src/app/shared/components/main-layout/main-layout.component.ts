@@ -3,10 +3,10 @@ import {
   signal,
   input,
   output,
-  OnInit,
-  OnDestroy,
+  type OnInit,
+  type OnDestroy,
 } from '@angular/core';
-import { MenuItem } from '../../models/menu/menu-item.interface';
+import { type MenuItem } from '../../models/menu/menu-item.interface';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
 
 import { RouterOutlet } from '@angular/router';
@@ -72,9 +72,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.resizeListener) {
-      window.removeEventListener('resize', this.resizeListener);
-    }
+    window.removeEventListener('resize', this.resizeListener);
   }
 
   toggleSidebar(): void {

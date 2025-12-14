@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, type OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 @Component({

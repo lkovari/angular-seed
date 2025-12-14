@@ -2,8 +2,8 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
-  OnInit,
-  OnDestroy,
+  type OnInit,
+  type OnDestroy,
 } from '@angular/core';
 import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/public-api';
 
@@ -55,7 +55,7 @@ export class FooterComponent implements OnInit, OnDestroy {
     } while (idx === this.previousIndex);
     this.previousIndex = idx;
     const order = this.developerOrders[idx];
-    return order.map((i) => this.developers[i - 1]).join(', ');
+    return order?.map((i) => this.developers[i - 1]).join(', ') ?? '';
   }
 
   onAnimationEnd(): void {

@@ -1,5 +1,6 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { ErrorHandler, NgZone } from '@angular/core';
+import { NgZone } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { GlobalErrorHandler } from './global-error-handler';
 import { ErrorNotificationService } from './services/error-notification';
@@ -66,8 +67,8 @@ describe('GlobalErrorHandler', () => {
 
       expect(addErrorSpy).toHaveBeenCalled();
       const callArgs = addErrorSpy.mock.calls[0];
-      expect(callArgs[1]).toBe(actualError);
-      expect(['Angular Error', 'Error']).toContain(callArgs[2]);
+      expect(callArgs?.[1]).toBe(actualError);
+      expect(['Angular Error', 'Error']).toContain(callArgs?.[2]);
     });
 
     it('should extract actual error from Angular wrapper with error property', () => {
@@ -82,8 +83,8 @@ describe('GlobalErrorHandler', () => {
 
       expect(addErrorSpy).toHaveBeenCalled();
       const callArgs = addErrorSpy.mock.calls[0];
-      expect(callArgs[1]).toBe(actualError);
-      expect(['Angular Error', 'Error']).toContain(callArgs[2]);
+      expect(callArgs?.[1]).toBe(actualError);
+      expect(['Angular Error', 'Error']).toContain(callArgs?.[2]);
     });
 
     it('should handle string errors', () => {
@@ -112,8 +113,9 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(httpError);
 
-      expect(showErrorSpy).toHaveBeenCalled() ||
-        expect(addErrorSpy).toHaveBeenCalled();
+      const showErrorCalled = showErrorSpy.mock.calls.length > 0;
+      const addErrorCalled = addErrorSpy.mock.calls.length > 0;
+      expect(showErrorCalled || addErrorCalled).toBe(true);
     });
 
     it('should run outside Angular zone', () => {
@@ -141,9 +143,10 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleLogSpy).toHaveBeenCalled();
       const logCalls = consoleLogSpy.mock.calls;
-      const hasReportCall = logCalls.some((call) =>
+      const hasReportCall = logCalls.some((call: unknown[]) =>
         call[0]?.toString().includes('Error would be reported'),
       );
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       expect(hasReportCall || logCalls.length > 0).toBe(true);
     });
   });
@@ -160,8 +163,8 @@ describe('GlobalErrorHandler', () => {
 
       expect(addErrorSpy).toHaveBeenCalled();
       const callArgs = addErrorSpy.mock.calls[0];
-      expect(callArgs[0]).toBe('Test error message');
-      expect(callArgs[1]).toBe(error);
+      expect(callArgs?.[0]).toBe('Test error message');
+      expect(callArgs?.[1]).toBe(error);
       expect(['Angular Error', 'Error']).toContain(callArgs[2]);
     });
 
@@ -203,8 +206,9 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(httpError);
 
-      expect(showErrorSpy).toHaveBeenCalled() ||
-        expect(addErrorSpy).toHaveBeenCalled();
+      const showErrorCalled = showErrorSpy.mock.calls.length > 0;
+      const addErrorCalled = addErrorSpy.mock.calls.length > 0;
+      expect(showErrorCalled || addErrorCalled).toBe(true);
     });
 
     it('should notify user for promise rejection error', () => {
@@ -279,8 +283,9 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(httpError);
 
-      expect(showErrorSpy).toHaveBeenCalled() ||
-        expect(addErrorSpy).toHaveBeenCalled();
+      const showErrorCalled = showErrorSpy.mock.calls.length > 0;
+      const addErrorCalled = addErrorSpy.mock.calls.length > 0;
+      expect(showErrorCalled || addErrorCalled).toBe(true);
     });
 
     it('should handle HttpErrorResponse for various status codes', () => {
@@ -299,8 +304,9 @@ describe('GlobalErrorHandler', () => {
 
         handler.handleError(httpError);
 
-        expect(showErrorSpy).toHaveBeenCalled() ||
-          expect(addErrorSpy).toHaveBeenCalled();
+        const showErrorCalled = showErrorSpy.mock.calls.length > 0;
+        const addErrorCalled = addErrorSpy.mock.calls.length > 0;
+        expect(showErrorCalled || addErrorCalled).toBe(true);
         showErrorSpy.mockClear();
         addErrorSpy.mockClear();
       });
@@ -449,7 +455,10 @@ describe('GlobalErrorHandler', () => {
       expect(consoleGroupSpy).toHaveBeenCalledWith(
         expect.stringContaining('Global Error Handler'),
       );
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error Info:', expect.any(Object));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error Info:',
+        expect.any(Object),
+      );
       expect(consoleErrorSpy).toHaveBeenCalledWith('Original Error:', error);
     });
 
@@ -491,7 +500,9 @@ describe('GlobalErrorHandler', () => {
       handler.handleError(error);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error would be reported to monitoring service'),
+        expect.stringContaining(
+          'Error would be reported to monitoring service',
+        ),
         expect.any(Object),
       );
     });
@@ -595,7 +606,9 @@ describe('GlobalErrorHandler', () => {
 
       expect(addErrorSpy).toHaveBeenCalled();
       const callArgs = addErrorSpy.mock.calls[0];
-      expect(callArgs[0]).toBe('Failed to load script. Please refresh the page.');
+      expect(callArgs[0]).toBe(
+        'Failed to load script. Please refresh the page.',
+      );
       expect(callArgs[2]).toBe('Resource Loading Error');
     });
   });
@@ -634,7 +647,9 @@ describe('GlobalErrorHandler', () => {
     });
 
     it('should handle circular reference in error object', () => {
-      const error: any = { message: 'Circular error' };
+      const error: { message: string; self?: unknown } = {
+        message: 'Circular error',
+      };
       error.self = error;
 
       expect(() => handler.handleError(error)).not.toThrow();
@@ -652,4 +667,3 @@ describe('GlobalErrorHandler', () => {
     });
   });
 });
-

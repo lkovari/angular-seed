@@ -1,24 +1,21 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorNotificationService } from './error-notification';
 
 describe('ErrorNotificationService', () => {
   let service: ErrorNotificationService;
-  let router: Router;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         ErrorNotificationService,
-        provideRouter([
-          { path: 'test-route', component: class {} },
-        ]),
+        provideRouter([{ path: 'test-route', component: class {} }]),
       ],
     });
 
     service = TestBed.inject(ErrorNotificationService);
-    router = TestBed.inject(Router);
   });
 
   afterEach(() => {
@@ -62,7 +59,7 @@ describe('ErrorNotificationService', () => {
     });
 
     it('should use custom duration', () => {
-      const id = service.showError('Test error', 3000);
+      service.showError('Test error', 3000);
 
       const notification = service.notificationsSignal()[0];
       expect(notification.duration).toBe(3000);
@@ -160,7 +157,7 @@ describe('ErrorNotificationService', () => {
 
   describe('showPersistent', () => {
     it('should add persistent notification', () => {
-      const id = service.showPersistent('Persistent message');
+      service.showPersistent('Persistent message');
 
       const notification = service.notificationsSignal()[0];
       expect(notification.message).toBe('Persistent message');
@@ -250,7 +247,9 @@ describe('ErrorNotificationService', () => {
 
       const notification = service.notificationsSignal()[0];
       expect(notification.errorContext?.errorType).toBeDefined();
-      expect(['TypeError', 'Unknown']).toContain(notification.errorContext?.errorType);
+      expect(['TypeError', 'Unknown']).toContain(
+        notification.errorContext?.errorType,
+      );
     });
 
     it('should use custom duration', () => {
@@ -567,4 +566,3 @@ describe('ErrorNotificationService', () => {
     });
   });
 });
-

@@ -1,18 +1,15 @@
+import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandler } from '@angular/core';
-import { HttpClient, provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   provideErrorHandling,
   provideBasicErrorHandling,
   provideProductionErrorHandling,
-  ErrorHandlingConfig,
+  type ErrorHandlingConfig,
 } from './error-handling';
 import { GlobalErrorHandler } from '../global-error-handler';
-import { httpErrorInterceptor } from '../interceptors/http-error';
 
 describe('provideErrorHandling', () => {
   describe('Default Configuration', () => {
@@ -160,7 +157,10 @@ describe('provideErrorHandling', () => {
           p !== null &&
           'provide' in p &&
           p.provide === ErrorHandler,
-      ) as { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler };
+      ) as {
+        provide: typeof ErrorHandler;
+        useClass: typeof GlobalErrorHandler;
+      };
 
       expect(errorHandlerProvider).toBeDefined();
       expect(errorHandlerProvider.useClass).toBe(GlobalErrorHandler);
@@ -281,4 +281,3 @@ describe('provideProductionErrorHandling', () => {
     expect(Array.isArray(providers)).toBe(true);
   });
 });
-

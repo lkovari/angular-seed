@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -89,9 +90,13 @@ describe('GenerateErrorsComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       process.removeListener('unhandledRejection', nodeRejectionHandler);
-      window.removeEventListener('unhandledrejection', unhandledRejectionHandler, {
-        capture: true,
-      });
+      window.removeEventListener(
+        'unhandledrejection',
+        unhandledRejectionHandler,
+        {
+          capture: true,
+        },
+      );
 
       if (process.stderr && originalStderrWrite) {
         process.stderr.write = originalStderrWrite;
@@ -124,7 +129,10 @@ describe('GenerateErrorsComponent', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
+      window.removeEventListener(
+        'unhandledrejection',
+        unhandledRejectionHandler,
+      );
 
       if (process.stderr && originalStderrWrite) {
         process.stderr.write = originalStderrWrite;

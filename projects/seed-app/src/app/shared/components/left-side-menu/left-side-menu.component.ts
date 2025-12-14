@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { MenuItem } from '../../models/menu/menu-item.interface';
+import { type MenuItem } from '../../models/menu/menu-item.interface';
 import { RouterLink } from '@angular/router';
 
 @Component({

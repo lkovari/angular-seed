@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import {
   HttpClient,
@@ -17,7 +18,6 @@ describe('httpErrorInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
   let notificationService: ErrorNotificationService;
-  let router: Router;
   let localStorageSpy: Storage;
   let sessionStorageSpy: Storage;
 
@@ -67,7 +67,6 @@ describe('httpErrorInterceptor', () => {
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
     notificationService = TestBed.inject(ErrorNotificationService);
-    router = TestBed.inject(Router);
   });
 
   afterEach(() => {
@@ -492,4 +491,3 @@ describe('httpErrorInterceptor', () => {
     });
   });
 });
-

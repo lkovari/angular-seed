@@ -69,7 +69,7 @@ export class ErrorNotificationService {
       userAgent:
         typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
       errorType:
-        errorType ||
+        errorType ??
         (originalError &&
         typeof originalError === 'object' &&
         'constructor' in originalError &&
@@ -141,23 +141,27 @@ export class ErrorNotificationService {
     const callStack = this.extractCallStack(error);
     const route = this.getCurrentRoute();
 
-    return this.addNotification(
-      {
-        message,
-        type: 'error',
-        autoHide: true,
-        duration,
-        callStack,
-        route,
-        errorContext: {
-          url: typeof window !== 'undefined' ? window.location.href : undefined,
-          userAgent:
-            typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-          errorType: 'ManualError',
-        },
-      },
-      true,
-    ); // Add to history
+    const config: Partial<ErrorNotification> = {
+      message,
+      type: 'error',
+      autoHide: true,
+      duration,
+      ...(callStack !== undefined && { callStack }),
+      ...(route !== undefined && { route }),
+    };
+    if (typeof window !== 'undefined' || typeof navigator !== 'undefined') {
+      const errorContext: ErrorNotification['errorContext'] = {
+        errorType: 'ManualError',
+      };
+      if (typeof window !== 'undefined') {
+        errorContext.url = window.location.href;
+      }
+      if (typeof navigator !== 'undefined') {
+        errorContext.userAgent = navigator.userAgent;
+      }
+      config.errorContext = errorContext;
+    }
+    return this.addNotification(config, true); // Add to history
   }
 
   showWarning(message: string, duration = 4000): string {
@@ -192,12 +196,15 @@ export class ErrorNotificationService {
     type: ErrorNotification['type'] = 'error',
     action?: ErrorNotification['action'],
   ): string {
-    return this.addNotification({
+    const config: Partial<ErrorNotification> = {
       message,
       type,
       autoHide: false,
-      action,
-    });
+    };
+    if (action !== undefined) {
+      config.action = action;
+    }
+    return this.addNotification(config);
   }
 
   dismiss(id: string): void {
@@ -311,9 +318,10 @@ export class ErrorNotificationService {
         // Try to extract meaningful file names from bundled paths
         if (line.includes('localhost:4200')) {
           // Extract the part after localhost:4200
-          const match = line.match(/localhost:4200\/(.+?)(?:\?|$)/);
+          const regex = /localhost:4200\/(.+?)(?:\?|$)/;
+          const match = regex.exec(line);
           if (match) {
-            return line.replace(match[0], match[1]);
+            return line.replace(match[0], match[1] ?? '');
           }
         }
         return line;
@@ -334,16 +342,18 @@ export class ErrorNotificationService {
   ): string {
     const notification: ErrorNotification = {
       id: `error-${this.nextId++}`,
-      message: config.message || '',
-      type: config.type || 'error',
+      message: config.message ?? '',
+      type: config.type ?? 'error',
       timestamp: new Date(),
-      route: config.route,
-      httpStatus: config.httpStatus,
+      ...(config.route !== undefined && { route: config.route }),
+      ...(config.httpStatus !== undefined && { httpStatus: config.httpStatus }),
       autoHide: config.autoHide ?? true,
-      duration: config.duration || 5000,
-      callStack: config.callStack,
-      errorContext: config.errorContext,
-      action: config.action,
+      duration: config.duration ?? 5000,
+      ...(config.callStack !== undefined && { callStack: config.callStack }),
+      ...(config.errorContext !== undefined && {
+        errorContext: config.errorContext,
+      }),
+      ...(config.action !== undefined && { action: config.action }),
     };
 
     const current = this.notifications();

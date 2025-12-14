@@ -1,9 +1,15 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import {
+  type HttpInterceptorFn,
+  type HttpErrorResponse,
+  type HttpRequest,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { throwError, timer } from 'rxjs';
+import { type Observable, throwError, timer } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { ErrorNotificationService } from '../services/error-notification';
+
+const CORRELATION_ID_HEADER = 'X-Correlation-ID';
 
 export interface RetryConfig {
   maxAttempts: number;
@@ -33,7 +39,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
     // Global error handling
     catchError((error: HttpErrorResponse) => {
-      handleHttpError(error, router, notificationService);
+      handleHttpError(error, req, router, notificationService);
       return throwError(() => error);
     }),
   );
@@ -41,12 +47,12 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function retryWithBackoff(config: RetryConfig) {
-  return (source: import('rxjs').Observable<unknown>) =>
+  return (source: Observable<unknown>): Observable<unknown> =>
     source.pipe(
       retry({
         count: config.maxAttempts,
         delay: (error: HttpErrorResponse, attempt: number) => {
-          if (!config.retryCondition || !config.retryCondition(error)) {
+          if (!config.retryCondition?.(error)) {
             return throwError(() => error);
           }
 
@@ -64,9 +70,12 @@ function retryWithBackoff(config: RetryConfig) {
 
 function handleHttpError(
   error: HttpErrorResponse,
+  request: HttpRequest<unknown>,
   router: Router,
   notificationService: ErrorNotificationService,
 ): void {
+  const correlationId = request.headers.get(CORRELATION_ID_HEADER);
+
   // Log the error details
   console.group('🌐 HTTP Error Interceptor');
   console.error('HTTP Error:', {
@@ -75,6 +84,7 @@ function handleHttpError(
     url: error.url,
     message: error.message,
     error: error.error,
+    correlationId: correlationId || 'Not set',
   });
   console.groupEnd();
 

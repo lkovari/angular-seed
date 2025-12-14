@@ -1,4 +1,8 @@
-import { ErrorHandler, Provider, EnvironmentProviders } from '@angular/core';
+import {
+  ErrorHandler,
+  type Provider,
+  type EnvironmentProviders,
+} from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 // Import our custom error handling services
@@ -74,11 +78,14 @@ export function provideBasicErrorHandling(): Array<
 export function provideProductionErrorHandling(
   monitoringConfig?: ErrorHandlingConfig['monitoringConfig'],
 ): Array<Provider | EnvironmentProviders> {
-  return provideErrorHandling({
+  const config: Partial<ErrorHandlingConfig> = {
     enableGlobalHandler: true,
     enableHttpInterceptor: true,
     enableNotifications: true,
     production: true,
-    monitoringConfig,
-  });
+  };
+  if (monitoringConfig !== undefined) {
+    config.monitoringConfig = monitoringConfig;
+  }
+  return provideErrorHandling(config);
 }

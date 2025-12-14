@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import * as angular from '@angular/forms';
 
 import { AngularVersionComponent } from './angular-version.component';

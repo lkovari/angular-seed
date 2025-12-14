@@ -22,7 +22,7 @@ export class LoadingIndicatorService {
     const currentCount = this.refCount();
     const newCount = currentCount + 1;
     this.refCount.set(newCount);
-    console.log(`>>>RefCount #${newCount}`);
+    console.warn(`>>>RefCount #${newCount}`);
 
     if (currentCount === 0) {
       this.displaySpinner();
@@ -34,7 +34,7 @@ export class LoadingIndicatorService {
     if (currentCount > 0) {
       const newCount = currentCount - 1;
       this.refCount.set(newCount);
-      console.log(`>>>RefCount #${newCount}`);
+      console.warn(`>>>RefCount #${newCount}`);
 
       if (currentCount === 1) {
         this.hideSpinnerDisplay();
@@ -44,7 +44,7 @@ export class LoadingIndicatorService {
 
   forceHide(): void {
     this.refCount.set(0);
-    console.log('>>>RefCount #0 (forced)');
+    console.warn('>>>RefCount #0 (forced)');
     this.hideSpinnerDisplay();
   }
 

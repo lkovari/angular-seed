@@ -1,4 +1,4 @@
-import { LoadingIndicatorAdapter } from '../../../../../../seed-common-lib/src/public-api';
+import { type LoadingIndicatorAdapter } from '../../../../../../seed-common-lib/src/public-api';
 
 /**
  * Custom loading adapter that uses external HTML and SCSS files

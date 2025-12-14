@@ -3,17 +3,35 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
+    /* === Global strictness & safety === */
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* === Modern JS/TS targets === */
+    "target": "ES2022",
+    "module": "preserve",
     "moduleResolution": "bundler",
+    "useDefineForClassFields": false,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /* === Angular & decorators === */
+    "experimentalDecorators": true,
+
+    /* === Source & helpers === */
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "importHelpers": true,
+
+    /* === Module resolution === */
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "paths": {
       "global-error-handler-lib": [
         "./dist/global-error-handler-lib"
@@ -22,9 +40,11 @@
         "./dist/seed-common-lib"
       ]
     },
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022"
+
+    /* === Libs & type-checking speed === */
+    "lib": ["ES2022", "dom"],
+    "skipLibCheck": true,
+    "types": []
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -38,6 +58,18 @@
     },
     {
       "path": "./projects/global-error-handler-lib/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/seed-common-lib/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/seed-app/tsconfig.spec.json"
     }
+  ],
+  "exclude": [
+    "node_modules",
+    "tmp",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ]
 }

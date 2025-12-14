@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, type OnInit, type OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-not-found',
@@ -8,10 +8,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 })
 export class NotFoundComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
-    console.log('NotFoundComponent initialized');
+    console.warn('NotFoundComponent initialized');
   }
 
   ngOnDestroy(): void {
-    console.log('NotFoundComponent destroyed');
+    console.warn('NotFoundComponent destroyed');
   }
 }

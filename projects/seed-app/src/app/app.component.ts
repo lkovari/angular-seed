@@ -85,7 +85,7 @@ export class AppComponent {
   openWaitSpinnerTest(): void {
     const testComponent = this.waitSpinnerTest();
     if (testComponent) {
-      (testComponent as WaitSpinnerTestComponent).openModal();
+      testComponent.openModal();
     }
   }
 
@@ -146,7 +146,7 @@ export class AppComponent {
       503: 'Service Unavailable',
       504: 'Gateway Timeout',
     };
-    return statusTexts[status] || '';
+    return statusTexts[status] ?? '';
   }
 
   formatContext(context: Record<string, unknown>): string {

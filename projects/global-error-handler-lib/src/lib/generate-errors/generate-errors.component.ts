@@ -29,7 +29,7 @@ export class GenerateErrorsComponent {
   }
 
   throwAsyncError(): void {
-    this.asyncErrorFunction();
+    void this.asyncErrorFunction();
   }
 
   private async asyncErrorFunction(): Promise<void> {
@@ -82,7 +82,7 @@ export class GenerateErrorsComponent {
   }
 
   throwPromiseError(): void {
-    Promise.reject(new Error('This is a rejected Promise error'));
+    void Promise.reject(new Error('This is a rejected Promise error'));
   }
 
   throwTimeoutError(): void {

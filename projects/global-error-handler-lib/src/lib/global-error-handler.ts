@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable, NgZone, inject } from '@angular/core';
+import { type ErrorHandler, Injectable, NgZone, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorNotificationService } from './services/error-notification';
 
@@ -37,7 +37,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
       this.ngZone.run(() => {
         const error = {
-          message: event.reason?.message || 'Unhandled Promise Rejection',
+          message: event.reason?.message ?? 'Unhandled Promise Rejection',
           reason: event.reason,
           stack: event.reason?.stack,
           promise: event.promise,
@@ -158,14 +158,16 @@ export class GlobalErrorHandler implements ErrorHandler {
       return undefined;
     };
 
+    const stack = getErrorStack(error);
+    const context = this.getErrorContext(error);
     const errorInfo: ErrorInfo = {
       error: getErrorMessage(error),
       timestamp: new Date(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      stack: getErrorStack(error),
-      context: this.getErrorContext(error),
-      errorType,
+      ...(stack !== undefined && { stack }),
+      ...(context !== undefined && { context }),
+      ...(errorType !== undefined && { errorType }),
     };
 
     console.group(`🚨 Global Error Handler - ${errorType}`);
@@ -197,7 +199,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       const errMessage = (error as { message: string }).message;
       message = errMessage || this.getFriendlyErrorMessage(errMessage);
       originalError = error;
-      actualErrorType = errorType || 'JavaScript Error';
+      actualErrorType = errorType ?? 'JavaScript Error';
     } else if (
       error &&
       typeof error === 'object' &&
@@ -234,7 +236,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     } else if (typeof error === 'string') {
       message = error;
       originalError = new Error(error);
-      actualErrorType = errorType || 'String Error';
+      actualErrorType = errorType ?? 'String Error';
     }
 
     // Show user-friendly notification with original error for call stack
@@ -314,7 +316,7 @@ export class GlobalErrorHandler implements ErrorHandler {
         lineno?: number;
         colno?: number;
       };
-      return `JavaScript Error - ${err.filename}:${err.lineno || '?'}:${err.colno || '?'}`;
+      return `JavaScript Error - ${err.filename}:${err.lineno ?? '?'}:${err.colno ?? '?'}`;
     }
 
     if (
@@ -327,7 +329,7 @@ export class GlobalErrorHandler implements ErrorHandler {
         resourceType: string;
         resourceUrl?: string;
       };
-      return `Resource Loading Error - ${err.resourceType} at ${err.resourceUrl || 'unknown'}`;
+      return `Resource Loading Error - ${err.resourceType} at ${err.resourceUrl ?? 'unknown'}`;
     }
 
     if (
@@ -357,7 +359,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     ) {
       const stack = (error as { stack: string }).stack;
       const stackLines = stack.split('\n');
-      return stackLines[1]?.trim() || 'Unknown context';
+      return stackLines[1]?.trim() ?? 'Unknown context';
     }
 
     return 'Global error context';
@@ -439,14 +441,17 @@ export class GlobalErrorHandler implements ErrorHandler {
       return 'Unknown';
     };
 
+    const stack = getErrorStack(error);
+    const context = this.getErrorContext(error);
+    const errorTypeValue = getErrorType(error);
     const errorInfo: ErrorInfo = {
       error: getErrorMessage(error),
       timestamp: new Date(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      stack: getErrorStack(error),
-      context: this.getErrorContext(error),
-      errorType: getErrorType(error),
+      ...(stack !== undefined && { stack }),
+      ...(context !== undefined && { context }),
+      ...(errorTypeValue !== undefined && { errorType: errorTypeValue }),
     };
 
     // Example implementation - replace with your monitoring service
