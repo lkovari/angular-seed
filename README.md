@@ -514,6 +514,7 @@ Shared common library for reusable components and utilities.
 - Loading indicator system with reference counting
 - HTTP interceptor for automatic loading state
 - HTTP correlation ID interceptor for request tracking
+- Angular version display component
 - Signal-based reactive state management
 - Customizable loading adapters
 - Testing component for loading scenarios
@@ -524,7 +525,8 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { 
   loadingInterceptor, 
   correlationIdInterceptor,
-  LoadingSpinnerComponent 
+  LoadingSpinnerComponent,
+  AngularVersionComponent
 } from 'seed-common-lib';
 
 export const appConfig: ApplicationConfig = {
@@ -537,10 +539,27 @@ export const appConfig: ApplicationConfig = {
 };
 
 @Component({
-  imports: [LoadingSpinnerComponent],
-  template: `<lib-loading-spinner />`
+  imports: [LoadingSpinnerComponent, AngularVersionComponent],
+  template: `
+    <lib-loading-spinner />
+    <lib-angular-version />
+  `
 })
 export class AppComponent {}
+```
+
+**Angular Version Component:**
+
+The Angular version component displays the current Angular version. It's located in `projects/seed-common-lib/src/lib/angular-version/` and can be imported from `seed-common-lib`.
+
+```typescript
+import { AngularVersionComponent } from 'seed-common-lib';
+
+@Component({
+  imports: [AngularVersionComponent],
+  template: `<lib-angular-version />`
+})
+export class MyComponent {}
 ```
 
 **Correlation ID Interceptor:**
