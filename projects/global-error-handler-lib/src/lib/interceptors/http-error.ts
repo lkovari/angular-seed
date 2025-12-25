@@ -84,7 +84,7 @@ function handleHttpError(
     url: error.url,
     message: error.message,
     error: error.error,
-    correlationId: correlationId || 'Not set',
+    correlationId: correlationId ?? 'Not set',
   });
   console.groupEnd();
 

@@ -13,7 +13,7 @@ export const correlationIdInterceptor: HttpInterceptorFn = (req, next) => {
 };
 
 function generateCorrelationId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID !== undefined) {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
   }
 
