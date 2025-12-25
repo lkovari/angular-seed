@@ -8,7 +8,7 @@ import { Component, output, input } from '@angular/core';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  lastUpdateDate = new Date('12/14/2025 07:28 PM');
+  lastUpdateDate = new Date('12/25/2025 11:50 AM');
   sidebarVisibleChange = output<void>();
 
   // Inputs from parent

@@ -16,6 +16,7 @@ import {
   LoadingSpinnerComponent,
   LoadingIndicatorService,
   WaitSpinnerTestComponent,
+  SignupSigninComponent,
 } from '../../../seed-common-lib/src/public-api';
 // import { CustomLoadingAdapter } from './shared/adapters/custom-loading';
 
@@ -26,6 +27,7 @@ import {
     GenerateErrorsComponent,
     LoadingSpinnerComponent,
     WaitSpinnerTestComponent,
+    SignupSigninComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -37,6 +39,7 @@ export class AppComponent {
 
   // ViewChild for wait spinner test component
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
+  signupSignin = viewChild(SignupSigninComponent);
 
   title = 'seed-app';
   showErrorModal = signal(false);
@@ -80,12 +83,38 @@ export class AppComponent {
       event.preventDefault();
       this.openWaitSpinnerTest();
     }
+
+    // Check for Ctrl+Shift+U (Control key on Mac, not Cmd) - U for Sign Up
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'u') {
+      event.preventDefault();
+      this.openSignUpModal();
+    }
+
+    // Check for Ctrl+Shift+I (Control key on Mac, not Cmd) - I for Sign In
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') {
+      event.preventDefault();
+      this.openSignInModal();
+    }
   }
 
   openWaitSpinnerTest(): void {
     const testComponent = this.waitSpinnerTest();
     if (testComponent) {
       testComponent.openModal();
+    }
+  }
+
+  openSignUpModal(): void {
+    const component = this.signupSignin();
+    if (component) {
+      component.openSignUpModal();
+    }
+  }
+
+  openSignInModal(): void {
+    const component = this.signupSignin();
+    if (component) {
+      component.openSignInModal();
     }
   }
 

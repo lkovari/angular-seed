@@ -1,0 +1,156 @@
+@if (showSignUpModal()) {
+<div class="modal-overlay" (click)="closeSignUpModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Sign Up</h3>
+            <button class="close-btn" (click)="closeSignUpModal()" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form novalidate autocomplete="off" (ngSubmit)="submitSignUp()">
+                <div class="form-group mb-2">
+                    <div class="form-control ommit-border">
+                        <label class="row" for="signUpEmail">Email<span class="text-danger">*</span></label>
+
+                        <input id="signUpEmail" class="form-control row" type="email" placeholder="Type your email"
+                            [field]="signUpForm.email" [ngClass]="{
+                'is-invalid': signUpForm.email().touched() && signUpForm.email().invalid()
+              }" />
+
+                        <span class="invalid-feedback">
+                            @if (signUpForm.email().touched() && signUpForm.email().invalid()) {
+                            <span>{{ signUpForm.email().errors()[0]?.message }}</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="form-control ommit-border">
+                        <label class="row" for="signUpPassword">Password<span class="text-danger">*</span></label>
+
+                        <input id="signUpPassword" class="form-control row" type="password" placeholder="Type a password"
+                            [field]="signUpForm.password" [ngClass]="{
+                'is-invalid': signUpForm.password().touched() && signUpForm.password().invalid()
+              }" />
+
+                        <span class="invalid-feedback">
+                            @if (signUpForm.password().touched() && signUpForm.password().invalid()) {
+                            <span>{{ signUpForm.password().errors()[0]?.message }}</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="form-control ommit-border">
+                        <label class="row" for="signUpConfirmPassword">Confirm Password<span
+                                class="text-danger">*</span></label>
+
+                        <input id="signUpConfirmPassword" class="form-control row" type="password"
+                            placeholder="Type a confirm password" [field]="signUpForm.confirmPassword" [ngClass]="{
+                'is-invalid': signUpForm.confirmPassword().touched() && signUpForm.confirmPassword().invalid()
+              }" />
+
+                        <span class="invalid-feedback">
+                            @if (signUpForm.confirmPassword().touched() && signUpForm.confirmPassword().invalid()) {
+                            <span>{{ signUpForm.confirmPassword().errors()[0]?.message }}</span>
+                            }
+                        </span>
+                    </div>
+
+                    @if (signUpForm.confirmPassword().touched() && !passwordsMatch() && signUpModel().confirmPassword) {
+                    <span class="show-invalid-feedback">Passwords do not match!</span>
+                    }
+
+                    <button type="submit" class="submit-btn" [disabled]="signUpForm().invalid() || (!passwordsMatch() && signUpModel().confirmPassword)">Sign Up</button>
+                </div>
+            </form>
+
+            @if (submittedSignUpData()) {
+            <div class="submitted-data">
+                <h4>Submitted Data:</h4>
+                <div class="data-item">
+                    <strong>Email:</strong> {{ submittedSignUpData()!.email }}
+                </div>
+                <div class="data-item">
+                    <strong>Password:</strong> {{ submittedSignUpData()!.password }}
+                </div>
+                <div class="data-item">
+                    <strong>Confirm Password:</strong> {{ submittedSignUpData()!.confirmPassword }}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}
+
+@if (showSignInModal()) {
+<div class="modal-overlay" (click)="closeSignInModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Sign In</h3>
+            <button class="close-btn" (click)="closeSignInModal()" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form novalidate autocomplete="off" (ngSubmit)="submitSignIn()">
+                <div class="form-group mb-2">
+                    <div class="form-control ommit-border">
+                        <label class="row" for="signInEmail">Email<span class="text-danger">*</span></label>
+
+                        <input id="signInEmail" class="form-control row" type="email" placeholder="Type your email"
+                            [field]="signInForm.email" [ngClass]="{
+                'is-invalid': signInForm.email().touched() && signInForm.email().invalid()
+              }" />
+
+                        <span class="invalid-feedback">
+                            @if (signInForm.email().touched() && signInForm.email().invalid()) {
+                            <span>{{ signInForm.email().errors()[0]?.message }}</span>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="form-control ommit-border">
+                        <label class="row" for="signInPassword">Password<span class="text-danger">*</span></label>
+
+                        <input id="signInPassword" class="form-control row" type="password" placeholder="Type your password"
+                            [field]="signInForm.password" [ngClass]="{
+                'is-invalid': signInForm.password().touched() && signInForm.password().invalid()
+              }" />
+
+                        <span class="invalid-feedback">
+                            @if (signInForm.password().touched() && signInForm.password().invalid()) {
+                            <span>{{ signInForm.password().errors()[0]?.message }}</span>
+                            }
+                        </span>
+                    </div>
+
+                    <button type="submit" class="submit-btn" [disabled]="signInForm().invalid()">Sign In</button>
+                </div>
+            </form>
+
+            @if (submittedSignInData()) {
+            <div class="submitted-data">
+                <h4>Submitted Data:</h4>
+                <div class="data-item">
+                    <strong>Email:</strong> {{ submittedSignInData()!.email }}
+                </div>
+                <div class="data-item">
+                    <strong>Password:</strong> {{ submittedSignInData()!.password }}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}

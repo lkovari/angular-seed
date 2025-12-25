@@ -55,18 +55,18 @@ A modern Angular 21 seed project with comprehensive error handling, workspace ar
 - CSS Grid layout
 - Separated and parametrized components (header, sidebar, footer)
 - Dynamic side menu generation from JSON descriptor
-- Token interceptor for access and refresh tokens
 - HTTP correlation ID interceptor for request tracking
 - Responsive design with mobile support
 
 ### Modern Angular Practices
 - **Standalone components** - No NgModules
-- **TODO: Simplified filenames** - No `.component`, `.service` suffixes
 - **OnPush change detection** - Optimized performance
 - **Control flow syntax** - `@if`, `@for` instead of `*ngIf`, `*ngFor`
 - **Zoneless change detection** - `provideZonelessChangeDetection()`
 - **Signals** - Modern reactive state management
 - **Functional interceptors** - Modern HTTP interceptor pattern
+- **Signal inputs/outputs** - Modern `input()` and `output()` API
+- **Typed reactive forms** - Fully type-safe form groups and controls
 
 ## Angular Version
 
@@ -467,13 +467,13 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 When creating new components, services, pipes, or directives in this project:
 
 1. **Use standalone components** - No NgModules
-2. **Simplified filenames** - Do not include `.component`, `.service`, `.pipe`, or `.directive` in filenames
-   - `header.ts` instead of `header.component.ts`
-   - `auth.ts` instead of `auth.service.ts`
-3. **OnPush change detection** - Always use `ChangeDetectionStrategy.OnPush`
-4. **Modern control flow** - Use `@if`, `@for` instead of `*ngIf`, `*ngFor`
-5. **Zoneless change detection** - The app uses `provideZonelessChangeDetection()`
-6. **Signals over RxJS** - Prefer Angular signals for state management
+2. **OnPush change detection** - Always use `ChangeDetectionStrategy.OnPush`
+3. **Modern control flow** - Use `@if`, `@for`, `@switch` instead of `*ngIf`, `*ngFor`, `*ngSwitch`
+4. **Zoneless change detection** - The app uses `provideZonelessChangeDetection()`
+5. **Signals over RxJS** - Prefer Angular signals for state management
+6. **Signal inputs/outputs** - Use `input()` and `output()` instead of `@Input()` and `@Output()`
+7. **Typed reactive forms** - Use typed `FormGroup` and `FormControl` for type safety
+8. **Functional interceptors** - Use functional HTTP interceptors instead of class-based
 
 ### Libraries
 
@@ -515,9 +515,10 @@ Shared common library for reusable components and utilities.
 - HTTP interceptor for automatic loading state
 - HTTP correlation ID interceptor for request tracking
 - Angular version display component
+- Signup/Signin component with typed forms and modal dialogs
+- Wait spinner test component for testing loading scenarios
 - Signal-based reactive state management
 - Customizable loading adapters
-- Testing component for loading scenarios
 
 **Usage:**
 ```typescript
@@ -526,7 +527,9 @@ import {
   loadingInterceptor, 
   correlationIdInterceptor,
   LoadingSpinnerComponent,
-  AngularVersionComponent
+  AngularVersionComponent,
+  WaitSpinnerTestComponent,
+  SignupSigninComponent
 } from 'seed-common-lib';
 
 export const appConfig: ApplicationConfig = {
@@ -539,10 +542,17 @@ export const appConfig: ApplicationConfig = {
 };
 
 @Component({
-  imports: [LoadingSpinnerComponent, AngularVersionComponent],
+  imports: [
+    LoadingSpinnerComponent, 
+    AngularVersionComponent,
+    WaitSpinnerTestComponent,
+    SignupSigninComponent
+  ],
   template: `
     <lib-loading-spinner />
     <lib-angular-version />
+    <lib-wait-spinner-test />
+    <lib-signup-signin />
   `
 })
 export class AppComponent {}
@@ -573,7 +583,7 @@ import { CORRELATION_ID_HEADER } from 'seed-common-lib';
 console.log(CORRELATION_ID_HEADER); // 'X-Correlation-ID'
 ```
 
-**Technical Details:**
+**Loading Indicator Technical Details:**
 
 The loading indicator uses a reference counting mechanism to handle multiple concurrent HTTP requests:
 
@@ -585,7 +595,7 @@ The loading indicator uses a reference counting mechanism to handle multiple con
 
 This ensures the spinner remains visible until ALL operations complete. The system logs reference count changes to the console as `>>>RefCount #N` for debugging.
 
-**Manual Control:**
+**Loading Indicator Manual Control:**
 ```typescript
 import { LoadingIndicatorService } from 'seed-common-lib';
 
@@ -600,10 +610,225 @@ export class MyComponent {
 }
 ```
 
+**Signup/Signin Component:**
+
+A modern, fully-typed signup and signin component demonstrating Angular v21 best practices with **Signal Forms API**, signals, and modal dialogs.
+
+**Features:**
+- **Angular v21 Signal Forms API** - Uses experimental `form()` function from `@angular/forms/signals`
+- **Signal-based form models** - Form data stored in writable signals
+- **Schema-based validation** - Path-based validators with custom error messages
+- **Signal inputs/outputs** - Modern `input()` and `output()` API
+- **Computed signals** - Cross-field validation using computed signals
+- **Field directive** - Uses `[field]` directive instead of `formControlName`
+- **Modal dialogs** - Separate signal-based modals for signup and signin forms
+- **Keyboard shortcuts** - Open modals via Ctrl+Shift+U (signup) or Ctrl+Shift+I (signin)
+- **OnPush change detection** - Optimized performance
+- **Modern control flow** - Uses `@if` syntax
+- **Form validation** - Required fields, email format, minimum length, and password matching
+
+**Input Parameters:**
+- `githubLogoPath` (signal input, optional): URL path to GitHub logo image. Defaults to empty string.
+
+**Output Events:**
+- `signUp` (signal output): Emitted when signup form is submitted with valid data. Emits `{ email: string; password: string }`.
+- `signIn` (signal output): Emitted when signin form is submitted with valid data. Emits `{ email: string; password: string }`.
+
+**Usage:**
+```typescript
+import { SignupSigninComponent } from 'seed-common-lib';
+
+@Component({
+  imports: [SignupSigninComponent],
+  template: `
+    <lib-signup-signin 
+      [githubLogoPath]="'assets/github-logo.png'"
+      (signUp)="handleSignUp($event)"
+      (signIn)="handleSignIn($event)"
+    />
+  `
+})
+export class MyComponent {
+  handleSignUp(event: { email: string; password: string }): void {
+    console.log('Sign up:', event);
+    // Handle signup logic
+  }
+
+  handleSignIn(event: { email: string; password: string }): void {
+    console.log('Sign in:', event);
+    // Handle signin logic
+  }
+}
+```
+
+**Technical Implementation:**
+
+The component uses Angular v21 Signal Forms API (experimental):
+
+1. **Signal Form Models:**
+   ```typescript
+   readonly signUpModel = signal({
+     email: '',
+     password: '',
+     confirmPassword: '',
+   });
+   
+   readonly signInModel = signal({
+     email: '',
+     password: '',
+   });
+   ```
+   Form data is stored in writable signals, providing the source of truth for form values.
+
+2. **Signal Forms with Schema-Based Validation:**
+   ```typescript
+   readonly signUpForm = form(this.signUpModel, (fieldPath) => {
+     required(fieldPath.email, { message: 'Email is required' });
+     email(fieldPath.email, { message: 'Enter a valid email address' });
+     required(fieldPath.password, { message: 'Password is required' });
+     minLength(fieldPath.password, 5, {
+       message: 'Password must be at least 5 characters',
+     });
+     required(fieldPath.confirmPassword, {
+       message: 'Confirm password is required',
+     });
+     minLength(fieldPath.confirmPassword, 5, {
+       message: 'Confirm password must be at least 5 characters',
+     });
+   });
+   ```
+   Uses the `form()` function with a schema function that binds validators to field paths. All validation rules are defined in one place with custom error messages.
+
+3. **Computed Signal for Cross-Field Validation:**
+   ```typescript
+   readonly passwordsMatch = computed(() => {
+     const model = this.signUpModel();
+     return model.password === model.confirmPassword;
+   });
+   ```
+   Uses a computed signal to check if passwords match, providing reactive cross-field validation.
+
+4. **Signal-Based Form Access:**
+   ```typescript
+   // Form is accessed as a signal
+   if (!this.signUpForm().valid()) {
+     return;
+   }
+   
+   // Field states are accessed as signals
+   signUpForm.email().touched()
+   signUpForm.email().invalid()
+   signUpForm.email().errors()[0]?.message
+   
+   // Values come from the model signal
+   const credentials = this.signUpModel();
+   ```
+
+5. **Field Directive in Template:**
+   ```html
+   <input [field]="signUpForm.email" />
+   @if (signUpForm.email().touched() && signUpForm.email().invalid()) {
+     <span>{{ signUpForm.email().errors()[0]?.message }}</span>
+   }
+   ```
+   Uses the `Field` directive from `@angular/forms/signals` instead of `formControlName`. Field states are accessed as signals with methods like `touched()`, `invalid()`, and `errors()`.
+
+6. **Form Validation Rules:**
+   - Email: Required, valid email format
+   - Password: Required, minimum 5 characters
+   - Confirm Password: Required, minimum 5 characters
+   - Cross-field: Passwords must match (via computed signal)
+
+7. **Modal Management:**
+   - Separate signal-based modals (`showSignUpModal`, `showSignInModal`)
+   - Click outside to close
+   - Close button in header
+   - Auto-closes after successful form submission (10-second timeout)
+   - Form models reset when modals close
+
+8. **Modern Angular Patterns:**
+   - **Standalone component** - No NgModules
+   - **OnPush change detection** - Optimized performance
+   - **Signal inputs/outputs** - `input()` and `output()` instead of decorators
+   - **Modern control flow** - `@if` instead of `*ngIf`
+   - **Signal-based state** - All state managed with signals
+
+**Keyboard Shortcuts:**
+- Press **Ctrl+Shift+U** (Windows/Linux) or **Cmd+Shift+U** (Mac) to open the signup modal
+- Press **Ctrl+Shift+I** (Windows/Linux) or **Cmd+Shift+I** (Mac) to open the signin modal
+
+The keyboard handlers are managed at the app level (in `AppComponent`) and call the component's `openSignUpModal()` and `openSignInModal()` methods.
+
+**Testing:**
+
+The component includes comprehensive test coverage using Vitest:
+
+1. **Component Initialization Tests:**
+   - Component creation
+   - Modal state initialization (closed by default)
+   - Submitted data initialization (null by default)
+   - Form model initialization with empty values
+   - Default input values
+
+2. **Form Validation Tests - Sign Up:**
+   - Email validation (required, invalid format, valid format)
+   - Password validation (required, too short, valid length)
+   - Confirm password validation (required)
+   - Password matching validation (mismatch, match, empty fields)
+
+3. **Form Validation Tests - Sign In:**
+   - Email validation (required, invalid format)
+   - Password validation (required, too short)
+
+4. **Modal Management Tests:**
+   - Open/close signup modal
+   - Open/close signin modal
+   - Clear submitted data when closing modals
+
+5. **Form Submission Tests - Sign Up:**
+   - Prevent submission when form is invalid
+   - Emit signUp event with correct data when valid
+   - Store submitted data after successful submission
+   - Validate all fields on submit attempt
+
+6. **Form Submission Tests - Sign In:**
+   - Prevent submission when form is invalid
+   - Emit signIn event with correct data when valid
+   - Store submitted data after successful submission
+   - Validate all fields on submit attempt
+
+7. **Submitted Data Timeout Tests:**
+   - Clear submitted signup data after 10 seconds
+   - Clear submitted signin data after 10 seconds
+   - Clear previous timeout when submitting again
+   - Cancel timeout when closing modal manually
+
+8. **Signal Forms API Tests:**
+   - Verify form signals return correct structure
+   - Verify field accessors exist
+   - Verify form state updates when model changes
+
+9. **Input/Output Tests:**
+   - Accept githubLogoPath input
+   - Emit signUp output event with correct data
+   - Emit signIn output event with correct data
+
+10. **Edge Cases Tests:**
+    - Handle multiple rapid submissions
+    - Prevent submission when email is missing
+    - Prevent submission when password is missing
+    - Prevent submission when confirmPassword is missing
+    - Prevent submission when passwords do not match
+    - Handle form reset after submission
+
+All tests use Vitest with fake timers for timeout testing and proper signal-based assertions for form state validation.
+
 ### Keyboard Shortcuts
 
 - **Ctrl+Shift+E** (Windows/Linux) or **Cmd+Shift+E** (Mac) - Open error testing modal
 - **Ctrl+Shift+W** (Windows/Linux) or **Cmd+Shift+W** (Mac) - Open loading spinner test modal
+- **Ctrl+Shift+U** (Windows/Linux) or **Cmd+Shift+U** (Mac) - Open signup modal
+- **Ctrl+Shift+I** (Windows/Linux) or **Cmd+Shift+I** (Mac) - Open signin modal
 
 ## Troubleshooting
 
