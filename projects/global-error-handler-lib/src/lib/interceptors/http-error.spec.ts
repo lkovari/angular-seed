@@ -20,10 +20,15 @@ describe('httpErrorInterceptor', () => {
   let notificationService: ErrorNotificationService;
   let localStorageSpy: Storage;
   let sessionStorageSpy: Storage;
+  let localStorageRemoveItemSpy: ReturnType<typeof vi.fn>;
+  let sessionStorageRemoveItemSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    localStorageRemoveItemSpy = vi.fn();
+    sessionStorageRemoveItemSpy = vi.fn();
+
     localStorageSpy = {
-      removeItem: vi.fn(),
+      removeItem: localStorageRemoveItemSpy,
       getItem: vi.fn(),
       setItem: vi.fn(),
       clear: vi.fn(),
@@ -32,7 +37,7 @@ describe('httpErrorInterceptor', () => {
     } as unknown as Storage;
 
     sessionStorageSpy = {
-      removeItem: vi.fn(),
+      removeItem: sessionStorageRemoveItemSpy,
       getItem: vi.fn(),
       setItem: vi.fn(),
       clear: vi.fn(),
@@ -83,8 +88,12 @@ describe('httpErrorInterceptor', () => {
 
       const response = await new Promise((resolve, reject) => {
         httpClient.get('/api/success').subscribe({
-          next: resolve,
-          error: reject,
+          next: (value) => {
+            resolve(value);
+          },
+          error: (err: unknown) => {
+            reject(err instanceof Error ? err : new Error(String(err)));
+          },
         });
 
         const req = httpMock.expectOne('/api/success');
@@ -105,8 +114,12 @@ describe('httpErrorInterceptor', () => {
 
       const error = await new Promise<HttpErrorResponse>((resolve, reject) => {
         httpClient.get('/api/error').subscribe({
-          next: () => reject(new Error('Should have errored')),
-          error: resolve,
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
+          error: (err: HttpErrorResponse) => {
+            resolve(err);
+          },
         });
 
         const req = httpMock.expectOne('/api/error');
@@ -123,8 +136,12 @@ describe('httpErrorInterceptor', () => {
     it('should re-throw the error after handling', async () => {
       const error = await new Promise<HttpErrorResponse>((resolve, reject) => {
         httpClient.get('/api/error').subscribe({
-          next: () => reject(new Error('Should have errored')),
-          error: resolve,
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
+          error: (err: HttpErrorResponse) => {
+            resolve(err);
+          },
         });
 
         const req = httpMock.expectOne('/api/error');
@@ -145,15 +162,17 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/unauthorized').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'You are not authorized. Please log in again.',
               expect.any(HttpErrorResponse),
               'HttpError',
             );
-            expect(localStorageSpy.removeItem).toHaveBeenCalledWith('token');
-            expect(sessionStorageSpy.removeItem).toHaveBeenCalledWith('token');
+            expect(localStorageRemoveItemSpy).toHaveBeenCalledWith('token');
+            expect(sessionStorageRemoveItemSpy).toHaveBeenCalledWith('token');
             resolve();
           },
         });
@@ -172,11 +191,15 @@ describe('httpErrorInterceptor', () => {
       );
       const consoleWarnSpy = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/forbidden').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'You do not have permission to perform this action.',
@@ -203,11 +226,15 @@ describe('httpErrorInterceptor', () => {
       );
       const consoleWarnSpy = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/not-found').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'The requested resource was not found.',
@@ -234,11 +261,15 @@ describe('httpErrorInterceptor', () => {
       );
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/server-error').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Internal server error. Please try again later.',
@@ -269,7 +300,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/error-502').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Service temporarily unavailable. Please try again later.',
@@ -293,7 +326,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/error-503').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Service temporarily unavailable. Please try again later.',
@@ -320,7 +355,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/error-504').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Service temporarily unavailable. Please try again later.',
@@ -348,11 +385,15 @@ describe('httpErrorInterceptor', () => {
       );
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/network-error').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Unable to connect to the server. Please check your internet connection.',
@@ -383,7 +424,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/bad-request').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Invalid request. Please check your input and try again.',
@@ -409,7 +452,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/payment-required').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'Payment required. Please complete payment to continue.',
@@ -437,11 +482,15 @@ describe('httpErrorInterceptor', () => {
       );
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/unknown-error').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledWith(
               'An error occurred (418). Please try again.',
@@ -469,7 +518,9 @@ describe('httpErrorInterceptor', () => {
 
       await new Promise<void>((resolve, reject) => {
         httpClient.get('/api/test').subscribe({
-          next: () => reject(new Error('Should have errored')),
+          next: () => {
+            reject(new Error('Should have errored'));
+          },
           error: () => {
             expect(addErrorSpy).toHaveBeenCalledTimes(1);
             const callArgs = addErrorSpy.mock.calls[0];

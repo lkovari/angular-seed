@@ -21,14 +21,11 @@ describe('AngularVersionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize angularVersion on ngOnInit', () => {
-    expect(component.angularVersion).toBeUndefined();
-    component.ngOnInit();
-    expect(component.angularVersion).toBe(angular.VERSION.full);
+  it('should initialize angularVersion signal', () => {
+    expect(component.angularVersion()).toBe(angular.VERSION.full);
   });
 
   it('should display Angular version in template', () => {
-    component.ngOnInit();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -38,13 +35,11 @@ describe('AngularVersionComponent', () => {
   });
 
   it('should have correct Angular version format', () => {
-    component.ngOnInit();
     // Angular version should be in format like "20.0.0" or similar
-    expect(component.angularVersion).toMatch(/^\d+\.\d+\.\d+/);
+    expect(component.angularVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });
 
   it('should render version in container div', () => {
-    component.ngOnInit();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;

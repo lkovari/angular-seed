@@ -11,7 +11,10 @@ describe('ErrorNotificationService', () => {
     TestBed.configureTestingModule({
       providers: [
         ErrorNotificationService,
-        provideRouter([{ path: 'test-route', component: class {} }]),
+        provideRouter([{ path: 'test-route', component: class TestComponent {
+          // Test component for router testing
+          testProperty = 'test';
+        } }]),
       ],
     });
 
@@ -71,7 +74,7 @@ describe('ErrorNotificationService', () => {
       const notification = service.notificationsSignal()[0];
       expect(notification.callStack).toBeDefined();
       expect(Array.isArray(notification.callStack)).toBe(true);
-      expect(notification.callStack!.length).toBeGreaterThan(0);
+      expect(notification.callStack?.length ?? 0).toBeGreaterThan(0);
     });
 
     it('should include route information', () => {
@@ -295,7 +298,9 @@ describe('ErrorNotificationService', () => {
     });
 
     it('should not throw when dismissing non-existent id', () => {
-      expect(() => service.dismiss('non-existent-id')).not.toThrow();
+      expect(() => {
+        service.dismiss('non-existent-id');
+      }).not.toThrow();
     });
   });
 
@@ -487,7 +492,7 @@ describe('ErrorNotificationService', () => {
 
       const notification = service.notificationsSignal()[0];
       expect(notification.callStack).toBeDefined();
-      expect(notification.callStack!.length).toBeGreaterThan(0);
+      expect(notification.callStack?.length ?? 0).toBeGreaterThan(0);
     });
 
     it('should handle error without stack property', () => {

@@ -5,8 +5,8 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { type Observable, throwError, timer } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ErrorNotificationService } from '../services/error-notification';
 
 const CORRELATION_ID_HEADER = 'X-Correlation-ID';
@@ -18,23 +18,13 @@ export interface RetryConfig {
   retryCondition?: (error: HttpErrorResponse) => boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const DEFAULT_RETRY_CONFIG: RetryConfig = {
-  maxAttempts: 1, // Reduced from 3 to 1 for faster error display
-  delay: 500, // Reduced from 1000 to 500ms
-  backoff: 2,
-  retryCondition: (error: HttpErrorResponse) => {
-    // Only retry on network errors (status 0), not on 5xx errors for testing
-    return error.status === 0;
-  },
-};
-
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const notificationService = inject(ErrorNotificationService);
 
   return next(req).pipe(
-    // No retry for testing - errors show immediately
+    // Retry logic commented out - errors show immediately for testing
+    // To enable retry, uncomment the retryWithBackoff function below and use:
     // retryWithBackoff(DEFAULT_RETRY_CONFIG),
 
     // Global error handling
@@ -45,28 +35,36 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function retryWithBackoff(config: RetryConfig) {
-  return (source: Observable<unknown>): Observable<unknown> =>
-    source.pipe(
-      retry({
-        count: config.maxAttempts,
-        delay: (error: HttpErrorResponse, attempt: number) => {
-          if (!config.retryCondition?.(error)) {
-            return throwError(() => error);
-          }
-
-          const delayTime =
-            config.delay * Math.pow(config.backoff, attempt - 1);
-          console.log(
-            `Retrying HTTP request in ${delayTime}ms (attempt ${attempt}/${config.maxAttempts})`,
-          );
-
-          return timer(delayTime);
-        },
-      }),
-    );
-}
+// Retry logic - commented out but kept for future use
+// Uncomment and export if retry functionality is needed:
+//
+// export const DEFAULT_RETRY_CONFIG: RetryConfig = {
+//   maxAttempts: 1,
+//   delay: 500,
+//   backoff: 2,
+//   retryCondition: (error: HttpErrorResponse) => {
+//     return error.status === 0;
+//   },
+// };
+//
+// export function retryWithBackoff(config: RetryConfig) {
+//   return (source: Observable<unknown>): Observable<unknown> =>
+//     source.pipe(
+//       retry({
+//         count: config.maxAttempts,
+//         delay: (error: HttpErrorResponse, attempt: number) => {
+//           if (!config.retryCondition?.(error)) {
+//             return throwError(() => error);
+//           }
+//           const delayTime = config.delay * Math.pow(config.backoff, attempt - 1);
+//           console.log(
+//             `Retrying HTTP request in ${String(delayTime)}ms (attempt ${String(attempt)}/${String(config.maxAttempts)})`,
+//           );
+//           return timer(delayTime);
+//         },
+//       }),
+//     );
+// }
 
 function handleHttpError(
   error: HttpErrorResponse,
@@ -80,10 +78,9 @@ function handleHttpError(
   console.group('🌐 HTTP Error Interceptor');
   console.error('HTTP Error:', {
     status: error.status,
-    statusText: error.statusText,
     url: error.url,
     message: error.message,
-    error: error.error,
+    error: error.error as unknown,
     correlationId: correlationId ?? 'Not set',
   });
   console.groupEnd();
@@ -95,10 +92,10 @@ function handleHttpError(
   // Handle specific HTTP errors
   switch (error.status) {
     case 401:
-      handleUnauthorized(router);
+      handleUnauthorized();
       break;
     case 403:
-      handleForbidden(router);
+      handleForbidden();
       break;
     case 404:
       handleNotFound(error);
@@ -138,26 +135,26 @@ function getHttpErrorMessage(error: HttpErrorResponse): string {
     case 504:
       return 'Service temporarily unavailable. Please try again later.';
     default:
-      return `An error occurred (${error.status}). Please try again.`;
+      return `An error occurred (${String(error.status)}). Please try again.`;
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function handleUnauthorized(_router: Router): void {
+function handleUnauthorized(): void {
   // Clear authentication tokens
   localStorage.removeItem('token');
   sessionStorage.removeItem('token');
 
-  // Only redirect if login route exists
+  // Redirect logic commented out - would use router if needed
+  // const router = inject(Router);
   // router.navigate(['/login'], {
   //   queryParams: { returnUrl: router.url }
   // });
   console.warn('401 Unauthorized - would redirect to login if route exists');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function handleForbidden(_router: Router): void {
-  // Only redirect if unauthorized route exists
+function handleForbidden(): void {
+  // Redirect logic commented out - would use router if needed
+  // const router = inject(Router);
   // router.navigate(['/unauthorized']);
   console.warn(
     '403 Forbidden - would redirect to unauthorized page if route exists',
@@ -165,7 +162,7 @@ function handleForbidden(_router: Router): void {
 }
 
 function handleNotFound(error: HttpErrorResponse): void {
-  console.warn(`Resource not found: ${error.url}`);
+  console.warn(`Resource not found: ${error.url ?? 'unknown'}`);
   // TODO Could show a toast notification here
 }
 

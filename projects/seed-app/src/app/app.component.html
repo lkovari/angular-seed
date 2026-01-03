@@ -111,7 +111,7 @@
           </div>
         } @else {
           <div class="flex flex-col gap-3">
-            @for (error of errorHistory(); track error.id) {
+            @for (error of formattedErrorHistory(); track error.id) {
               <div
                 class="bg-gray-50 border border-gray-200 rounded-md p-3 text-xs"
               >
@@ -130,7 +130,7 @@
                       >{{ error.type }}</span
                     >
                     <span class="text-gray-500 text-[10px] font-medium">{{
-                      formatTimestamp(error.timestamp)
+                      error.formattedTimestamp
                     }}</span>
                   </div>
                 </div>
@@ -154,7 +154,7 @@
                 @if (error.httpStatus) {
                   <div class="text-gray-500 text-[10px] mb-1">
                     <strong class="text-gray-700">Status:</strong>
-                    {{ error.httpStatus }} {{ getStatusText(error.httpStatus) }}
+                    {{ error.httpStatus }} {{ error.statusText }}
                   </div>
                 }
                 @if (error.errorContext) {
@@ -166,7 +166,7 @@
                     </summary>
                     <pre
                       class="mt-2 bg-gray-50 text-gray-800 p-2 rounded text-[10px] leading-relaxed overflow-x-auto border border-gray-200"
-                      >{{ formatContext(error.errorContext) }}</pre
+                      >{{ error.formattedContext }}</pre
                     >
                   </details>
                 }

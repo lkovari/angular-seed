@@ -29,27 +29,23 @@ export interface ErrorNotification {
 export class ErrorNotificationService {
   private router = inject(Router);
   private notifications = signal<ErrorNotification[]>([]);
-  // Separate history for debugging/monitoring with call stacks
   errorHistory = signal<ErrorNotification[]>([]);
   private nextId = 1;
+  private notificationTimeouts = new Map<
+    string,
+    ReturnType<typeof setTimeout>
+  >();
 
-  // Expose notifications as a computed signal for reactive access
   public readonly notificationsSignal = computed(() => this.notifications());
 
-  // Expose error history as a computed signal for debugging/monitoring
   public readonly errorHistorySignal = computed(() => this.errorHistory());
 
-  /**
-   * Add an error with call stack information
-   * This method should be called from error handlers that have access to the original error
-   */
   addErrorWithCallStack(
     message: string,
     originalError?: unknown,
     errorType?: string,
     duration = 5000,
   ): string {
-    // For HTTP errors or errors without stack, generate one
     let callStack: string[];
     if (
       originalError &&
@@ -59,7 +55,6 @@ export class ErrorNotificationService {
     ) {
       callStack = this.extractCallStack(originalError);
     } else {
-      // Generate a new stack trace from current location
       const stackError = new Error();
       callStack = this.extractCallStack(stackError);
     }
@@ -73,7 +68,6 @@ export class ErrorNotificationService {
         (originalError &&
         typeof originalError === 'object' &&
         'constructor' in originalError &&
-        originalError.constructor &&
         typeof originalError.constructor === 'object' &&
         'name' in originalError.constructor
           ? String((originalError.constructor as { name: unknown }).name)
@@ -81,7 +75,6 @@ export class ErrorNotificationService {
       originalError: originalError,
     };
 
-    // Extract HTTP status if available
     let httpStatus: number | undefined;
     if (
       originalError &&
@@ -108,7 +101,6 @@ export class ErrorNotificationService {
       }
     }
 
-    // Get current Angular route
     const route = this.getCurrentRoute();
 
     console.log(`ERROR WITH STACK: ${message}`, {
@@ -130,13 +122,12 @@ export class ErrorNotificationService {
         httpStatus,
       },
       true,
-    ); // true means add to error history
+    );
   }
 
   showError(message: string, duration = 5000): string {
     console.log(`ERROR CAUGHT: ${message}`);
 
-    // Generate call stack for this error
     const error = new Error(message);
     const callStack = this.extractCallStack(error);
     const route = this.getCurrentRoute();
@@ -146,22 +137,22 @@ export class ErrorNotificationService {
       type: 'error',
       autoHide: true,
       duration,
-      ...(callStack !== undefined && { callStack }),
+      ...(callStack.length > 0 && { callStack }),
       ...(route !== undefined && { route }),
     };
-    if (typeof window !== 'undefined' || typeof navigator !== 'undefined') {
-      const errorContext: ErrorNotification['errorContext'] = {
-        errorType: 'ManualError',
-      };
-      if (typeof window !== 'undefined') {
-        errorContext.url = window.location.href;
-      }
-      if (typeof navigator !== 'undefined') {
-        errorContext.userAgent = navigator.userAgent;
-      }
+    const errorContext: ErrorNotification['errorContext'] = {
+      errorType: 'ManualError',
+    };
+    if (typeof window !== 'undefined') {
+      errorContext.url = window.location.href;
+    }
+    if (typeof navigator !== 'undefined') {
+      errorContext.userAgent = navigator.userAgent;
+    }
+    if (errorContext.url || errorContext.userAgent) {
       config.errorContext = errorContext;
     }
-    return this.addNotification(config, true); // Add to history
+    return this.addNotification(config, true);
   }
 
   showWarning(message: string, duration = 4000): string {
@@ -208,6 +199,12 @@ export class ErrorNotificationService {
   }
 
   dismiss(id: string): void {
+    const timeoutId = this.notificationTimeouts.get(id);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      this.notificationTimeouts.delete(id);
+    }
+
     const current = this.notifications();
     this.notifications.set(
       current.filter((n: ErrorNotification) => n.id !== id),
@@ -218,51 +215,36 @@ export class ErrorNotificationService {
     this.notifications.set([]);
   }
 
-  /**
-   * Get all errors from history (for debugging/monitoring)
-   */
   getAllErrors(): ErrorNotification[] {
     return this.errorHistory();
   }
 
-  /**
-   * Clear error history
-   */
   clearErrorHistory(): void {
     this.errorHistory.set([]);
   }
 
-  /**
-   * Alias for clearErrorHistory - clear the error history
-   */
   clearHistory(): void {
     this.clearErrorHistory();
   }
 
-  /**
-   * Get current Angular route path
-   */
   private getCurrentRoute(): string | undefined {
     try {
-      return this.router?.url || undefined;
+      return this.router.url || undefined;
     } catch {
       return undefined;
     }
   }
 
-  /**
-   * Extract call stack from an error object
-   */
   private extractCallStack(error?: unknown): string[] {
     if (!error) {
-      // Generate current call stack
       const stack = new Error().stack;
-      return this.parseStackTrace(stack, true);
+      return stack ? this.parseStackTrace(stack, true) : ['Stack trace not available'];
     }
 
     if (
-      error &&
       typeof error === 'object' &&
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      error !== null &&
       'stack' in error &&
       typeof (error as { stack: unknown }).stack === 'string'
     ) {
@@ -273,14 +255,10 @@ export class ErrorNotificationService {
       return [error];
     }
 
-    // If no stack available, generate one
     const stack = new Error().stack;
-    return this.parseStackTrace(stack, true);
+    return stack ? this.parseStackTrace(stack, true) : ['Stack trace not available'];
   }
 
-  /**
-   * Parse stack trace string into array of meaningful stack frames
-   */
   private parseStackTrace(stackTrace?: string, isGenerated = false): string[] {
     if (!stackTrace) {
       return ['Stack trace not available'];
@@ -291,7 +269,6 @@ export class ErrorNotificationService {
       .filter((line) => line.trim() !== '')
       .map((line) => line.trim());
 
-    // If we have lines with 'at ', filter them
     const atLines = lines.filter((line) => line.includes('at '));
 
     if (atLines.length > 0) {
@@ -302,7 +279,6 @@ export class ErrorNotificationService {
           !line.includes('zone.js'),
       );
 
-      // If this is a generated stack, skip the first few frames (ErrorNotificationService methods)
       if (isGenerated) {
         filtered = filtered.filter(
           (line) =>
@@ -313,11 +289,8 @@ export class ErrorNotificationService {
         );
       }
 
-      // Clean up the stack trace to show more readable paths
       const cleaned = filtered.map((line) => {
-        // Try to extract meaningful file names from bundled paths
         if (line.includes('localhost:4200')) {
-          // Extract the part after localhost:4200
           const regex = /localhost:4200\/(.+?)(?:\?|$)/;
           const match = regex.exec(line);
           if (match) {
@@ -331,7 +304,6 @@ export class ErrorNotificationService {
       return result.length > 0 ? result : ['at (call location not available)'];
     }
 
-    // If no 'at ' lines, return all lines (some browsers format differently)
     const result = lines.slice(0, 15);
     return result.length > 0 ? result : ['Stack trace format not recognized'];
   }
@@ -341,7 +313,7 @@ export class ErrorNotificationService {
     addToHistory = false,
   ): string {
     const notification: ErrorNotification = {
-      id: `error-${this.nextId++}`,
+      id: `error-${String(this.nextId++)}`,
       message: config.message ?? '',
       type: config.type ?? 'error',
       timestamp: new Date(),
@@ -359,17 +331,17 @@ export class ErrorNotificationService {
     const current = this.notifications();
     this.notifications.set([...current, notification]);
 
-    // Add to error history if requested (for errors with call stacks)
     if (addToHistory) {
       const currentHistory = this.errorHistory();
       this.errorHistory.set([...currentHistory, notification]);
     }
 
-    // Auto-hide if configured
     if (notification.autoHide && notification.duration) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         this.dismiss(notification.id);
+        this.notificationTimeouts.delete(notification.id);
       }, notification.duration);
+      this.notificationTimeouts.set(notification.id, timeoutId);
     }
 
     return notification.id;

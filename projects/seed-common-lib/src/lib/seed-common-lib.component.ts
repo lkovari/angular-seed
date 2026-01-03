@@ -6,4 +6,7 @@ import { Component } from '@angular/core';
   styleUrl: './lib-seed-common-lib.component.scss',
   imports: [],
 })
-export class SeedCommonLibComponent {}
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
+export class SeedCommonLibComponent {
+  // Component placeholder
+}

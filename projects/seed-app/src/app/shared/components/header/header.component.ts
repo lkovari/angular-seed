@@ -8,13 +8,13 @@ import { Component, output, input } from '@angular/core';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  lastUpdateDate = new Date('12/25/2025 11:50 AM');
-  sidebarVisibleChange = output<void>();
+  lastUpdateDate = new Date('01/03/2026 03:18 PM');
+  sidebarVisibleChange = output();
 
   // Inputs from parent
   showErrorIndicator = input<boolean>(false);
   errorCount = input<number>(0);
-  errorIndicatorClick = output<void>();
+  errorIndicatorClick = output();
 
   toggleSidebar(): void {
     this.sidebarVisibleChange.emit();

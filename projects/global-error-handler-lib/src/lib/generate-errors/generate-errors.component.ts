@@ -1,6 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorNotificationService } from '../services/error-notification';
+import { MockHttpService } from '../services/mock-http.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'lib-generate-errors',
@@ -12,6 +19,8 @@ import { ErrorNotificationService } from '../services/error-notification';
 export class GenerateErrorsComponent {
   private http = inject(HttpClient);
   private notificationService = inject(ErrorNotificationService);
+  private mockHttp = inject(MockHttpService);
+  private destroyRef = inject(DestroyRef);
 
   throwSimpleError(): void {
     throw new Error('This is a simple JavaScript error for testing');
@@ -20,11 +29,13 @@ export class GenerateErrorsComponent {
   throwTypeError(): void {
     const obj: unknown = null;
     // @ts-expect-error - Intentionally calling method on null for error testing
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     obj.someMethod();
   }
 
   throwReferenceError(): void {
     // @ts-expect-error - Intentionally accessing non-existent variable for error testing
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     nonExistentVariable.toString();
   }
 
@@ -38,46 +49,111 @@ export class GenerateErrorsComponent {
   }
 
   triggerHttp404(): void {
-    this.http.get('/api/non-existent-endpoint').subscribe({
-      next: () => console.log('Success'),
-      error: (err) => console.error('HTTP Error caught:', err),
-    });
+    this.http
+      .get('/api/non-existent-endpoint')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('HTTP Error caught:', err);
+        },
+      });
   }
 
   triggerHttp500(): void {
-    this.http.get('https://httpbin.org/status/500').subscribe({
-      next: () => console.log('Success'),
-      error: (err) => console.error('HTTP 500 Error caught:', err),
-    });
+    this.mockHttp
+      .getErrorResponse(500, 'Internal Server Error')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('HTTP 500 Error caught:', err);
+          this.notificationService.addErrorWithCallStack(
+            'Internal server error. Please try again later.',
+            err,
+            'HttpError',
+          );
+        },
+      });
   }
 
   triggerHttp401(): void {
-    this.http.get('https://httpbin.org/status/401').subscribe({
-      next: () => console.log('Success'),
-      error: (err) => console.error('HTTP 401 Error caught:', err),
-    });
+    this.mockHttp
+      .getErrorResponse(401, 'Unauthorized')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('HTTP 401 Error caught:', err);
+          this.notificationService.addErrorWithCallStack(
+            'You are not authorized. Please log in again.',
+            err,
+            'HttpError',
+          );
+        },
+      });
   }
 
   triggerHttp402(): void {
-    this.http.get('https://httpbin.org/status/402').subscribe({
-      next: () => console.log('Success'),
-      error: (err) => console.error('HTTP 402 Error caught:', err),
-    });
+    this.mockHttp
+      .getErrorResponse(402, 'Payment Required')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('HTTP 402 Error caught:', err);
+          this.notificationService.addErrorWithCallStack(
+            'Payment required. Please complete payment to continue.',
+            err,
+            'HttpError',
+          );
+        },
+      });
   }
 
   triggerHttp403(): void {
-    this.http.get('https://httpbin.org/status/403').subscribe({
-      next: () => console.log('Success'),
-      error: (err) => console.error('HTTP 403 Error caught:', err),
-    });
+    this.mockHttp
+      .getErrorResponse(403, 'Forbidden')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('HTTP 403 Error caught:', err);
+          this.notificationService.addErrorWithCallStack(
+            'You do not have permission to perform this action.',
+            err,
+            'HttpError',
+          );
+        },
+      });
   }
 
   triggerNetworkError(): void {
-    this.http
-      .get('https://invalid-domain-that-does-not-exist-12345.com/api')
+    this.mockHttp
+      .getNetworkError()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => console.log('Success'),
-        error: (err) => console.error('Network Error caught:', err),
+        next: () => {
+          console.log('Success');
+        },
+        error: (err) => {
+          console.error('Network Error caught:', err);
+          this.notificationService.addErrorWithCallStack(
+            'Unable to connect to the server. Please check your internet connection.',
+            err,
+            'HttpError',
+          );
+        },
       });
   }
 

@@ -42,26 +42,34 @@ describe('GenerateErrorsComponent', () => {
 
   describe('JavaScript Errors', () => {
     it('should throw a simple error when throwSimpleError is called', () => {
-      expect(() => component.throwSimpleError()).toThrow(
-        'This is a simple JavaScript error for testing',
-      );
+      expect(() => {
+        component.throwSimpleError();
+      }).toThrow('This is a simple JavaScript error for testing');
     });
 
     it('should throw a TypeError when throwTypeError is called', () => {
-      expect(() => component.throwTypeError()).toThrow();
+      expect(() => {
+        component.throwTypeError();
+      }).toThrow();
     });
 
     it('should throw a ReferenceError when throwReferenceError is called', () => {
-      expect(() => component.throwReferenceError()).toThrow();
+      expect(() => {
+        component.throwReferenceError();
+      }).toThrow();
     });
 
     it('should trigger async error when throwAsyncError is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
       const consoleWarnSpy = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
         event.preventDefault();
@@ -72,16 +80,19 @@ describe('GenerateErrorsComponent', () => {
         capture: true,
       });
 
-      const originalStderrWrite = process.stderr?.write;
-      if (process.stderr) {
-        process.stderr.write = vi.fn() as typeof process.stderr.write;
-      }
+      const originalStderrWrite = process.stderr.write.bind(process.stderr);
+      process.stderr.write = vi.fn() as typeof process.stderr.write;
 
       // Also handle Node.js unhandled rejections
-      const nodeRejectionHandler = () => {};
+      function noOpRejectionHandler(): void {
+        // Intentionally empty - suppresses unhandled rejection events in tests
+      }
+      const nodeRejectionHandler = noOpRejectionHandler;
       process.on('unhandledRejection', nodeRejectionHandler);
 
-      expect(() => component.throwAsyncError()).not.toThrow();
+      expect(() => {
+        component.throwAsyncError();
+      }).not.toThrow();
 
       // Wait for the async error to occur
       await new Promise((resolve) => setTimeout(resolve, 150));
@@ -98,9 +109,7 @@ describe('GenerateErrorsComponent', () => {
         },
       );
 
-      if (process.stderr && originalStderrWrite) {
-        process.stderr.write = originalStderrWrite;
-      }
+      process.stderr.write = originalStderrWrite;
 
       consoleErrorSpy.mockRestore();
       consoleWarnSpy.mockRestore();
@@ -109,10 +118,14 @@ describe('GenerateErrorsComponent', () => {
     it('should create rejected promise when throwPromiseError is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
       const consoleWarnSpy = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
         event.preventDefault();
@@ -120,12 +133,12 @@ describe('GenerateErrorsComponent', () => {
 
       window.addEventListener('unhandledrejection', unhandledRejectionHandler);
 
-      const originalStderrWrite = process.stderr?.write;
-      if (process.stderr) {
-        process.stderr.write = vi.fn() as typeof process.stderr.write;
-      }
+      const originalStderrWrite = process.stderr.write.bind(process.stderr);
+      process.stderr.write = vi.fn() as typeof process.stderr.write;
 
-      expect(() => component.throwPromiseError()).not.toThrow();
+      expect(() => {
+        component.throwPromiseError();
+      }).not.toThrow();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -134,9 +147,7 @@ describe('GenerateErrorsComponent', () => {
         unhandledRejectionHandler,
       );
 
-      if (process.stderr && originalStderrWrite) {
-        process.stderr.write = originalStderrWrite;
-      }
+      process.stderr.write = originalStderrWrite;
 
       consoleErrorSpy.mockRestore();
       consoleWarnSpy.mockRestore();
@@ -145,10 +156,14 @@ describe('GenerateErrorsComponent', () => {
     it('should schedule timeout error when throwTimeoutError is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
       const consoleWarnSpy = vi
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       const errorHandler = (event: ErrorEvent) => {
         event.preventDefault();
@@ -158,16 +173,19 @@ describe('GenerateErrorsComponent', () => {
       // Use capture phase to catch the error
       window.addEventListener('error', errorHandler, true);
 
-      const originalStderrWrite = process.stderr?.write;
-      if (process.stderr) {
-        process.stderr.write = vi.fn() as typeof process.stderr.write;
-      }
+      const originalStderrWrite = process.stderr.write.bind(process.stderr);
+      process.stderr.write = vi.fn() as typeof process.stderr.write;
 
       // Also handle Node.js uncaught exceptions
-      const nodeErrorHandler = () => {};
+      function noOpErrorHandler(): void {
+        // Intentionally empty - suppresses uncaught exception events in tests
+      }
+      const nodeErrorHandler = noOpErrorHandler;
       process.on('uncaughtException', nodeErrorHandler);
 
-      expect(() => component.throwTimeoutError()).not.toThrow();
+      expect(() => {
+        component.throwTimeoutError();
+      }).not.toThrow();
 
       // Wait for the setTimeout error to occur
       await new Promise((resolve) => setTimeout(resolve, 150));
@@ -178,9 +196,7 @@ describe('GenerateErrorsComponent', () => {
       process.removeListener('uncaughtException', nodeErrorHandler);
       window.removeEventListener('error', errorHandler, true);
 
-      if (process.stderr && originalStderrWrite) {
-        process.stderr.write = originalStderrWrite;
-      }
+      process.stderr.write = originalStderrWrite;
 
       consoleErrorSpy.mockRestore();
       consoleWarnSpy.mockRestore();
@@ -191,7 +207,9 @@ describe('GenerateErrorsComponent', () => {
     it('should trigger HTTP 404 error when triggerHttp404 is called', () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerHttp404();
 
@@ -203,86 +221,108 @@ describe('GenerateErrorsComponent', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it('should trigger HTTP 500 error when triggerHttp500 is called', () => {
+    it('should trigger HTTP 500 error when triggerHttp500 is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerHttp500();
 
-      const req = httpMock.expectOne('https://httpbin.org/status/500');
-      expect(req.request.method).toBe('GET');
-      req.flush('Internal Server Error', {
-        status: 500,
-        statusText: 'Internal Server Error',
-      });
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalled();
+        },
+        { timeout: 100 },
+      );
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
+      expect(errorCall).toContain('HTTP 500 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
-    it('should trigger HTTP 401 error when triggerHttp401 is called', () => {
+    it('should trigger HTTP 401 error when triggerHttp401 is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerHttp401();
 
-      const req = httpMock.expectOne('https://httpbin.org/status/401');
-      expect(req.request.method).toBe('GET');
-      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalled();
+        },
+        { timeout: 100 },
+      );
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
+      expect(errorCall).toContain('HTTP 401 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
-    it('should trigger HTTP 402 error when triggerHttp402 is called', () => {
+    it('should trigger HTTP 402 error when triggerHttp402 is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerHttp402();
 
-      const req = httpMock.expectOne('https://httpbin.org/status/402');
-      expect(req.request.method).toBe('GET');
-      req.flush('Payment Required', {
-        status: 402,
-        statusText: 'Payment Required',
-      });
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalled();
+        },
+        { timeout: 100 },
+      );
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
+      expect(errorCall).toContain('HTTP 402 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
-    it('should trigger HTTP 403 error when triggerHttp403 is called', () => {
+    it('should trigger HTTP 403 error when triggerHttp403 is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerHttp403();
 
-      const req = httpMock.expectOne('https://httpbin.org/status/403');
-      expect(req.request.method).toBe('GET');
-      req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalled();
+        },
+        { timeout: 100 },
+      );
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
+      expect(errorCall).toContain('HTTP 403 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
-    it('should trigger network error when triggerNetworkError is called', () => {
+    it('should trigger network error when triggerNetworkError is called', async () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation
+        });
 
       component.triggerNetworkError();
 
-      const req = httpMock.expectOne(
-        'https://invalid-domain-that-does-not-exist-12345.com/api',
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalled();
+        },
+        { timeout: 100 },
       );
-      expect(req.request.method).toBe('GET');
-      req.error(new ProgressEvent('error'));
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
+      expect(errorCall).toContain('Network Error caught');
       consoleErrorSpy.mockRestore();
     });
   });

@@ -1,9 +1,8 @@
 import {
-  ChangeDetectorRef,
   Component,
-  inject,
-  type OnInit,
   type OnDestroy,
+  ChangeDetectionStrategy,
+  signal,
 } from '@angular/core';
 import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/public-api';
 
@@ -12,10 +11,9 @@ import { AngularVersionComponent } from '../../../../../../seed-common-lib/src/p
   imports: [AngularVersionComponent],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FooterComponent implements OnInit, OnDestroy {
-  private cdr = inject(ChangeDetectorRef);
-
+export class FooterComponent implements OnDestroy {
   developers = [
     'László Kővári',
     'Developer #1',
@@ -31,14 +29,13 @@ export class FooterComponent implements OnInit, OnDestroy {
   ];
 
   private previousIndex: number | null = null;
-  currentDeveloperOrder = '';
+  currentDeveloperOrder = signal('');
   private intervalId: ReturnType<typeof setInterval> | undefined;
 
-  ngOnInit(): void {
-    this.currentDeveloperOrder = this.getDeveloperOrder();
+  constructor() {
+    this.currentDeveloperOrder.set(this.getDeveloperOrder());
     this.intervalId = setInterval(() => {
-      this.currentDeveloperOrder = this.getDeveloperOrder();
-      this.cdr.detectChanges();
+      this.currentDeveloperOrder.set(this.getDeveloperOrder());
     }, 9000);
   }
 
@@ -59,6 +56,6 @@ export class FooterComponent implements OnInit, OnDestroy {
   }
 
   onAnimationEnd(): void {
-    // TODO
+    // Nothing TODO
   }
 }

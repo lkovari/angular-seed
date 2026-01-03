@@ -17,5 +17,5 @@ function generateCorrelationId(): string {
     return crypto.randomUUID();
   }
 
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+  return `${String(Date.now())}-${Math.random().toString(36).substring(2, 15)}`;
 }

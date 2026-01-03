@@ -1,4 +1,4 @@
-import { Component, type OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import * as angular from '@angular/forms';
 
 @Component({
@@ -6,10 +6,8 @@ import * as angular from '@angular/forms';
   imports: [],
   templateUrl: './angular-version.component.html',
   styleUrl: './angular-version.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AngularVersionComponent implements OnInit {
-  angularVersion!: string;
-  ngOnInit(): void {
-    this.angularVersion = angular.VERSION.full;
-  }
+export class AngularVersionComponent {
+  angularVersion = signal(angular.VERSION.full);
 }

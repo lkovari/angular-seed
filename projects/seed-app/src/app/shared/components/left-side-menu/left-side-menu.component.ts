@@ -10,5 +10,5 @@ import { RouterLink } from '@angular/router';
 })
 export class LeftSideMenuComponent {
   menuItems = input<MenuItem[]>([]);
-  menuItemSelected = output<void>();
+  menuItemSelected = output();
 }

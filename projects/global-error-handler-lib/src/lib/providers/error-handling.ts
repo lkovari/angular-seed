@@ -34,9 +34,9 @@ const DEFAULT_CONFIG: ErrorHandlingConfig = {
  */
 export function provideErrorHandling(
   config: Partial<ErrorHandlingConfig> = {},
-): Array<Provider | EnvironmentProviders> {
+): (Provider | EnvironmentProviders)[] {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-  const providers: Array<Provider | EnvironmentProviders> = [];
+  const providers: (Provider | EnvironmentProviders)[] = [];
 
   // Global Error Handler
   if (finalConfig.enableGlobalHandler) {
@@ -61,9 +61,9 @@ export function provideErrorHandling(
  * Simplified provider for basic error handling
  * Includes global error handler and HTTP interceptor with default settings
  */
-export function provideBasicErrorHandling(): Array<
+export function provideBasicErrorHandling(): (
   Provider | EnvironmentProviders
-> {
+)[] {
   return provideErrorHandling({
     enableGlobalHandler: true,
     enableHttpInterceptor: true,
@@ -77,7 +77,7 @@ export function provideBasicErrorHandling(): Array<
  */
 export function provideProductionErrorHandling(
   monitoringConfig?: ErrorHandlingConfig['monitoringConfig'],
-): Array<Provider | EnvironmentProviders> {
+): (Provider | EnvironmentProviders)[] {
   const config: Partial<ErrorHandlingConfig> = {
     enableGlobalHandler: true,
     enableHttpInterceptor: true,

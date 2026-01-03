@@ -19,6 +19,9 @@
     "useDefineForClassFields": false,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    "incremental": true,
+    "noEmitOnError": true,
+    "baseUrl": "./",
 
     /* === Angular & decorators === */
     "experimentalDecorators": true,

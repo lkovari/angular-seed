@@ -5,6 +5,7 @@ import {
   input,
   output,
   signal,
+  type OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -22,7 +23,7 @@ import {
   styleUrl: './signup-signin.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SignupSigninComponent {
+export class SignupSigninComponent implements OnDestroy {
   readonly githubLogoPath = input<string>('');
 
   readonly signUp = output<{ email: string; password: string }>();
@@ -166,5 +167,14 @@ export class SignupSigninComponent {
       email: '',
       password: '',
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.signUpTimeout) {
+      clearTimeout(this.signUpTimeout);
+    }
+    if (this.signInTimeout) {
+      clearTimeout(this.signInTimeout);
+    }
   }
 }

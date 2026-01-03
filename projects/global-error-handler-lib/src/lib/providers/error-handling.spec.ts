@@ -25,11 +25,10 @@ describe('provideErrorHandling', () => {
       const providers = provideErrorHandling();
 
       const errorHandlerProvider = providers.find(
-        (p) =>
+        (p): p is { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler } =>
           typeof p === 'object' &&
-          p !== null &&
           'provide' in p &&
-          p.provide === ErrorHandler,
+          (p as { provide: unknown }).provide === ErrorHandler,
       );
 
       expect(errorHandlerProvider).toBeDefined();
@@ -58,11 +57,10 @@ describe('provideErrorHandling', () => {
       const providers = provideErrorHandling({ production: true });
 
       const errorHandlerProvider = providers.find(
-        (p) =>
+        (p): p is { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler } =>
           typeof p === 'object' &&
-          p !== null &&
           'provide' in p &&
-          p.provide === ErrorHandler,
+          (p as { provide: unknown }).provide === ErrorHandler,
       );
 
       expect(errorHandlerProvider).toBeDefined();
@@ -76,21 +74,14 @@ describe('provideErrorHandling', () => {
       });
 
       const errorHandlerProvider = providers.find(
-        (p) =>
+        (p): p is { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler } =>
           typeof p === 'object' &&
-          p !== null &&
           'provide' in p &&
-          p.provide === ErrorHandler,
+          (p as { provide: unknown }).provide === ErrorHandler,
       );
 
       expect(errorHandlerProvider).toBeDefined();
-      if (
-        errorHandlerProvider &&
-        typeof errorHandlerProvider === 'object' &&
-        'useClass' in errorHandlerProvider
-      ) {
-        expect(errorHandlerProvider.useClass).toBe(GlobalErrorHandler);
-      }
+      expect(errorHandlerProvider?.useClass).toBe(GlobalErrorHandler);
     });
 
     it('should NOT include ErrorHandler when enableGlobalHandler is false', () => {
@@ -99,11 +90,10 @@ describe('provideErrorHandling', () => {
       });
 
       const errorHandlerProvider = providers.find(
-        (p) =>
+        (p): p is { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler } =>
           typeof p === 'object' &&
-          p !== null &&
           'provide' in p &&
-          p.provide === ErrorHandler,
+          (p as { provide: unknown }).provide === ErrorHandler,
       );
 
       expect(errorHandlerProvider).toBeUndefined();
@@ -152,15 +142,11 @@ describe('provideErrorHandling', () => {
       });
 
       const errorHandlerProvider = providers.find(
-        (p) =>
+        (p): p is { provide: typeof ErrorHandler; useClass: typeof GlobalErrorHandler } =>
           typeof p === 'object' &&
-          p !== null &&
           'provide' in p &&
-          p.provide === ErrorHandler,
-      ) as {
-        provide: typeof ErrorHandler;
-        useClass: typeof GlobalErrorHandler;
-      };
+          (p as { provide: unknown }).provide === ErrorHandler,
+      );
 
       expect(errorHandlerProvider).toBeDefined();
       expect(errorHandlerProvider.useClass).toBe(GlobalErrorHandler);
@@ -168,8 +154,8 @@ describe('provideErrorHandling', () => {
   });
 
   describe('Integration Tests', () => {
-    it('should work when provided in TestBed', async () => {
-      await TestBed.configureTestingModule({
+    it('should work when provided in TestBed', () => {
+      TestBed.configureTestingModule({
         providers: [
           provideHttpClient(),
           provideHttpClientTesting(),
@@ -184,8 +170,8 @@ describe('provideErrorHandling', () => {
       expect(errorHandler).toBeInstanceOf(GlobalErrorHandler);
     });
 
-    it('should handle errors when ErrorHandler is provided', async () => {
-      await TestBed.configureTestingModule({
+    it('should handle errors when ErrorHandler is provided', () => {
+      TestBed.configureTestingModule({
         providers: [
           provideHttpClient(),
           provideHttpClientTesting(),
@@ -222,9 +208,8 @@ describe('provideBasicErrorHandling', () => {
     const errorHandlerProvider = providers.find(
       (p) =>
         typeof p === 'object' &&
-        p !== null &&
         'provide' in p &&
-        p.provide === ErrorHandler,
+        (p as { provide: unknown }).provide === ErrorHandler,
     );
 
     expect(errorHandlerProvider).toBeDefined();
@@ -253,9 +238,8 @@ describe('provideProductionErrorHandling', () => {
     const errorHandlerProvider = providers.find(
       (p) =>
         typeof p === 'object' &&
-        p !== null &&
         'provide' in p &&
-        p.provide === ErrorHandler,
+        (p as { provide: unknown }).provide === ErrorHandler,
     );
 
     expect(errorHandlerProvider).toBeDefined();

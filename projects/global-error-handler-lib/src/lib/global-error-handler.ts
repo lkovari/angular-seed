@@ -20,7 +20,6 @@ export class GlobalErrorHandler implements ErrorHandler {
   private hasInitialized = false;
 
   constructor() {
-    // Initialize additional error listeners when service is created
     this.initializeErrorListeners();
   }
 
@@ -30,16 +29,26 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
     this.hasInitialized = true;
 
-    // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
-      // Prevent default to avoid console error
       event.preventDefault();
 
       this.ngZone.run(() => {
-        const error = {
-          message: event.reason?.message ?? 'Unhandled Promise Rejection',
+        const reason: unknown = event.reason;
+        const error: {
+          message: string;
+          reason: unknown;
+          stack?: string;
+          promise: Promise<unknown>;
+        } = {
+          message:
+            reason && typeof reason === 'object' && 'message' in reason
+              ? String((reason as { message: unknown }).message)
+              : 'Unhandled Promise Rejection',
           reason: event.reason,
-          stack: event.reason?.stack,
+          stack:
+            reason && typeof reason === 'object' && 'stack' in reason
+              ? String((reason as { stack: unknown }).stack)
+              : undefined,
           promise: event.promise,
         };
         this.logError(error, 'Promise Rejection');
@@ -47,13 +56,10 @@ export class GlobalErrorHandler implements ErrorHandler {
       });
     });
 
-    // Handle global JavaScript errors and resource loading errors
     window.addEventListener(
       'error',
       (event) => {
-        // Check if it's a resource loading error
         if (event.target !== window) {
-          // Resource loading error
           this.ngZone.run(() => {
             const target = event.target as HTMLElement;
             const getResourceUrl = (el: HTMLElement): string => {
@@ -73,24 +79,36 @@ export class GlobalErrorHandler implements ErrorHandler {
             };
             const error = {
               message: 'Resource Loading Error',
-              resourceType: target.tagName?.toLowerCase() || 'unknown',
+              resourceType: target.tagName.toLowerCase() || 'unknown',
               resourceUrl: getResourceUrl(target),
-              outerHTML: target.outerHTML?.substring(0, 200) || 'unknown',
+              outerHTML: target.outerHTML.substring(0, 200) || 'unknown',
             };
             this.logError(error, 'Resource Loading Error');
             this.notifyUser(error, 'Resource Loading Error');
           });
         } else {
-          // JavaScript error
           event.preventDefault();
 
           this.ngZone.run(() => {
-            const error = {
+            const eventError: unknown = event.error;
+            const error: {
+              message: string;
+              filename?: string;
+              lineno?: number;
+              colno?: number;
+              stack?: string;
+              error: unknown;
+            } = {
               message: event.message || 'JavaScript Error',
               filename: event.filename,
               lineno: event.lineno,
               colno: event.colno,
-              stack: event.error?.stack,
+              stack:
+                eventError &&
+                typeof eventError === 'object' &&
+                'stack' in eventError
+                  ? String((eventError as { stack: unknown }).stack)
+                  : undefined,
               error: event.error,
             };
             this.logError(error, 'Timeout Error');
@@ -99,13 +117,11 @@ export class GlobalErrorHandler implements ErrorHandler {
         }
       },
       true,
-    ); // Use capture phase to catch all errors
+    );
   }
 
   handleError(error: unknown): void {
-    // Run outside Angular zone to prevent potential infinite loops
     this.ngZone.runOutsideAngular(() => {
-      // Extract the actual error from Angular's error wrapper
       const actualError = this.extractActualError(error);
 
       this.logError(actualError, 'Angular Error');
@@ -115,7 +131,6 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private extractActualError(error: unknown): unknown {
-    // Angular often wraps errors, try to get the original
     if (error && typeof error === 'object') {
       if ('rejection' in error) {
         return (error as { rejection: unknown }).rejection;
@@ -165,12 +180,18 @@ export class GlobalErrorHandler implements ErrorHandler {
       timestamp: new Date(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      ...(stack !== undefined && { stack }),
-      ...(context !== undefined && { context }),
-      ...(errorType !== undefined && { errorType }),
     };
+    if (stack !== undefined) {
+      errorInfo.stack = stack;
+    }
+    if (context) {
+      errorInfo.context = context;
+    }
+    if (errorType) {
+      errorInfo.errorType = errorType;
+    }
 
-    console.group(`🚨 Global Error Handler - ${errorType}`);
+    console.group(`Global Error Handler - ${errorType}`);
     console.error('Error Info:', errorInfo);
     console.error('Original Error:', error);
     console.groupEnd();
@@ -184,7 +205,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (error instanceof HttpErrorResponse) {
       message = this.getHttpErrorMessage(error);
       originalError = error;
-      actualErrorType = `HTTP ${error.status} Error`;
+      actualErrorType = `HTTP ${String(error.status)} Error`;
     } else if (error instanceof Error) {
       // Standard Error object - use the actual error message
       message = error.message || this.getFriendlyErrorMessage(error.message);
@@ -200,24 +221,48 @@ export class GlobalErrorHandler implements ErrorHandler {
       message = errMessage || this.getFriendlyErrorMessage(errMessage);
       originalError = error;
       actualErrorType = errorType ?? 'JavaScript Error';
-    } else if (
-      error &&
-      typeof error === 'object' &&
-      'reason' in error &&
-      (error as { reason: unknown }).reason
-    ) {
-      // Handle promise rejections
-      const reason = (error as { reason: unknown }).reason;
+      } else if (
+        error &&
+        typeof error === 'object' &&
+        'reason' in error
+      ) {
+        const reason = (error as { reason: unknown }).reason;
       let reasonMessage = 'Promise Rejection';
       if (reason instanceof Error) {
         reasonMessage = reason.message;
         originalError = reason;
       } else if (reason && typeof reason === 'object' && 'message' in reason) {
         const msg = (reason as { message: unknown }).message;
-        reasonMessage = typeof msg === 'string' ? msg : String(reason);
+        reasonMessage =
+          typeof msg === 'string'
+            ? msg
+            : JSON.stringify(reason, null, 2);
         originalError = reason;
-      } else {
-        reasonMessage = String(reason);
+      } else if (reason !== null && reason !== undefined) {
+        if (typeof reason === 'string') {
+          reasonMessage = reason;
+        } else if (typeof reason === 'object') {
+          try {
+            reasonMessage = JSON.stringify(reason, null, 2);
+          } catch {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            reasonMessage = typeof reason === 'object' && reason !== null ? '[object Object]' : String(reason);
+          }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        } else if (reason !== null && reason !== undefined) {
+          if (typeof reason === 'string') {
+            reasonMessage = reason;
+          } else if (typeof reason === 'object') {
+            try {
+              reasonMessage = JSON.stringify(reason);
+            } catch {
+              reasonMessage = '[object Object]';
+            }
+          } else {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            reasonMessage = String(reason);
+          }
+        }
         originalError = reason;
       }
       message = reasonMessage || this.getFriendlyErrorMessage(reasonMessage);
@@ -228,7 +273,6 @@ export class GlobalErrorHandler implements ErrorHandler {
       'resourceType' in error &&
       typeof (error as { resourceType: unknown }).resourceType === 'string'
     ) {
-      // Handle resource loading errors
       const resourceType = (error as { resourceType: string }).resourceType;
       message = `Failed to load ${resourceType}. Please refresh the page.`;
       originalError = new Error(message);
@@ -239,7 +283,6 @@ export class GlobalErrorHandler implements ErrorHandler {
       actualErrorType = errorType ?? 'String Error';
     }
 
-    // Show user-friendly notification with original error for call stack
     this.showNotification(message, 'error', originalError, actualErrorType);
   }
 
@@ -262,12 +305,11 @@ export class GlobalErrorHandler implements ErrorHandler {
       case 504:
         return 'Service temporarily unavailable. Please try again later.';
       default:
-        return `An error occurred (${error.status}). Please try again.`;
+        return `An error occurred (${String(error.status)}). Please try again.`;
     }
   }
 
   private getFriendlyErrorMessage(message: string): string {
-    // Map technical errors to user-friendly messages
     const errorMappings: Record<string, string> = {
       ChunkLoadError:
         'Failed to load application resources. Please refresh the page.',
@@ -288,8 +330,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       Export: 'Failed to export module. Please refresh the page.',
     };
 
-    // Convert message to string if it's not already
-    const messageStr = String(message || '').toLowerCase();
+    const messageStr = message.toLowerCase();
 
     for (const [technical, friendly] of Object.entries(errorMappings)) {
       if (messageStr.includes(technical.toLowerCase())) {
@@ -302,7 +343,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private getErrorContext(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
-      return `HTTP Error - ${error.status} ${error.url}`;
+      return `HTTP Error - ${String(error.status)} ${error.url ?? 'unknown'}`;
     }
 
     if (
@@ -316,7 +357,7 @@ export class GlobalErrorHandler implements ErrorHandler {
         lineno?: number;
         colno?: number;
       };
-      return `JavaScript Error - ${err.filename}:${err.lineno ?? '?'}:${err.colno ?? '?'}`;
+      return `JavaScript Error - ${err.filename}:${String(err.lineno ?? '?')}:${String(err.colno ?? '?')}`;
     }
 
     if (
@@ -335,20 +376,19 @@ export class GlobalErrorHandler implements ErrorHandler {
     if (
       error &&
       typeof error === 'object' &&
-      'reason' in error &&
-      (error as { reason: unknown }).reason
+      'reason' in error
     ) {
       const reason = (error as { reason: unknown }).reason;
-      const reasonName =
-        reason &&
-        typeof reason === 'object' &&
-        'constructor' in reason &&
-        reason.constructor &&
-        typeof reason.constructor === 'object' &&
-        'name' in reason.constructor
-          ? String((reason.constructor as { name: unknown }).name)
-          : 'Unknown';
-      return `Promise Rejection - ${reasonName}`;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (reason && typeof reason === 'object' && reason !== null && 'constructor' in reason) {
+        const constructor = reason.constructor;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (typeof constructor === 'object' && constructor !== null && 'name' in constructor) {
+          const name = (constructor as { name: unknown }).name;
+          return `Promise Rejection - ${typeof name === 'string' ? name : 'Unknown'}`;
+        }
+      }
+      return 'Promise Rejection - Unknown';
     }
 
     if (
@@ -371,11 +411,9 @@ export class GlobalErrorHandler implements ErrorHandler {
     originalError?: unknown,
     errorType?: string,
   ): void {
-    // Use the notification service with signals
     this.ngZone.run(() => {
       switch (type) {
         case 'error':
-          // Use addErrorWithCallStack for errors to collect call stack information
           if (originalError) {
             this.notificationService.addErrorWithCallStack(
               message,
@@ -395,12 +433,10 @@ export class GlobalErrorHandler implements ErrorHandler {
       }
     });
 
-    // Also log to console
     console.log(`ERROR CAUGHT: ${message}`);
   }
 
   private reportError(error: unknown): void {
-    // Send error to monitoring service (e.g., Sentry, LogRocket, Application Insights)
     const getErrorMessage = (err: unknown): string => {
       if (err && typeof err === 'object') {
         if ('message' in err && typeof err.message === 'string') {
@@ -434,9 +470,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     const getErrorType = (err: unknown): string => {
       if (err && typeof err === 'object' && 'errorType' in err) {
         const errorType = (err as { errorType: unknown }).errorType;
-        if (typeof errorType === 'string') {
-          return errorType;
-        }
+        return typeof errorType === 'string' ? errorType : 'Unknown';
       }
       return 'Unknown';
     };
@@ -449,22 +483,23 @@ export class GlobalErrorHandler implements ErrorHandler {
       timestamp: new Date(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      ...(stack !== undefined && { stack }),
-      ...(context !== undefined && { context }),
-      ...(errorTypeValue !== undefined && { errorType: errorTypeValue }),
     };
+    if (stack !== undefined) {
+      errorInfo.stack = stack;
+    }
+    if (context) {
+      errorInfo.context = context;
+    }
+    if (errorTypeValue) {
+      errorInfo.errorType = errorTypeValue;
+    }
 
-    // Example implementation - replace with your monitoring service
-    // this.monitoringService.captureError(errorInfo);
-
-    // For development, log to console
     if (!this.isProduction()) {
       console.log('Error would be reported to monitoring service:', errorInfo);
     }
   }
 
   private isProduction(): boolean {
-    // Replace with your environment check
-    return false; // !isDevMode() or check environment variables
+    return false;
   }
 }

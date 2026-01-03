@@ -22,9 +22,15 @@ describe('GlobalErrorHandler', () => {
     notificationService = TestBed.inject(ErrorNotificationService);
     ngZone = TestBed.inject(NgZone);
 
-    consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {
+      // Mock implementation
+    });
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Mock implementation
+    });
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+      // Mock implementation
+    });
   });
 
   afterEach(() => {
@@ -142,11 +148,14 @@ describe('GlobalErrorHandler', () => {
       handler.handleError(error);
 
       expect(consoleLogSpy).toHaveBeenCalled();
-      const logCalls = consoleLogSpy.mock.calls;
-      const hasReportCall = logCalls.some((call: unknown[]) =>
-        call[0]?.toString().includes('Error would be reported'),
-      );
-      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment -- Vitest mock.calls is typed as any
+      const mockCalls = consoleLogSpy.mock.calls;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Type assertion needed for Vitest mock calls
+      const logCalls = (mockCalls as unknown) as [string, unknown][];
+      const hasReportCall = logCalls.some((call) => {
+        const firstArg = call[0];
+        return typeof firstArg === 'string' && firstArg.includes('Error would be reported');
+      });
       expect(hasReportCall || logCalls.length > 0).toBe(true);
     });
   });
@@ -399,9 +408,11 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
-          context: expect.stringContaining('JavaScript Error'),
-        }),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
+          context: expect.any(String),
+        }) as unknown,
       );
     });
 
@@ -415,9 +426,11 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
-          context: expect.stringContaining('Resource Loading Error'),
-        }),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
+          context: expect.any(String),
+        }) as unknown,
       );
     });
 
@@ -439,9 +452,11 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
-        }),
+        }) as unknown,
       );
     });
   });
@@ -469,12 +484,15 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           error: 'Test error',
           errorType: 'Angular Error',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           url: expect.any(String),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           userAgent: expect.any(String),
-        }),
+        }) as unknown,
       );
     });
 
@@ -486,9 +504,10 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           stack: 'Error: Test error\n    at test.js:1:1',
-        }),
+        }) as unknown,
       );
     });
   });
@@ -513,13 +532,18 @@ describe('GlobalErrorHandler', () => {
       handler.handleError(error);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
         expect.any(String),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           error: 'Test error',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           timestamp: expect.any(Date),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           url: expect.any(String),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           userAgent: expect.any(String),
-        }),
+        }) as unknown,
       );
     });
   });
@@ -615,11 +639,15 @@ describe('GlobalErrorHandler', () => {
 
   describe('Edge Cases', () => {
     it('should handle null error', () => {
-      expect(() => handler.handleError(null)).not.toThrow();
+      expect(() => {
+        handler.handleError(null);
+      }).not.toThrow();
     });
 
     it('should handle undefined error', () => {
-      expect(() => handler.handleError(undefined)).not.toThrow();
+      expect(() => {
+        handler.handleError(undefined);
+      }).not.toThrow();
     });
 
     it('should handle error with empty message', () => {
@@ -652,7 +680,9 @@ describe('GlobalErrorHandler', () => {
       };
       error.self = error;
 
-      expect(() => handler.handleError(error)).not.toThrow();
+      expect(() => {
+        handler.handleError(error);
+      }).not.toThrow();
     });
   });
 

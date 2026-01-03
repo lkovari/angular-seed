@@ -3,8 +3,8 @@ import {
   signal,
   input,
   output,
-  type OnInit,
   type OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { type MenuItem } from '../../models/menu/menu-item.interface';
 import { LeftSideMenuComponent } from '../left-side-menu/left-side-menu.component';
@@ -23,16 +23,16 @@ import { FooterComponent } from '../footer/footer.component';
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainLayoutComponent implements OnInit, OnDestroy {
-  sidebarVisible: boolean = true;
+export class MainLayoutComponent implements OnDestroy {
+  sidebarVisible = signal(true);
   private _isMobileView = signal(false);
   private resizeListener!: () => void;
 
-  // Error indicator inputs/outputs
   showErrorIndicator = input<boolean>(false);
   errorCount = input<number>(0);
-  errorIndicatorClick = output<void>();
+  errorIndicatorClick = output();
 
   menuItems: MenuItem[] = [
     {
@@ -52,20 +52,20 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this._isMobileView.set(window.innerWidth <= 768);
     if (this._isMobileView()) {
-      this.sidebarVisible = false;
+      this.sidebarVisible.set(false);
     } else {
-      this.sidebarVisible = true;
+      this.sidebarVisible.set(true);
     }
 
     this.resizeListener = () => {
       this._isMobileView.set(window.innerWidth <= 768);
       if (this._isMobileView()) {
-        this.sidebarVisible = false;
+        this.sidebarVisible.set(false);
       } else {
-        this.sidebarVisible = true;
+        this.sidebarVisible.set(true);
       }
     };
     window.addEventListener('resize', this.resizeListener);
@@ -76,19 +76,16 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar(): void {
-    this.sidebarVisible = !this.sidebarVisible;
+    this.sidebarVisible.update((value) => !value);
   }
 
-  openNav() {
-    const navi = document.getElementById('navi');
-    if (navi) {
-      navi.style.width = '100%';
-    }
+  openNav(): void {
+    this.sidebarVisible.set(true);
   }
 
-  closeNav() {
+  closeNav(): void {
     if (window.innerWidth <= 768) {
-      this.sidebarVisible = false;
+      this.sidebarVisible.set(false);
     }
   }
 

@@ -6,6 +6,8 @@ import {
   inject,
   effect,
   viewChild,
+  computed,
+  type OnDestroy,
 } from '@angular/core';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 import {
@@ -33,11 +35,10 @@ import {
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   private errorNotificationService = inject(ErrorNotificationService);
   private loadingService = inject(LoadingIndicatorService);
 
-  // ViewChild for wait spinner test component
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
   signupSignin = viewChild(SignupSigninComponent);
 
@@ -49,17 +50,24 @@ export class AppComponent {
 
   private indicatorTimeout: ReturnType<typeof setTimeout> | undefined;
 
+  readonly formattedErrorHistory = computed(() => {
+    return this.errorHistory().map((error) => ({
+      ...error,
+      formattedTimestamp: new Date(error.timestamp).toLocaleString(),
+      statusText: this.getStatusText(error.httpStatus ?? 0),
+      formattedContext: error.errorContext
+        ? this.formatContext(error.errorContext)
+        : '',
+    }));
+  });
+
   constructor() {
-    // Watch for new errors in history
     effect(() => {
       const errors = this.errorHistory();
       if (errors.length > 0) {
         this.showIndicatorTemporarily();
       }
     });
-
-    // Optional: Set custom loading adapter
-    // this.loadingService.setAdapter(new CustomLoadingAdapter());
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -127,15 +135,12 @@ export class AppComponent {
   }
 
   showIndicatorTemporarily(): void {
-    // Clear any existing timeout
     if (this.indicatorTimeout) {
       clearTimeout(this.indicatorTimeout);
     }
 
-    // Show indicator
     this.showErrorIndicator.set(true);
 
-    // Hide after 10 seconds
     this.indicatorTimeout = setTimeout(() => {
       this.showErrorIndicator.set(false);
     }, 10000);
@@ -143,7 +148,6 @@ export class AppComponent {
 
   openErrorHistoryModal(): void {
     this.showErrorHistoryModal.set(true);
-    // Keep indicator visible when modal is open
     if (this.indicatorTimeout) {
       clearTimeout(this.indicatorTimeout);
     }
@@ -156,14 +160,20 @@ export class AppComponent {
   clearErrorHistory(): void {
     this.errorNotificationService.clearErrorHistory();
     this.showErrorIndicator.set(false);
-    // Don't close the modal, let user close it with X button
+    this.showErrorHistoryModal.set(false);
   }
 
-  formatTimestamp(date: Date): string {
+  ngOnDestroy(): void {
+    if (this.indicatorTimeout) {
+      clearTimeout(this.indicatorTimeout);
+    }
+  }
+
+  private formatTimestamp(date: Date): string {
     return new Date(date).toLocaleString();
   }
 
-  getStatusText(status: number): string {
+  private getStatusText(status: number): string {
     const statusTexts: Record<number, string> = {
       400: 'Bad Request',
       401: 'Unauthorized',
@@ -178,8 +188,7 @@ export class AppComponent {
     return statusTexts[status] ?? '';
   }
 
-  formatContext(context: Record<string, unknown>): string {
-    // Create a clean copy without the originalError (too verbose)
+  private formatContext(context: Record<string, unknown>): string {
     const cleanContext = {
       url: context['url'],
       userAgent: context['userAgent'],

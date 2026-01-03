@@ -89,7 +89,7 @@
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
-        },
+        }
       }
     },
     "seed-common-lib": {
@@ -126,7 +126,7 @@
             }
           },
           "defaultConfiguration": "production"
-        },
+        }
       }
     },
     "global-error-handler-lib": {
