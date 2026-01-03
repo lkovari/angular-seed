@@ -157,6 +157,154 @@ readonly signUpForm = form(this.signUpModel, (fieldPath) => {
 });
 ```
 
+### Slide Toggle Component
+
+**Purpose:** Custom form control component demonstrating Angular 21 Signal Forms integration with `FormCheckboxControl` interface.
+
+**Key Technology:** **Signal Forms API** - This component uses the modern Signal Forms approach, eliminating the need for `ControlValueAccessor`.
+
+**Why No ControlValueAccessor?**
+
+In Angular 21's Signal Forms API, custom form controls implement either:
+- `FormCheckboxControl` for checkbox/boolean-based controls
+- `FormValueControl<T>` for other value-based controls (text, number, select, etc.)
+
+Both interfaces replace `ControlValueAccessor` and provide:
+
+1. **Automatic Integration** - The `Field` directive automatically binds form fields to components implementing `FormCheckboxControl`
+2. **Signal-Based State** - Uses `model()` signals for two-way data binding instead of callback functions
+3. **Type Safety** - Full TypeScript type checking for form values
+4. **Simplified API** - No need to implement `writeValue()`, `registerOnChange()`, `registerOnTouched()`, or `setDisabledState()`
+5. **Reactive by Default** - Signal-based reactivity eliminates manual change detection triggers
+
+**Implementation:**
+- Implements `FormCheckboxControl` interface from `@angular/forms/signals`
+- Uses `checked = model<boolean>(false)` for two-way binding (replaces `ControlValueAccessor`)
+- Uses `touched = model<boolean>(false)` for touch state management
+- Signal inputs for form state: `disabled`, `readonly`, `hidden`, `invalid`, `errors`, `disabledReasons`
+- Signal inputs for component-specific props: `orientation`, `spin`, `knobColor`, etc.
+- `ChangeDetectionStrategy.OnPush` for optimal performance
+- Standalone component (default in Angular 21)
+
+**Example:**
+```typescript
+@Component({
+  selector: 'lib-slide-toggle',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SlideToggleComponent implements FormCheckboxControl {
+  // Required by FormCheckboxControl - replaces ControlValueAccessor
+  checked = model<boolean>(false);
+  touched = model<boolean>(false);
+
+  // Form state provided by Field directive (read-only)
+  disabled = input<boolean>(false);
+  readonly = input<boolean>(false);
+  invalid = input<boolean>(false);
+  errors = input<readonly WithOptionalField<ValidationError>[]>([]);
+
+  // Component-specific inputs
+  orientation = input<'horizontal' | 'vertical'>('horizontal');
+  spin = input<boolean>(false);
+
+  onToggle(): void {
+    if (this.disabled() || this.readonly()) return;
+    this.checked.update(v => !v);
+    this.touched.set(true);
+  }
+}
+```
+
+**Usage with Signal Forms:**
+```html
+<lib-slide-toggle
+  [field]="myForm.toggle"
+  [orientation]="'horizontal'"
+  [spin]="false"
+></lib-slide-toggle>
+```
+
+The `[field]` binding automatically:
+- Syncs the `checked` model with the form field value
+- Sets `disabled`, `readonly`, `invalid`, and `errors` inputs based on form state
+- Handles validation and error display
+- Manages touch state
+
+### Components Test Component
+
+**Purpose:** Interactive testing and demonstration component for the slide-toggle component with full Signal Forms integration.
+
+**Implementation:**
+- Signal Forms API with `form()` function
+- Signal-based form model (`signal<SlideToggleFormValue>`)
+- Field directive binding (`[field]="slideToggleForm.toggle"`)
+- Dynamic field state management using `disabled()` function
+- Computed signals for reactive form status and values
+- Effect-based status updates
+
+**Key Features:**
+- Real-time form validation status display
+- Interactive test controls for toggle state, orientation, spin, and disabled state
+- Form value display with JSON formatting
+- Component status tracking (on/off/wait states)
+
+**Example:**
+```typescript
+@Component({
+  selector: 'lib-components-tests',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ComponentsTestsComponent {
+  slideToggleModel = signal<SlideToggleFormValue>({
+    toggle: false,
+    orientation: 'horizontal',
+    spin: false,
+  });
+
+  isToggleDisabled = signal<boolean>(false);
+
+  // Signal Forms - no ControlValueAccessor needed
+  slideToggleForm = form(this.slideToggleModel, (fieldPath) => {
+    disabled(fieldPath.toggle, () => this.isToggleDisabled());
+  });
+
+  formStatus = computed(() => {
+    return this.slideToggleForm().valid() ? 'VALID' : 'INVALID';
+  });
+}
+```
+
+**Signal Forms Benefits:**
+- **No ControlValueAccessor** - Direct integration via `FormCheckboxControl` or `FormValueControl<T>`
+- **Automatic State Sync** - Field directive handles all form state synchronization
+- **Type Safety** - Full TypeScript support for form values and validation
+- **Reactive Updates** - Signal-based reactivity ensures UI stays in sync
+- **Simplified Code** - Less boilerplate compared to reactive forms with `ControlValueAccessor`
+
+**FormCheckboxControl vs FormValueControl<T>:**
+
+- **`FormCheckboxControl`** - For boolean/checkbox controls:
+  ```typescript
+  export class MyCheckboxComponent implements FormCheckboxControl {
+    checked = model<boolean>(false);
+    touched = model<boolean>(false);
+    disabled = input<boolean>(false);
+    // ... other FormCheckboxControl properties
+  }
+  ```
+
+- **`FormValueControl<T>`** - For other value-based controls (text, number, select, etc.):
+  ```typescript
+  export class MyInputComponent implements FormValueControl<string> {
+    value = model<string>('');
+    touched = model<boolean>(false);
+    disabled = input<boolean>(false);
+    // ... other FormValueControl properties
+  }
+  ```
+
+Both interfaces eliminate the need for `ControlValueAccessor` and provide the same benefits: automatic form integration, type safety, and signal-based reactivity.
+
 ## Configuration
 
 ### TypeScript Configuration
@@ -302,25 +450,47 @@ pnpm run lint:global-error-handler-lib
 
 When creating new components, services, pipes, or directives:
 
-1. **Standalone Components** - No NgModules, use direct imports
+1. **Standalone Components** - No NgModules, use direct imports (default in Angular 21)
 2. **OnPush Change Detection** - Always use `ChangeDetectionStrategy.OnPush`
 3. **Modern Control Flow** - Use `@if`, `@for`, `@switch` instead of structural directives
 4. **Zoneless Change Detection** - App uses `provideZonelessChangeDetection()`
 5. **Signals over RxJS** - Prefer Angular signals for state management
 6. **Signal Inputs/Outputs** - Use `input()` and `output()` instead of decorators
-7. **Typed Reactive Forms** - Use typed `FormGroup` and `FormControl`
-8. **Functional Interceptors** - Use functional HTTP interceptors
+7. **Signal Forms API** - Use Signal Forms (`form()`, `Field` directive) for new forms
+8. **FormCheckboxControl/FormValueControl for Custom Controls** - Implement `FormCheckboxControl` (for boolean/checkbox) or `FormValueControl<T>` (for other values) instead of `ControlValueAccessor` for custom form controls
+9. **Functional Interceptors** - Use functional HTTP interceptors
 
 ### Code Quality Standards
 
 - All components use `ChangeDetectionStrategy.OnPush`
 - All state management uses Angular signals
-- All forms use Signal Forms API or typed reactive forms
+- All new forms use Signal Forms API (`form()`, `Field` directive)
+- Custom form controls implement `FormCheckboxControl` (for boolean/checkbox) or `FormValueControl<T>` (for other values) - no `ControlValueAccessor` needed
 - All HTTP interceptors are functional
 - All ESLint rules are followed (with documented exceptions)
 - All TypeScript strict mode rules are enabled
 
 ## Reference
+
+### Signal Forms Locations
+
+Signal Forms are marked with `// SignalForm` comments throughout the codebase. Here are the locations:
+
+**Form Definitions (TypeScript):**
+- `projects/seed-common-lib/src/lib/components-tests/components-tests.component.ts` - `slideToggleForm` (line 40)
+- `projects/seed-common-lib/src/lib/signup-signin/signup-signin.component.ts` - `signUpForm` (line 38), `signInForm` (line 63)
+
+**Field Bindings (Templates):**
+- `projects/seed-common-lib/src/lib/components-tests/components-tests.component.html` - `[field]="slideToggleForm.toggle"` (line 29)
+- `projects/seed-common-lib/src/lib/signup-signin/signup-signin.component.html` - Multiple `[field]` bindings:
+  - `[field]="signUpForm.email"` (line 22)
+  - `[field]="signUpForm.password"` (line 37)
+  - `[field]="signUpForm.confirmPassword"` (line 53)
+  - `[field]="signInForm.email"` (line 112)
+  - `[field]="signInForm.password"` (line 127)
+
+**FormCheckboxControl Implementation:**
+- `projects/seed-common-lib/src/lib/slide-toggle/slide-toggle.component.ts` - `SlideToggleComponent` implements `FormCheckboxControl` (line 10)
 
 ### Keyboard Shortcuts
 
@@ -328,6 +498,7 @@ When creating new components, services, pipes, or directives:
 - **Ctrl+Shift+W** / **Cmd+Shift+W** - Open loading spinner test modal
 - **Ctrl+Shift+U** / **Cmd+Shift+U** - Open signup modal
 - **Ctrl+Shift+I** / **Cmd+Shift+I** - Open signin modal
+- **Ctrl+Shift+C** / **Cmd+Shift+C** - Open components test component to show slide toggle component to demonstrate how it work
 
 ### Resources
 
