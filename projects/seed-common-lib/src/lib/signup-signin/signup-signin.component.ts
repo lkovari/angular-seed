@@ -35,6 +35,7 @@ export class SignupSigninComponent implements OnDestroy {
     confirmPassword: '',
   });
 
+  // SignalForm
   readonly signUpForm = form(this.signUpModel, (fieldPath) => {
     required(fieldPath.email, { message: 'Email is required' });
     email(fieldPath.email, { message: 'Enter a valid email address' });
@@ -60,6 +61,7 @@ export class SignupSigninComponent implements OnDestroy {
     password: '',
   });
 
+  // SignalForm
   readonly signInForm = form(this.signInModel, (fieldPath) => {
     required(fieldPath.email, { message: 'Email is required' });
     email(fieldPath.email, { message: 'Enter a valid email address' });

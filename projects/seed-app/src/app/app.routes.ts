@@ -7,6 +7,13 @@ export const routes: Routes = [
       import('./features/home/home.component').then((m) => m.HomeComponent),
     //canActivate: [authGuard]
   },
+  {
+    path: 'components-tests',
+    loadComponent: () =>
+      import('../../../seed-common-lib/src/public-api').then(
+        (m) => m.ComponentsTestsComponent,
+      ),
+  },
   // splash screen
   // login
   // logout

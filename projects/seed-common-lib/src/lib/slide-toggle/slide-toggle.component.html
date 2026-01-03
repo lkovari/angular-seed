@@ -1,0 +1,70 @@
+<div class="slide-toggle-container">
+    <div class="slide-toggle-layout" [class.vertical]="orientation() === 'vertical'" [class.disabled]="disabled()"
+        [class.spin]="spin()">
+        <label>
+            <input data-test-id="slide-toggle-input" type="checkbox" [checked]="checked()" (click)="toggleClick()"
+                [disabled]="disabled()" #inputToggle />
+            <span class="slider" [style]="checked() ? toggleOnStyle() : toggleOffStyle()"
+                [style.--slide-knob-bg-color]="knobColor()" [style.--slide-knob-spinner-color]="knobWaitSpinnerColor()">
+            </span>
+        </label>
+    </div>
+
+    <div class="slide-toggle-controls">
+        <div class="controls-row">
+            <label class="control-label">
+                <input
+                    type="checkbox"
+                    [checked]="checked()"
+                    (change)="onToggleChange($event)"
+                    class="control-input"
+                />
+                <span>On/Off</span>
+            </label>
+            <label class="control-label">
+                <input
+                    type="checkbox"
+                    [checked]="spin()"
+                    (change)="onSpinChange($event)"
+                    class="control-input"
+                />
+                <span>In Progress</span>
+            </label>
+            <label class="control-label">
+                <input
+                    type="checkbox"
+                    [checked]="disabled()"
+                    (change)="onDisabledChange($event)"
+                    class="control-input"
+                />
+                <span>disabled</span>
+            </label>
+        </div>
+
+        <div class="controls-row">
+            <label class="control-label">
+                <input
+                    type="radio"
+                    name="orientation"
+                    value="horizontal"
+                    [checked]="orientation() === 'horizontal'"
+                    (change)="onOrientationChange('horizontal')"
+                    class="control-input"
+                />
+                <span>horizontal</span>
+            </label>
+            <label class="control-label">
+                <input
+                    type="radio"
+                    name="orientation"
+                    value="vertical"
+                    [checked]="orientation() === 'vertical'"
+                    (change)="onOrientationChange('vertical')"
+                    class="control-input"
+                />
+                <span>vertical</span>
+            </label>
+        </div>
+    </div>
+</div>
+

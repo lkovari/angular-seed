@@ -9,3 +9,5 @@ export * from './lib/loading-indicator';
 export * from './lib/correlation-id';
 export * from './lib/wait-spinner-test/wait-spinner-test.component';
 export * from './lib/signup-signin';
+export * from './lib/slide-toggle';
+export * from './lib/components-tests';

@@ -19,6 +19,7 @@ import {
   LoadingIndicatorService,
   WaitSpinnerTestComponent,
   SignupSigninComponent,
+  ComponentsTestsComponent,
 } from '../../../seed-common-lib/src/public-api';
 // import { CustomLoadingAdapter } from './shared/adapters/custom-loading';
 
@@ -30,6 +31,7 @@ import {
     LoadingSpinnerComponent,
     WaitSpinnerTestComponent,
     SignupSigninComponent,
+    ComponentsTestsComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -41,6 +43,7 @@ export class AppComponent implements OnDestroy {
 
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
   signupSignin = viewChild(SignupSigninComponent);
+  componentsTests = viewChild(ComponentsTestsComponent);
 
   title = 'seed-app';
   showErrorModal = signal(false);
@@ -103,6 +106,18 @@ export class AppComponent implements OnDestroy {
       event.preventDefault();
       this.openSignInModal();
     }
+
+    // Check for Ctrl+Shift+C (Control key on Mac, not Cmd) - C for Components Tests
+    if (
+      event.ctrlKey &&
+      !event.metaKey &&
+      event.shiftKey &&
+      (event.key.toLowerCase() === 'c' || event.code === 'KeyC')
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.openComponentsTests();
+    }
   }
 
   openWaitSpinnerTest(): void {
@@ -123,6 +138,15 @@ export class AppComponent implements OnDestroy {
     const component = this.signupSignin();
     if (component) {
       component.openSignInModal();
+    }
+  }
+
+  openComponentsTests(): void {
+    const component = this.componentsTests();
+    if (component) {
+      component.openModal();
+    } else {
+      console.warn('ComponentsTestsComponent not found');
     }
   }
 
