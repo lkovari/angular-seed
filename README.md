@@ -345,18 +345,54 @@ Both interfaces eliminate the need for `ControlValueAccessor` and provide the sa
 - `@eslint/js` - Recommended JavaScript rules
 
 **TypeScript:**
-- `typescript-eslint/strictTypeChecked` - Strict type-checked rules
-- `typescript-eslint/stylisticTypeChecked` - Stylistic rules with type information
+- `typescript-eslint/strictTypeChecked` - Strict type-checked rules (includes many type-safety rules automatically)
+- `typescript-eslint/stylisticTypeChecked` - Stylistic rules with type information (includes code style rules automatically)
+
+**Note:** The `strictTypeChecked` and `stylisticTypeChecked` configs include many rules automatically. The explicit rules listed below are additional customizations or overrides.
+
+**Base JavaScript Rules:**
+- `no-console` - Warns on console statements (allows `console.warn` and `console.error`)
+- `no-debugger` - Prevents debugger statements
+- `no-alert` - Prevents alert statements
+- `no-eval` - Prevents eval usage
+- `no-new-func` - Prevents Function constructor usage
+- `no-throw-literal` - Requires throwing Error objects
+- `no-param-reassign` - Prevents parameter reassignment
+- `prefer-const` - Enforces const for variables that are never reassigned
+- `no-var` - Prevents var declarations
+- `no-await-in-loop` - Warns on await in loops
+- `prefer-promise-reject-errors` - Requires Error objects in promise rejections
+- `complexity` - Warns on high complexity (max: 15)
+- `max-depth` - Warns on deeply nested blocks (max: 4)
+- `max-params` - Warns on too many parameters (max: 4)
 
 **Custom TypeScript Rules:**
-- `@typescript-eslint/consistent-type-imports` - Enforces `type` keyword for type-only imports
+- `@typescript-eslint/consistent-type-imports` - Enforces `type` keyword for type-only imports (with inline-type-imports fix style)
 - `@typescript-eslint/no-floating-promises` - Requires promise handling
 - `@typescript-eslint/no-misused-promises` - Prevents incorrect promise usage
 - `@typescript-eslint/no-unnecessary-condition` - Flags always-true/false conditions
-- `@typescript-eslint/prefer-nullish-coalescing` - Prefers `??` over `\|\|` for null/undefined checks
+- `@typescript-eslint/prefer-nullish-coalescing` - Prefers `??` over `\|\|` (with ignoreConditionalTests and ignoreMixedLogicalExpressions)
 - `@typescript-eslint/prefer-optional-chain` - Prefers `?.` over verbose null checks
 - `@typescript-eslint/no-explicit-any` - Warns on explicit `any` usage (encourages proper typing)
 - `@typescript-eslint/use-unknown-in-catch-callback-variable` - Requires `unknown` in catch clauses
+- `@typescript-eslint/no-unused-vars` - Catches unused variables (allows `_` prefix, ignores rest siblings)
+- `@typescript-eslint/await-thenable` - Prevents awaiting non-promise values
+- `@typescript-eslint/no-confusing-void-expression` - Prevents confusing void expressions (with ignoreArrowShorthand)
+- `@typescript-eslint/no-unnecessary-type-assertion` - Flags unnecessary type assertions
+- `@typescript-eslint/prefer-as-const` - Prefers `as const` for literal types
+- `@typescript-eslint/prefer-includes` - Prefers `.includes()` over `.indexOf() !== -1`
+- `@typescript-eslint/prefer-string-starts-ends-with` - Prefers `.startsWith()`/`.endsWith()` over regex
+- `@typescript-eslint/restrict-plus-operands` - Ensures type-safe addition operations
+- `@typescript-eslint/restrict-template-expressions` - Ensures type-safe template expressions
+- `@typescript-eslint/unbound-method` - Prevents calling unbound methods
+- `@typescript-eslint/no-unnecessary-boolean-literal-compare` - Flags unnecessary boolean comparisons
+- `@typescript-eslint/no-meaningless-void-operator` - Prevents meaningless void operators
+- `@typescript-eslint/prefer-regexp-exec` - Prefers `RegExp.exec()` over `String.match()`
+- `@typescript-eslint/return-await` - Requires return await in try-catch blocks
+- `@typescript-eslint/no-misused-new` - Prevents misusing new operator
+- `@typescript-eslint/no-this-alias` - Prevents aliasing this
+- `@typescript-eslint/no-non-null-assertion` - Warns on non-null assertions
+- `@typescript-eslint/require-await` - Requires async functions to use await
 
 **Angular Component/Directive Rules:**
 - `@angular-eslint/component-selector` - Enforces `kebab-case` with `app`/`lib` prefix
@@ -368,6 +404,18 @@ Both interfaces eliminate the need for `ControlValueAccessor` and provide the sa
 **Angular Template Rules:**
 - `@angular-eslint/template/no-negated-async` - Prevents negated async pipes
 - `@angular-eslint/template/use-track-by-function` - Requires trackBy functions in `*ngFor`
+- All rules from `@angular-eslint/template/recommended` config
+
+**JavaScript Files Rules:**
+- `no-unused-vars` - Warns on unused variables in `.js`, `.jsx`, `.cjs`, `.mjs` files (allows `_` prefix)
+
+**Deprecated Detection Rules:**
+- `@typescript-eslint/no-deprecated` - Built-in TypeScript ESLint rule that detects `@deprecated` JSDoc tags (currently disabled to avoid duplicates)
+- `custom/detect-deprecated` - Custom rule with enhanced features:
+  - Custom error messages with `{{name}}` and `{{reason}}` placeholders
+  - File exclusions via `allowedInFiles` option
+  - Toggle usage reporting via `reportUsage` option
+  - See `tools/eslint-rules/README.md` for full details and comparison
 
 **Disabled Rules:**
 
