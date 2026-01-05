@@ -148,9 +148,8 @@ describe('GlobalErrorHandler', () => {
       handler.handleError(error);
 
       expect(consoleLogSpy).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment -- Vitest mock.calls is typed as any
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- Vitest mock.calls is typed as any
       const mockCalls = consoleLogSpy.mock.calls;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Type assertion needed for Vitest mock calls
       const logCalls = (mockCalls as unknown) as [string, unknown][];
       const hasReportCall = logCalls.some((call) => {
         const firstArg = call[0];
@@ -408,7 +407,6 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
@@ -426,7 +424,6 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
@@ -452,7 +449,6 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
@@ -484,7 +480,6 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           error: 'Test error',
           errorType: 'Angular Error',
@@ -504,7 +499,6 @@ describe('GlobalErrorHandler', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error Info:',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           stack: 'Error: Test error\n    at test.js:1:1',
         }) as unknown,
@@ -532,9 +526,7 @@ describe('GlobalErrorHandler', () => {
       handler.handleError(error);
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
         expect.any(String),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.objectContaining returns any type
         expect.objectContaining({
           error: 'Test error',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type

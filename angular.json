@@ -18,8 +18,8 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": [
-              "projects/seed-app/**/*.ts",
-              "projects/seed-app/**/*.html"
+              "**/*.ts",
+              "**/*.html"
             ]
           }
         },
@@ -107,8 +107,8 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": [
-              "projects/seed-common-lib/**/*.ts",
-              "projects/seed-common-lib/**/*.html"
+              "**/*.ts",
+              "**/*.html"
             ]
           }
         },
@@ -144,8 +144,8 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": [
-              "projects/global-error-handler-lib/**/*.ts",
-              "projects/global-error-handler-lib/**/*.html"
+              "**/*.ts",
+              "**/*.html"
             ]
           }
         },
