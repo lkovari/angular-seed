@@ -13,7 +13,7 @@
         </div>
 
         <div class="modal-body">
-            <form novalidate autocomplete="off" (ngSubmit)="submitSignUp()">
+            <form novalidate autocomplete="off">
                 <div class="form-group mb-2">
                     <div class="form-control ommit-border">
                         <label class="row" for="signUpEmail">Email<span class="text-danger">*</span></label>
@@ -68,7 +68,7 @@
                     <span class="show-invalid-feedback">Passwords do not match!</span>
                     }
 
-                    <button type="submit" class="submit-btn" [disabled]="signUpForm().invalid() || (!passwordsMatch() && signUpModel().confirmPassword)">Sign Up</button>
+                    <button type="button" class="submit-btn" [disabled]="!isSignUpFormValid()" (click)="submitSignUp($event)">Sign Up</button>
                 </div>
             </form>
 
@@ -106,7 +106,7 @@
         </div>
 
         <div class="modal-body">
-            <form novalidate autocomplete="off" (ngSubmit)="submitSignIn()">
+            <form novalidate autocomplete="off">
                 <div class="form-group mb-2">
                     <div class="form-control ommit-border">
                         <label class="row" for="signInEmail">Email<span class="text-danger">*</span></label>
@@ -140,7 +140,7 @@
                         </span>
                     </div>
 
-                    <button type="submit" class="submit-btn" [disabled]="signInForm().invalid()">Sign In</button>
+                    <button type="button" class="submit-btn" [disabled]="!isSignInFormValid()" (click)="submitSignIn($event)">Sign In</button>
                 </div>
             </form>
 

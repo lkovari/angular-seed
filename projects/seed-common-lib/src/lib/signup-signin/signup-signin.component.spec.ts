@@ -7,6 +7,19 @@ describe('SignupSigninComponent', () => {
   let component: SignupSigninComponent;
   let fixture: ComponentFixture<SignupSigninComponent>;
 
+  const createMockEvent = (): Event => {
+    const event = new Event('submit');
+    Object.defineProperty(event, 'preventDefault', {
+      value: vi.fn(),
+      writable: true,
+    });
+    Object.defineProperty(event, 'stopPropagation', {
+      value: vi.fn(),
+      writable: true,
+    });
+    return event;
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SignupSigninComponent],
@@ -264,7 +277,7 @@ describe('SignupSigninComponent', () => {
       const signUpSpy = vi.fn();
       const subscription = component.signUp.subscribe(signUpSpy);
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).not.toHaveBeenCalled();
       subscription.unsubscribe();
@@ -281,12 +294,13 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).toHaveBeenCalledOnce();
       expect(signUpSpy).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'password123',
+        confirmPassword: 'password123',
       });
       subscription.unsubscribe();
     });
@@ -299,7 +313,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(component.submittedSignUpData()).toEqual({
         email: 'test@example.com',
@@ -309,7 +323,7 @@ describe('SignupSigninComponent', () => {
     });
 
     it('should validate all fields on submit attempt', () => {
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       fixture.detectChanges();
 
       expect(component.signUpForm().invalid()).toBe(true);
@@ -321,7 +335,7 @@ describe('SignupSigninComponent', () => {
       const signInSpy = vi.fn();
       const subscription = component.signIn.subscribe(signInSpy);
 
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
 
       expect(signInSpy).not.toHaveBeenCalled();
       subscription.unsubscribe();
@@ -337,7 +351,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
 
       expect(signInSpy).toHaveBeenCalledOnce();
       expect(signInSpy).toHaveBeenCalledWith({
@@ -354,7 +368,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
 
       expect(component.submittedSignInData()).toEqual({
         email: 'test@example.com',
@@ -363,7 +377,7 @@ describe('SignupSigninComponent', () => {
     });
 
     it('should validate all fields on submit attempt', () => {
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
       fixture.detectChanges();
 
       expect(component.signInForm().invalid()).toBe(true);
@@ -376,6 +390,7 @@ describe('SignupSigninComponent', () => {
     });
 
     it('should clear submitted signup data after 10 seconds', () => {
+      component.openSignUpModal();
       component.signUpModel.set({
         email: 'test@example.com',
         password: 'password123',
@@ -383,29 +398,30 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       expect(component.submittedSignUpData()).not.toBeNull();
 
       vi.advanceTimersByTime(10000);
 
       expect(component.submittedSignUpData()).toBeNull();
-      expect(component.showSignUpModal()).toBe(false);
+      expect(component.showSignUpModal()).toBe(true);
     });
 
     it('should clear submitted signin data after 10 seconds', () => {
+      component.openSignInModal();
       component.signInModel.set({
         email: 'test@example.com',
         password: 'password123',
       });
       fixture.detectChanges();
 
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
       expect(component.submittedSignInData()).not.toBeNull();
 
       vi.advanceTimersByTime(10000);
 
       expect(component.submittedSignInData()).toBeNull();
-      expect(component.showSignInModal()).toBe(false);
+      expect(component.showSignInModal()).toBe(true);
     });
 
     it('should clear previous timeout when submitting again', () => {
@@ -416,7 +432,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       vi.advanceTimersByTime(5000);
 
       component.signUpModel.set({
@@ -425,7 +441,7 @@ describe('SignupSigninComponent', () => {
         confirmPassword: 'password123',
       });
       fixture.detectChanges();
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       vi.advanceTimersByTime(5000);
       expect(component.submittedSignUpData()).not.toBeNull();
@@ -442,7 +458,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       component.openSignUpModal();
 
       vi.advanceTimersByTime(5000);
@@ -501,11 +517,12 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'password123',
+        confirmPassword: 'password123',
       });
 
       subscription.unsubscribe();
@@ -521,7 +538,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignIn();
+      component.submitSignIn(createMockEvent());
 
       expect(signInSpy).toHaveBeenCalledWith({
         email: 'test@example.com',
@@ -543,9 +560,9 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       vi.advanceTimersByTime(5000);
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       vi.advanceTimersByTime(5000);
 
       expect(component.submittedSignUpData()).not.toBeNull();
@@ -565,7 +582,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).not.toHaveBeenCalled();
 
@@ -583,7 +600,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).not.toHaveBeenCalled();
 
@@ -601,7 +618,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).not.toHaveBeenCalled();
 
@@ -619,7 +636,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
 
       expect(signUpSpy).not.toHaveBeenCalled();
 
@@ -636,7 +653,7 @@ describe('SignupSigninComponent', () => {
       });
       fixture.detectChanges();
 
-      component.submitSignUp();
+      component.submitSignUp(createMockEvent());
       expect(component.submittedSignUpData()).not.toBeNull();
 
       vi.advanceTimersByTime(10000);

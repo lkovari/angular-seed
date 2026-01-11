@@ -7,7 +7,7 @@ import { type FormCheckboxControl, type ValidationError, type DisabledReason, ty
   styleUrl: './slide-toggle.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-// SignalForm - FormCheckboxControl implementation (replaces ControlValueAccessor)
+  // SignalForm - FormCheckboxControl or FormValueControl implementation (replaces ControlValueAccessor)
 export class SlideToggleComponent implements FormCheckboxControl {
   checked = model<boolean>(false);
   touched = model<boolean>(false);

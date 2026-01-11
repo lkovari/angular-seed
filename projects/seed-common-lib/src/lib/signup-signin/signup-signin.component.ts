@@ -11,10 +11,8 @@ import { CommonModule } from '@angular/common';
 import {
   Field,
   form,
-  required,
-  email,
-  minLength,
 } from '@angular/forms/signals';
+import { signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
 
 @Component({
   selector: 'lib-signup-signin',
@@ -26,50 +24,31 @@ import {
 export class SignupSigninComponent implements OnDestroy {
   readonly githubLogoPath = input<string>('');
 
-  readonly signUp = output<{ email: string; password: string }>();
-  readonly signIn = output<{ email: string; password: string }>();
+  readonly signUp = output<SignUp>();
+  readonly signIn = output<SignIn>();
 
-  readonly signUpModel = signal({
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  readonly signUpModel = signal<SignUp>(signUpInitialData);
 
   // SignalForm
-  readonly signUpForm = form(this.signUpModel, (fieldPath) => {
-    required(fieldPath.email, { message: 'Email is required' });
-    email(fieldPath.email, { message: 'Enter a valid email address' });
-    required(fieldPath.password, { message: 'Password is required' });
-    minLength(fieldPath.password, 5, {
-      message: 'Password must be at least 5 characters',
-    });
-    required(fieldPath.confirmPassword, {
-      message: 'Confirm password is required',
-    });
-    minLength(fieldPath.confirmPassword, 5, {
-      message: 'Confirm password must be at least 5 characters',
-    });
-  });
+  readonly signUpForm = form(this.signUpModel, signUpSchema);
 
   readonly passwordsMatch = computed(() => {
     const model = this.signUpModel();
     return model.password === model.confirmPassword;
   });
 
-  readonly signInModel = signal({
-    email: '',
-    password: '',
+  readonly isSignUpFormValid = computed(() => {
+    return this.signUpForm().valid() && this.passwordsMatch();
   });
 
-  // SignalForm
-  readonly signInForm = form(this.signInModel, (fieldPath) => {
-    required(fieldPath.email, { message: 'Email is required' });
-    email(fieldPath.email, { message: 'Enter a valid email address' });
-    required(fieldPath.password, { message: 'Password is required' });
-    minLength(fieldPath.password, 5, {
-      message: 'Password must be at least 5 characters',
-    });
+  readonly isSignInFormValid = computed(() => {
+    return this.signInForm().valid();
   });
+
+  readonly signInModel = signal<SignIn>(signUpInitialData);
+
+  // SignalForm
+  readonly signInForm = form(this.signInModel, signInSchema);
 
   readonly showSignUpModal = signal<boolean>(false);
   readonly showSignInModal = signal<boolean>(false);
@@ -87,7 +66,10 @@ export class SignupSigninComponent implements OnDestroy {
   private signUpTimeout: ReturnType<typeof setTimeout> | undefined;
   private signInTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  submitSignUp(): void {
+  submitSignUp(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
     if (!this.signUpForm().valid()) {
       return;
     }
@@ -98,10 +80,7 @@ export class SignupSigninComponent implements OnDestroy {
       return;
     }
 
-    this.signUp.emit({
-      email: credentials.email,
-      password: credentials.password,
-    });
+    this.signUp.emit(credentials);
 
     this.submittedSignUpData.set(credentials);
 
@@ -111,11 +90,13 @@ export class SignupSigninComponent implements OnDestroy {
 
     this.signUpTimeout = setTimeout(() => {
       this.submittedSignUpData.set(null);
-      this.closeSignUpModal();
     }, 10000);
   }
 
-  submitSignIn(): void {
+  submitSignIn(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    
     if (!this.signInForm().valid()) {
       return;
     }
@@ -132,7 +113,6 @@ export class SignupSigninComponent implements OnDestroy {
 
     this.signInTimeout = setTimeout(() => {
       this.submittedSignInData.set(null);
-      this.closeSignInModal();
     }, 10000);
   }
 

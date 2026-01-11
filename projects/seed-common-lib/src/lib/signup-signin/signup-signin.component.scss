@@ -166,12 +166,18 @@
     transition: all 0.2s;
     margin-top: 1rem;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: #2563eb;
     }
 
-    &:active {
+    &:active:not(:disabled) {
         transform: translateY(1px);
+    }
+
+    &:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 }
 
