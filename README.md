@@ -138,24 +138,43 @@ export const appConfig: ApplicationConfig = {
 - Field directive (`[field]`) instead of `formControlName`
 - Signal inputs/outputs (`input()`, `output()`)
 - Signal-based modal state management
+- Separated models, initial data, and validation schemas for SignIn and SignUp
+
+**Model Structure:**
+
+The component uses a clean separation of concerns with separate interfaces, initial data, and validation schemas for SignIn and SignUp:
+
+**Location:** `projects/seed-common-lib/src/lib/models/signup-signin.ts`
+
+**SignIn:**
+- `SignIn` interface - Type definition for sign-in form data
+- `signInItialData` - Initial empty values for sign-in form
+- `signInSchema` - Validation schema with email and password rules
+
+**SignUp:**
+- `SignUp` interface - Extends `SignIn` interface, adds `confirmPassword` field
+- `signUpInitialData` - Initial empty values for sign-up form
+- `signUpSchema` - Validation schema with email, password, and confirmPassword rules
 
 **Example:**
 ```typescript
-readonly signUpModel = signal({
-  email: '',
-  password: '',
-  confirmPassword: '',
-});
+// Models are imported from the models file
+import { signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
 
-readonly signUpForm = form(this.signUpModel, (fieldPath) => {
-  required(fieldPath.email, { message: 'Email is required' });
-  email(fieldPath.email, { message: 'Enter a valid email address' });
-  required(fieldPath.password, { message: 'Password is required' });
-  minLength(fieldPath.password, 5, {
-    message: 'Password must be at least 5 characters',
-  });
-});
+// Component uses the imported models and schemas
+readonly signUpModel = signal<SignUp>(signUpInitialData);
+readonly signUpForm = form(this.signUpModel, signUpSchema);
+
+readonly signInModel = signal<SignIn>(signUpInitialData);
+readonly signInForm = form(this.signInModel, signInSchema);
 ```
+
+**Benefits of Separation:**
+- **Reusability** - Models and schemas can be shared across components
+- **Maintainability** - Validation rules are centralized in one location
+- **Type Safety** - Interfaces ensure consistent data structures
+- **Testability** - Models and schemas can be tested independently
+- **Single Source of Truth** - Initial data and validation rules defined once
 
 ### Slide Toggle Component
 
