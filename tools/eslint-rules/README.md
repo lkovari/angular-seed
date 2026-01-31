@@ -1,6 +1,9 @@
 # Custom ESLint Rules
 
-This directory contains custom ESLint rules for the Angular seed project.
+This directory contains custom ESLint rules for the Angular seed project:
+
+- **`detect-deprecated`** - Detects `@deprecated` JSDoc and usage of deprecated items
+- **`detect-type-assertion`** - Warns on TypeScript type assertion (casting) usage
 
 ## Deprecated Detection Rules
 
@@ -35,6 +38,53 @@ This project uses two complementary rules for detecting deprecated code:
 - Want minimal maintenance overhead
 
 **Current Setup:** The project uses `custom/detect-deprecated` with the built-in rule disabled to avoid duplicate warnings. See `eslint.config.mjs` for configuration.
+
+## detect-type-assertion
+
+A custom rule that warns on TypeScript type assertion (casting) usage.
+
+### Features
+
+- Detects `value as Type` (TSAsExpression) and `<Type>value` (TSTypeAssertion)
+- Reports the asserted type in the message
+- Configurable file exclusions via `allowedInFiles`
+- Optional custom message with `{{typeText}}` placeholder
+
+### Configuration
+
+```javascript
+'custom/detect-type-assertion': [
+  'warn',
+  {
+    allowedInFiles: ['**/tools/eslint-rules/**'],
+    customMessage: undefined
+  }
+]
+```
+
+- **`allowedInFiles`** (string[]): File patterns where type assertions are allowed (no report). Supports wildcards.
+- **`customMessage`** (string): Custom message. Use `{{typeText}}` for the asserted type text.
+
+### Lint script
+
+To list type assertion usage across all `.ts` files:
+
+```bash
+pnpm run lint:type-assertions
+```
+
+To see only type-assertion warnings in the output:
+
+```bash
+pnpm run lint:type-assertions 2>&1 | grep -B1 "custom/detect-type-assertion"
+```
+
+### Implementation
+
+- **`detect-type-assertion.ts`** - TypeScript implementation (TSESTree)
+- **`detect-type-assertion.mjs`** - JavaScript version used by ESLint config
+
+The rule visits `TSAsExpression` and `TSTypeAssertion` nodes and reports with message: *"Type assertion (cast) used: '…'. Prefer type-safe alternatives where possible."*
 
 ### Using Both Rules Together
 
@@ -87,12 +137,13 @@ The JavaScript version (`.mjs`) is used because ESLint flat config requires ES m
 
 **Plugin Structure:**
 
-The rule is registered as a custom ESLint plugin in `eslint.config.mjs`:
+Both custom rules are registered in `eslint.config.mjs`:
 
 ```javascript
 const customPlugin = {
   rules: {
     'detect-deprecated': detectDeprecatedRule,
+    'detect-type-assertion': detectTypeAssertionRule,
   },
 };
 

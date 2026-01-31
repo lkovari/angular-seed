@@ -1,4 +1,5 @@
 # AngularSeed
+## Currently under construction see the section Known issues.
 
 A modern Angular 21 seed project with comprehensive error handling, workspace architecture, and best practices.
 
@@ -428,13 +429,10 @@ Both interfaces eliminate the need for `ControlValueAccessor` and provide the sa
 **JavaScript Files Rules:**
 - `no-unused-vars` - Warns on unused variables in `.js`, `.jsx`, `.cjs`, `.mjs` files (allows `_` prefix)
 
-**Deprecated Detection Rules:**
-- `@typescript-eslint/no-deprecated` - Built-in TypeScript ESLint rule that detects `@deprecated` JSDoc tags (currently disabled to avoid duplicates)
-- `custom/detect-deprecated` - Custom rule with enhanced features:
-  - Custom error messages with `{{name}}` and `{{reason}}` placeholders
-  - File exclusions via `allowedInFiles` option
-  - Toggle usage reporting via `reportUsage` option
-  - See `tools/eslint-rules/README.md` for full details and comparison
+**Custom Rules (see `tools/eslint-rules/README.md` for full details):**
+- `@typescript-eslint/no-deprecated` - Built-in rule that detects `@deprecated` JSDoc tags (currently disabled to avoid duplicates)
+- `custom/detect-deprecated` - Custom rule for deprecated detection with custom messages, `allowedInFiles`, and `reportUsage` options
+- `custom/detect-type-assertion` - Custom rule that warns on TypeScript type assertion (casting) usage (`value as Type`, `<Type>value`); options: `allowedInFiles`, `customMessage` with `{{typeText}}`
 
 **Disabled Rules:**
 
@@ -509,6 +507,9 @@ pnpm run lint:all
 pnpm run lint:seed-app
 pnpm run lint:seed-common-lib
 pnpm run lint:global-error-handler-lib
+
+# Check type assertion (cast) usage across all .ts files
+pnpm run lint:type-assertions
 ```
 
 ## Guidelines
@@ -573,3 +574,9 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 - [Angular Signals Documentation](https://angular.dev/guide/signals)
 - [Angular Standalone Components](https://angular.dev/guide/components/importing)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+
+## Known issues
+- fix lint warnings mainly type assertion (as casting) 
+- fix lint definite assignment assertion (! usage et variables or consts)
+- other not type safety TypeScript code

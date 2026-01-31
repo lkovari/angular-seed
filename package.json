@@ -24,6 +24,7 @@
     "gitbuild": "pnpm run build-libs && pnpm run build-app",
     "gitdeploy": "gh-pages -d dist",
     "lint": "ng lint",
+    "lint:type-assertions": "eslint \"**/*.ts\" --no-error-on-unmatched-pattern",
     "lint:all": "pnpm run lint:seed-app && pnpm run lint:seed-common-lib && pnpm run lint:global-error-handler-lib",
     "lint:seed-app": "ng lint seed-app",
     "lint:seed-common-lib": "ng lint seed-common-lib",

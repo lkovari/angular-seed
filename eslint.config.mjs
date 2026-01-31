@@ -6,12 +6,15 @@ import angularTemplate from '@angular-eslint/eslint-plugin-template';
 import angularTemplateParser from '@angular-eslint/template-parser';
 import prettier from 'eslint-config-prettier';
 import detectDeprecatedRuleModule from './tools/eslint-rules/detect-deprecated.mjs';
+import detectTypeAssertionRuleModule from './tools/eslint-rules/detect-type-assertion.mjs';
 
 const detectDeprecatedRule = detectDeprecatedRuleModule.default || detectDeprecatedRuleModule;
+const detectTypeAssertionRule = detectTypeAssertionRuleModule.default || detectTypeAssertionRuleModule;
 
 const customPlugin = {
   rules: {
     'detect-deprecated': detectDeprecatedRule,
+    'detect-type-assertion': detectTypeAssertionRule,
   },
 };
 
@@ -155,6 +158,10 @@ export default [
           allowedInFiles: [],
           customMessage: '⚠️ {{name}} is deprecated{{reason}}. Please migrate to the new API.',
         },
+      ],
+      'custom/detect-type-assertion': [
+        'warn',
+        { allowedInFiles: ['**/tools/eslint-rules/**'] },
       ],
     },
   },
