@@ -85,16 +85,20 @@ export class SlideToggleComponent implements FormCheckboxControl {
     }
   }
 
+  private isInputElement(target: EventTarget | null): target is HTMLInputElement {
+    return target instanceof HTMLInputElement;
+  }
+
   onToggleChange(event: Event): void {
     if (this.disabled() || this.readonly()) return;
-    const checked = (event.target as HTMLInputElement).checked;
-    this.checked.set(checked);
+    if (!this.isInputElement(event.target)) return;
+    this.checked.set(event.target.checked);
     this.touched.set(true);
   }
 
   onSpinChange(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.spinChanged.emit(checked);
+    if (!this.isInputElement(event.target)) return;
+    this.spinChanged.emit(event.target.checked);
   }
 
   onOrientationChange(value: 'horizontal' | 'vertical'): void {
@@ -102,8 +106,8 @@ export class SlideToggleComponent implements FormCheckboxControl {
   }
 
   onDisabledChange(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.disabledChanged.emit(checked);
+    if (!this.isInputElement(event.target)) return;
+    this.disabledChanged.emit(event.target.checked);
   }
 }
 
