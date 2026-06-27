@@ -1,0 +1,61 @@
+import {
+  Component,
+  type OnDestroy,
+  ChangeDetectionStrategy,
+  signal,
+} from '@angular/core';
+import { AngularVersionComponent } from '../angular-version/angular-version.component';
+
+@Component({
+  selector: 'app-footer',
+  imports: [AngularVersionComponent],
+  templateUrl: './footer.component.html',
+  styleUrl: './footer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class FooterComponent implements OnDestroy {
+  developers = [
+    'László Kővári',
+    'Developer #1',
+    'Developer #2',
+    'Developer #3',
+  ];
+
+  developerOrders = [
+    [1, 2, 3, 4],
+    [2, 3, 4, 1],
+    [3, 4, 1, 2],
+    [4, 1, 2, 3],
+  ];
+
+  private previousIndex: number | null = null;
+  currentDeveloperOrder = signal('');
+  private intervalId: ReturnType<typeof setInterval> | undefined;
+
+  constructor() {
+    this.currentDeveloperOrder.set(this.getDeveloperOrder());
+    this.intervalId = setInterval(() => {
+      this.currentDeveloperOrder.set(this.getDeveloperOrder());
+    }, 9000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  getDeveloperOrder(): string {
+    let idx: number;
+    do {
+      idx = Math.floor(Math.random() * 4);
+    } while (idx === this.previousIndex);
+    this.previousIndex = idx;
+    const order = this.developerOrders[idx];
+    return order?.map((i) => this.developers[i - 1]).join(', ') ?? '';
+  }
+
+  onAnimationEnd(): void {
+    // Nothing TODO
+  }
+}

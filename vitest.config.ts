@@ -59,6 +59,12 @@ export default defineConfig({
         __dirname,
         './projects/seed-common-lib/src/public-api.ts',
       ),
+      '@app/core': resolve(__dirname, './projects/seed-app/src/app/core'),
+      '@app/features': resolve(
+        __dirname,
+        './projects/seed-app/src/app/features',
+      ),
+      '@app/shared': resolve(__dirname, './projects/seed-app/src/app/shared'),
     },
   },
   assetsInclude: ['**/*.html'],

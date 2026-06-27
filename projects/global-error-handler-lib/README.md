@@ -176,18 +176,13 @@ Each error includes contextual information:
 
 ## Testing
 
-Use the `GenerateErrorsComponent` to test error handling:
+Error testing UI (`GenerateErrorsComponent`, `MockHttpService`) lives in the **seed-app** `features/dev-tools/` slice. Press **Cmd+Shift+E** (Mac) or **Ctrl+Shift+E** (Windows/Linux) in the running app to open the error testing modal.
+
+Import dev tools from the app slice:
 
 ```typescript
-import { GenerateErrorsComponent } from 'global-error-handler-lib';
-
-@Component({
-  imports: [GenerateErrorsComponent],
-  template: `<lib-generate-errors />`
-})
+import { GenerateErrorsComponent } from './features/dev-tools';
 ```
-
-Press **Cmd+Shift+E** (Mac) or **Ctrl+Shift+E** (Windows/Linux) to open the error testing modal.
 
 ### Available Test Scenarios
 

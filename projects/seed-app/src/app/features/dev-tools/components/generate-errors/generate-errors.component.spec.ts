@@ -1,0 +1,413 @@
+/// <reference types="node" />
+import nodeProcess from 'node:process';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { ErrorNotificationService } from '../../../../../../../global-error-handler-lib/src/public-api';
+
+import { GenerateErrorsComponent } from './generate-errors.component';
+
+function suppressStderr(): () => void {
+  const spy = vi
+    .spyOn(nodeProcess.stderr, 'write')
+    .mockImplementation(() => true);
+  return () => {
+    spy.mockRestore();
+  };
+}
+
+function suppressNodeUnhandledRejection(): () => void {
+  const handler = (): void => {
+    // Intentionally empty - suppresses unhandled rejection events in tests
+  };
+  nodeProcess.on('unhandledRejection', handler);
+  return () => {
+    nodeProcess.removeListener('unhandledRejection', handler);
+  };
+}
+
+function suppressNodeUncaughtException(): () => void {
+  const handler = (): void => {
+    // Intentionally empty - suppresses uncaught exception events in tests
+  };
+  nodeProcess.on('uncaughtException', handler);
+  return () => {
+    nodeProcess.removeListener('uncaughtException', handler);
+  };
+}
+
+describe('GenerateErrorsComponent', () => {
+  let component: GenerateErrorsComponent;
+  let fixture: ComponentFixture<GenerateErrorsComponent>;
+  let httpMock: HttpTestingController;
+  let notificationService: ErrorNotificationService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GenerateErrorsComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ErrorNotificationService,
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(GenerateErrorsComponent);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+    notificationService = TestBed.inject(ErrorNotificationService);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  describe('JavaScript Errors', () => {
+    it('should throw a simple error when throwSimpleError is called', () => {
+      expect(() => {
+        component.throwSimpleError();
+      }).toThrow('This is a simple JavaScript error for testing');
+    });
+
+    it('should throw a TypeError when throwTypeError is called', () => {
+      expect(() => {
+        component.throwTypeError();
+      }).toThrow();
+    });
+
+    it('should throw a ReferenceError when throwReferenceError is called', () => {
+      expect(() => {
+        component.throwReferenceError();
+      }).toThrow();
+    });
+
+    it('should trigger async error when throwAsyncError is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      window.addEventListener('unhandledrejection', unhandledRejectionHandler, {
+        capture: true,
+      });
+
+      const restoreStderr = suppressStderr();
+      const restoreNodeRejection = suppressNodeUnhandledRejection();
+
+      expect(() => {
+        component.throwAsyncError();
+      }).not.toThrow();
+
+      // Wait for the async error to occur
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Keep handler active a bit longer to catch any late rejections
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      restoreNodeRejection();
+      window.removeEventListener(
+        'unhandledrejection',
+        unhandledRejectionHandler,
+        {
+          capture: true,
+        },
+      );
+
+      restoreStderr();
+
+      consoleErrorSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should create rejected promise when throwPromiseError is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
+        event.preventDefault();
+      };
+
+      window.addEventListener('unhandledrejection', unhandledRejectionHandler);
+
+      const restoreStderr = suppressStderr();
+
+      expect(() => {
+        component.throwPromiseError();
+      }).not.toThrow();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      window.removeEventListener(
+        'unhandledrejection',
+        unhandledRejectionHandler,
+      );
+
+      restoreStderr();
+
+      consoleErrorSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should schedule timeout error when throwTimeoutError is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      const errorHandler = (event: ErrorEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      // Use capture phase to catch the error
+      window.addEventListener('error', errorHandler, true);
+
+      const restoreStderr = suppressStderr();
+      const restoreNodeException = suppressNodeUncaughtException();
+
+      expect(() => {
+        component.throwTimeoutError();
+      }).not.toThrow();
+
+      // Wait for the setTimeout error to occur
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Keep handler active a bit longer to catch any late errors
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      restoreNodeException();
+      window.removeEventListener('error', errorHandler, true);
+
+      restoreStderr();
+
+      consoleErrorSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('HTTP Errors', () => {
+    it('should trigger HTTP 404 error when triggerHttp404 is called', () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerHttp404();
+
+      const req = httpMock.expectOne('/api/non-existent-endpoint');
+      expect(req.request.method).toBe('GET');
+      req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should trigger HTTP 500 error when triggerHttp500 is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerHttp500();
+
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 500 Error caught'),
+            expect.anything(),
+          );
+        },
+        { timeout: 100 },
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should trigger HTTP 401 error when triggerHttp401 is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerHttp401();
+
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 401 Error caught'),
+            expect.anything(),
+          );
+        },
+        { timeout: 100 },
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should trigger HTTP 402 error when triggerHttp402 is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerHttp402();
+
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 402 Error caught'),
+            expect.anything(),
+          );
+        },
+        { timeout: 100 },
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should trigger HTTP 403 error when triggerHttp403 is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerHttp403();
+
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 403 Error caught'),
+            expect.anything(),
+          );
+        },
+        { timeout: 100 },
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should trigger network error when triggerNetworkError is called', async () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {
+          // Mock implementation
+        });
+
+      component.triggerNetworkError();
+
+      await vi.waitFor(
+        () => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Network Error caught'),
+            expect.anything(),
+          );
+        },
+        { timeout: 100 },
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('Notifications', () => {
+    it('should trigger error notification when triggerCustomNotification is called', () => {
+      const showErrorSpy = vi.spyOn(notificationService, 'showError');
+
+      component.triggerCustomNotification();
+
+      expect(showErrorSpy).toHaveBeenCalledWith(
+        'This is a custom error notification',
+        5000,
+      );
+    });
+
+    it('should trigger warning notification when triggerWarningNotification is called', () => {
+      const showWarningSpy = vi.spyOn(notificationService, 'showWarning');
+
+      component.triggerWarningNotification();
+
+      expect(showWarningSpy).toHaveBeenCalledWith(
+        'This is a warning notification',
+        4000,
+      );
+    });
+
+    it('should trigger info notification when triggerInfoNotification is called', () => {
+      const showInfoSpy = vi.spyOn(notificationService, 'showInfo');
+
+      component.triggerInfoNotification();
+
+      expect(showInfoSpy).toHaveBeenCalledWith(
+        'This is an info notification',
+        3000,
+      );
+    });
+
+    it('should trigger success notification when triggerSuccessNotification is called', () => {
+      const showSuccessSpy = vi.spyOn(notificationService, 'showSuccess');
+
+      component.triggerSuccessNotification();
+
+      expect(showSuccessSpy).toHaveBeenCalledWith(
+        'This is a success notification',
+        3000,
+      );
+    });
+  });
+
+  describe('Advanced Testing', () => {
+    it('should trigger error with call stack when throwErrorWithCallStack is called', () => {
+      const addErrorWithCallStackSpy = vi.spyOn(
+        notificationService,
+        'addErrorWithCallStack',
+      );
+
+      component.throwErrorWithCallStack();
+
+      expect(addErrorWithCallStackSpy).toHaveBeenCalledWith(
+        'Error with call stack captured',
+        expect.any(Error),
+        'CustomError',
+      );
+    });
+  });
+});

@@ -9,19 +9,15 @@ import {
   computed,
   type OnDestroy,
 } from '@angular/core';
-import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
+import { MainLayoutComponent } from './core/shell/main-layout/main-layout.component';
+import { ErrorNotificationService } from '../../../global-error-handler-lib/src/public-api';
+import { LoadingSpinnerComponent } from '../../../seed-common-lib/src/public-api';
 import {
-  GenerateErrorsComponent,
-  ErrorNotificationService,
-} from '../../../global-error-handler-lib/src/public-api';
-import {
-  LoadingSpinnerComponent,
-  LoadingIndicatorService,
   WaitSpinnerTestComponent,
-  SignupSigninComponent,
   ComponentsTestsComponent,
-} from '../../../seed-common-lib/src/public-api';
-// import { CustomLoadingAdapter } from './shared/adapters/custom-loading';
+  GenerateErrorsComponent,
+} from './features/dev-tools';
+import { SignupSigninComponent } from './features/auth';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +35,6 @@ import {
 })
 export class AppComponent implements OnDestroy {
   private errorNotificationService = inject(ErrorNotificationService);
-  private loadingService = inject(LoadingIndicatorService);
 
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
   signupSignin = viewChild(SignupSigninComponent);
@@ -183,10 +178,6 @@ export class AppComponent implements OnDestroy {
     if (this.indicatorTimeout) {
       clearTimeout(this.indicatorTimeout);
     }
-  }
-
-  private formatTimestamp(date: Date): string {
-    return new Date(date).toLocaleString();
   }
 
   private getStatusText(status: number): string {

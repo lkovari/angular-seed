@@ -13,12 +13,31 @@ type Options = [
   }
 ];
 
+interface DeprecatedRuleSourceCode {
+  parserServices?: {
+    program?: ts.Program;
+    esTreeNodeToTSNodeMap?: Map<TSESTree.Node, ts.Node>;
+    tsNodeToESTreeNodeMap?: Map<ts.Node, TSESTree.Node>;
+  };
+  getCommentsBefore(node: TSESTree.Node): { type: string; value?: string }[];
+}
+
+function isDeprecatedRuleSourceCode(
+  sourceCode: RuleContext<MessageIds, Options>['sourceCode']
+): sourceCode is DeprecatedRuleSourceCode {
+  return (
+    'parserServices' in sourceCode &&
+    'getCommentsBefore' in sourceCode &&
+    typeof sourceCode.getCommentsBefore === 'function'
+  );
+}
+
 export default {
   meta: {
-    type: 'problem' as const,
+    type: 'problem',
     docs: {
       description: 'Detect and report usage of @deprecated items',
-      recommended: 'error' as const,
+      recommended: 'error',
     },
     messages: {
       deprecatedFound:
@@ -55,21 +74,16 @@ export default {
       allowedInFiles: [],
       customMessage: undefined,
     },
-  ] as Options,
+  ] satisfies Options,
   create(
     context: RuleContext<MessageIds, Options>,
     [options]: Options
   ) {
-    interface SourceCode {
-      parserServices?: {
-        program?: ts.Program;
-        esTreeNodeToTSNodeMap?: Map<TSESTree.Node, ts.Node>;
-        tsNodeToESTreeNodeMap?: Map<ts.Node, TSESTree.Node>;
-      };
-      getCommentsBefore(node: TSESTree.Node): { type: string; value?: string }[];
+    if (!isDeprecatedRuleSourceCode(context.sourceCode)) {
+      return {};
     }
 
-    const sourceCode = context.sourceCode as SourceCode;
+    const sourceCode = context.sourceCode;
     const parserServices = sourceCode.parserServices;
 
     if (!parserServices?.program) {
@@ -113,24 +127,24 @@ export default {
 
     function getNodeName(node: TSESTree.Node): string | null {
       if (node.type === 'Identifier') {
-        return (node as TSESTree.Identifier).name;
+        return node.name;
       }
       if (node.type === 'MemberExpression') {
-        const property = (node as TSESTree.MemberExpression).property;
+        const property = node.property;
         if (property.type === 'Identifier') {
-          return (property as TSESTree.Identifier).name;
+          return property.name;
         }
       }
       if (node.type === 'PropertyDefinition') {
-        const key = (node as TSESTree.PropertyDefinition).key;
+        const key = node.key;
         if (key.type === 'Identifier') {
-          return (key as TSESTree.Identifier).name;
+          return key.name;
         }
       }
       if (node.type === 'MethodDefinition') {
-        const key = (node as TSESTree.MethodDefinition).key;
+        const key = node.key;
         if (key.type === 'Identifier') {
-          return (key as TSESTree.Identifier).name;
+          return key.name;
         }
       }
       return null;
@@ -151,14 +165,98 @@ export default {
       });
     }
 
+    function reportDeprecatedUsage(
+      node: TSESTree.Node,
+      identifierName: string,
+      reason?: string
+    ): void {
+      if (options.customMessage) {
+        context.report({
+          node,
+          message: formatCustomMessage(
+            options.customMessage,
+            identifierName,
+            reason
+          ),
+        });
+        return;
+      }
+
+      context.report({
+        node,
+        messageId: 'deprecatedUsage',
+        data: {
+          name: identifierName,
+        },
+      });
+    }
+
+    function reportDeprecatedDeclaration(
+      node: TSESTree.Node,
+      name: string,
+      reason?: string
+    ): void {
+      if (options.customMessage) {
+        context.report({
+          node,
+          message: formatCustomMessage(options.customMessage, name, reason),
+        });
+        return;
+      }
+
+      context.report({
+        node,
+        messageId: 'deprecatedFound',
+        data: {
+          name,
+          reason: reason ? `: ${reason}` : '',
+        },
+      });
+    }
+
+    function checkDeclarationForDeprecated(
+      declaration: ts.Declaration,
+      node: TSESTree.Node,
+      identifierName: string
+    ): boolean {
+      if (!parserServices.tsNodeToESTreeNodeMap) {
+        return false;
+      }
+
+      const esTreeNode = parserServices.tsNodeToESTreeNodeMap.get(declaration);
+      if (!esTreeNode) {
+        return false;
+      }
+
+      const deprecated = extractDeprecatedFromJSDoc(esTreeNode);
+      if (deprecated) {
+        reportDeprecatedUsage(node, identifierName, deprecated.reason);
+        return true;
+      }
+
+      const declarationSymbol = checker.getSymbolAtLocation(declaration);
+      if (!declarationSymbol) {
+        return false;
+      }
+
+      const deprecatedTag = declarationSymbol
+        .getJsDocTags()
+        .find((tag) => tag.name === 'deprecated');
+      if (!deprecatedTag) {
+        return false;
+      }
+
+      reportDeprecatedUsage(node, identifierName);
+      return true;
+    }
+
     function checkDeprecatedUsage(
       node: TSESTree.Node,
       identifierName: string
     ): void {
       if (!options.reportUsage) return;
 
-      const fileName = (context as { filename?: string }).filename ?? '';
-      if (isAllowedFile(fileName)) return;
+      if (isAllowedFile(context.filename)) return;
 
       if (!parserServices.esTreeNodeToTSNodeMap) return;
       const tsNode = parserServices.esTreeNodeToTSNodeMap.get(node);
@@ -172,59 +270,8 @@ export default {
         if (!declarations || declarations.length === 0) return;
 
         for (const declaration of declarations) {
-          if (!parserServices.tsNodeToESTreeNodeMap) continue;
-          const esTreeNode = parserServices.tsNodeToESTreeNodeMap.get(declaration);
-          if (!esTreeNode) continue;
-
-          const deprecated = extractDeprecatedFromJSDoc(esTreeNode);
-          if (deprecated) {
-            if (options.customMessage) {
-              context.report({
-                node,
-                message: formatCustomMessage(
-                  options.customMessage,
-                  identifierName,
-                  deprecated.reason
-                ),
-              });
-            } else {
-              context.report({
-                node,
-                messageId: 'deprecatedUsage',
-                data: {
-                  name: identifierName,
-                },
-              });
-            }
+          if (checkDeclarationForDeprecated(declaration, node, identifierName)) {
             return;
-          }
-
-          const declarationSymbol = (declaration as ts.Declaration & { symbol?: ts.Symbol }).symbol;
-          if (declarationSymbol) {
-            const jsDocTags = declarationSymbol.getJsDocTags();
-            const deprecatedTag = jsDocTags.find(
-              (tag) => tag.name === 'deprecated'
-            );
-            if (deprecatedTag) {
-              if (options.customMessage) {
-                context.report({
-                  node,
-                  message: formatCustomMessage(
-                    options.customMessage,
-                    identifierName
-                  ),
-                });
-              } else {
-                context.report({
-                  node,
-                  messageId: 'deprecatedUsage',
-                  data: {
-                    name: identifierName,
-                  },
-                });
-              }
-              return;
-            }
           }
         }
       } catch {
@@ -232,136 +279,76 @@ export default {
       }
     }
 
+    function reportDeprecatedDefinition(
+      node: TSESTree.Node,
+      reportNode: TSESTree.Node,
+      name: string,
+      reason?: string
+    ): void {
+      deprecatedItems.set(name, { node, reason });
+      reportDeprecatedDeclaration(reportNode, name, reason);
+    }
+
     return {
       ClassDeclaration(node: TSESTree.ClassDeclaration) {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = node.id?.name ?? 'Unknown';
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.id ?? node,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.id ?? node,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.id ?? node,
+            name,
+            deprecated.reason
+          );
         }
       },
       MethodDefinition(node: TSESTree.MethodDefinition) {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = getNodeName(node) ?? 'Unknown';
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.key,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.key,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.key,
+            name,
+            deprecated.reason
+          );
         }
       },
       PropertyDefinition(node: TSESTree.PropertyDefinition) {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = getNodeName(node) ?? 'Unknown';
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.key,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.key,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.key,
+            name,
+            deprecated.reason
+          );
         }
       },
       FunctionDeclaration(node: TSESTree.FunctionDeclaration) {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = node.id?.name ?? 'Unknown';
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.id ?? node,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.id ?? node,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.id ?? node,
+            name,
+            deprecated.reason
+          );
         }
       },
       VariableDeclarator(node: TSESTree.VariableDeclarator) {
         if (node.id.type === 'Identifier') {
           const deprecated = extractDeprecatedFromJSDoc(node);
           if (deprecated) {
-            const name = (node.id as TSESTree.Identifier).name;
-            deprecatedItems.set(name, { node, reason: deprecated.reason });
-            if (options.customMessage) {
-              context.report({
-                node: node.id,
-                message: formatCustomMessage(
-                  options.customMessage,
-                  name,
-                  deprecated.reason
-                ),
-              });
-            } else {
-              context.report({
-                node: node.id,
-                messageId: 'deprecatedFound',
-                data: {
-                  name,
-                  reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-                },
-              });
-            }
+            const name = node.id.name;
+            reportDeprecatedDefinition(
+              node,
+              node.id,
+              name,
+              deprecated.reason
+            );
           }
         }
       },
@@ -369,52 +356,24 @@ export default {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = node.id.name;
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.id,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.id,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.id,
+            name,
+            deprecated.reason
+          );
         }
       },
       TSTypeAliasDeclaration(node: TSESTree.TSTypeAliasDeclaration) {
         const deprecated = extractDeprecatedFromJSDoc(node);
         if (deprecated) {
           const name = node.id.name;
-          deprecatedItems.set(name, { node, reason: deprecated.reason });
-          if (options.customMessage) {
-            context.report({
-              node: node.id,
-              message: formatCustomMessage(
-                options.customMessage,
-                name,
-                deprecated.reason
-              ),
-            });
-          } else {
-            context.report({
-              node: node.id,
-              messageId: 'deprecatedFound',
-              data: {
-                name,
-                reason: deprecated.reason ? `: ${deprecated.reason}` : '',
-              },
-            });
-          }
+          reportDeprecatedDefinition(
+            node,
+            node.id,
+            name,
+            deprecated.reason
+          );
         }
       },
       Identifier(node: TSESTree.Identifier) {
@@ -427,8 +386,7 @@ export default {
           options.reportUsage &&
           node.property.type === 'Identifier'
         ) {
-          const property = node.property as TSESTree.Identifier;
-          checkDeprecatedUsage(node, property.name);
+          checkDeprecatedUsage(node, node.property.name);
         }
       },
     };

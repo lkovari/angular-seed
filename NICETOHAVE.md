@@ -17,13 +17,13 @@
 
 1. Environment Configuration
 2. HTTP Client Base Configuration (Base URL, Interceptors)
-3. Authentication Service & Guards
+3. Authentication Service & Guards — implement in `features/auth/` slice
 4. Token Management & Interceptor
 
 ## Phase 2: Developer Experience
 
-5. API Service Layer Pattern
-6. State Management (Signals-based Store)
+5. API Service Layer Pattern — co-locate per slice under `features/<name>/data/`
+6. State Management (Signals-based Store) — co-locate per slice under `features/<name>/state/`
 7. Logging Service
 8. Common Utilities
 
