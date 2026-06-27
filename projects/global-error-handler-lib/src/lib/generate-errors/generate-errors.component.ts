@@ -54,7 +54,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('HTTP Error caught:', err);
@@ -68,7 +68,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('HTTP 500 Error caught:', err);
@@ -87,7 +87,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('HTTP 401 Error caught:', err);
@@ -106,7 +106,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('HTTP 402 Error caught:', err);
@@ -125,7 +125,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('HTTP 403 Error caught:', err);
@@ -144,7 +144,7 @@ export class GenerateErrorsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('Success');
+          // Success path - no action needed
         },
         error: (err) => {
           console.error('Network Error caught:', err);

@@ -9,9 +9,8 @@ describe('GlobalErrorHandler', () => {
   let handler: GlobalErrorHandler;
   let notificationService: ErrorNotificationService;
   let ngZone: NgZone;
-  let consoleGroupSpy: ReturnType<typeof vi.spyOn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,13 +21,10 @@ describe('GlobalErrorHandler', () => {
     notificationService = TestBed.inject(ErrorNotificationService);
     ngZone = TestBed.inject(NgZone);
 
-    consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {
-      // Mock implementation
-    });
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
       // Mock implementation
     });
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
       // Mock implementation
     });
   });
@@ -138,7 +134,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(error);
 
-      expect(consoleGroupSpy).toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
@@ -147,15 +143,10 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(error);
 
-      expect(consoleLogSpy).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- Vitest mock.calls is typed as any
-      const mockCalls = consoleLogSpy.mock.calls;
-      const logCalls = (mockCalls as unknown) as [string, unknown][];
-      const hasReportCall = logCalls.some((call) => {
-        const firstArg = call[0];
-        return typeof firstArg === 'string' && firstArg.includes('Error would be reported');
-      });
-      expect(hasReportCall || logCalls.length > 0).toBe(true);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error would be reported'),
+        expect.any(Object),
+      );
     });
   });
 
@@ -410,7 +401,7 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
-        }) as unknown,
+        }),
       );
     });
 
@@ -427,7 +418,7 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
-        }) as unknown,
+        }),
       );
     });
 
@@ -452,7 +443,7 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           context: expect.any(String),
-        }) as unknown,
+        }),
       );
     });
   });
@@ -463,7 +454,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(error);
 
-      expect(consoleGroupSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Global Error Handler'),
       );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -487,7 +478,7 @@ describe('GlobalErrorHandler', () => {
           url: expect.any(String),
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           userAgent: expect.any(String),
-        }) as unknown,
+        }),
       );
     });
 
@@ -501,7 +492,7 @@ describe('GlobalErrorHandler', () => {
         'Error Info:',
         expect.objectContaining({
           stack: 'Error: Test error\n    at test.js:1:1',
-        }) as unknown,
+        }),
       );
     });
   });
@@ -512,7 +503,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(error);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining(
           'Error would be reported to monitoring service',
         ),
@@ -525,7 +516,7 @@ describe('GlobalErrorHandler', () => {
 
       handler.handleError(error);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           error: 'Test error',
@@ -535,7 +526,7 @@ describe('GlobalErrorHandler', () => {
           url: expect.any(String),
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any type
           userAgent: expect.any(String),
-        }) as unknown,
+        }),
       );
     });
   });

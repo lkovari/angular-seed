@@ -20,7 +20,7 @@
 
                         <!-- SignalForm: Field binding -->
                         <input id="signUpEmail" class="form-control row" type="email" placeholder="Type your email"
-                            [field]="signUpForm.email" [ngClass]="{
+                            [formField]="signUpForm.email" [ngClass]="{
                 'is-invalid': signUpForm.email().touched() && signUpForm.email().invalid()
               }" />
 
@@ -36,7 +36,7 @@
 
                         <!-- SignalForm: Field binding -->
                         <input id="signUpPassword" class="form-control row" type="password" placeholder="Type a password"
-                            [field]="signUpForm.password" [ngClass]="{
+                            [formField]="signUpForm.password" [ngClass]="{
                 'is-invalid': signUpForm.password().touched() && signUpForm.password().invalid()
               }" />
 
@@ -53,7 +53,7 @@
 
                         <!-- SignalForm: Field binding -->
                         <input id="signUpConfirmPassword" class="form-control row" type="password"
-                            placeholder="Type a confirm password" [field]="signUpForm.confirmPassword" [ngClass]="{
+                            placeholder="Type a confirm password" [formField]="signUpForm.confirmPassword" [ngClass]="{
                 'is-invalid': signUpForm.confirmPassword().touched() && signUpForm.confirmPassword().invalid()
               }" />
 
@@ -113,7 +113,7 @@
 
                         <!-- SignalForm: Field binding -->
                         <input id="signInEmail" class="form-control row" type="email" placeholder="Type your email"
-                            [field]="signInForm.email" [ngClass]="{
+                            [formField]="signInForm.email" [ngClass]="{
                 'is-invalid': signInForm.email().touched() && signInForm.email().invalid()
               }" />
 
@@ -129,7 +129,7 @@
 
                         <!-- SignalForm: Field binding -->
                         <input id="signInPassword" class="form-control row" type="password" placeholder="Type your password"
-                            [field]="signInForm.password" [ngClass]="{
+                            [formField]="signInForm.password" [ngClass]="{
                 'is-invalid': signInForm.password().touched() && signInForm.password().invalid()
               }" />
 

@@ -13,6 +13,121 @@ export interface ErrorInfo {
   errorType?: string;
 }
 
+interface NotificationPayload {
+  message: string;
+  originalError: unknown;
+  actualErrorType?: string;
+}
+
+function getStringProperty(obj: object, key: string): string | undefined {
+  if (!Reflect.has(obj, key)) {
+    return undefined;
+  }
+  const value: unknown = Reflect.get(obj, key);
+  return typeof value === 'string' ? value : undefined;
+}
+
+function hasRejection(obj: object): obj is { rejection: unknown } {
+  return 'rejection' in obj;
+}
+
+function hasNestedError(obj: object): obj is { error: unknown } {
+  return 'error' in obj;
+}
+
+function getResourceUrl(el: HTMLElement): string {
+  if (el instanceof HTMLScriptElement || el instanceof HTMLImageElement) {
+    return el.src;
+  }
+  if (el instanceof HTMLLinkElement) {
+    return el.href;
+  }
+  if (getStringProperty(el, 'src')) {
+    return getStringProperty(el, 'src') ?? 'unknown';
+  }
+  if (getStringProperty(el, 'href')) {
+    return getStringProperty(el, 'href') ?? 'unknown';
+  }
+  return 'unknown';
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err && typeof err === 'object') {
+    if ('message' in err && typeof err.message === 'string') {
+      return err.message;
+    }
+    if ('reason' in err && typeof err.reason === 'string') {
+      return err.reason;
+    }
+  }
+  return String(err);
+}
+
+function getErrorStack(err: unknown): string | undefined {
+  if (err && typeof err === 'object') {
+    if ('stack' in err && typeof err.stack === 'string') {
+      return err.stack;
+    }
+    if (
+      'reason' in err &&
+      err.reason &&
+      typeof err.reason === 'object' &&
+      'stack' in err.reason &&
+      typeof err.reason.stack === 'string'
+    ) {
+      return err.reason.stack;
+    }
+  }
+  return undefined;
+}
+
+function getConstructorName(value: object): string {
+  if (
+    'constructor' in value &&
+    typeof value.constructor === 'object' &&
+    'name' in value.constructor
+  ) {
+    const name: unknown = Reflect.get(value.constructor, 'name');
+    return typeof name === 'string' ? name : 'Unknown';
+  }
+  return 'Unknown';
+}
+
+function formatReasonMessage(reason: unknown): {
+  message: string;
+  originalError: unknown;
+} {
+  if (reason instanceof Error) {
+    return { message: reason.message, originalError: reason };
+  }
+  if (reason && typeof reason === 'object' && 'message' in reason) {
+    const msg = reason.message;
+    const message =
+      typeof msg === 'string' ? msg : JSON.stringify(reason, null, 2);
+    return { message, originalError: reason };
+  }
+  if (typeof reason === 'string') {
+    return { message: reason, originalError: reason };
+  }
+  if (reason !== null && reason !== undefined && typeof reason === 'object') {
+    try {
+      return {
+        message: JSON.stringify(reason, null, 2),
+        originalError: reason,
+      };
+    } catch {
+      return { message: '[object Object]', originalError: reason };
+    }
+  }
+  if (typeof reason === 'number' || typeof reason === 'boolean' || typeof reason === 'bigint') {
+    return { message: reason.toString(), originalError: reason };
+  }
+  if (typeof reason === 'symbol') {
+    return { message: reason.toString(), originalError: reason };
+  }
+  return { message: 'Promise Rejection', originalError: reason };
+}
+
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private readonly ngZone = inject(NgZone);
@@ -42,12 +157,12 @@ export class GlobalErrorHandler implements ErrorHandler {
         } = {
           message:
             reason && typeof reason === 'object' && 'message' in reason
-              ? String((reason as { message: unknown }).message)
+              ? String(reason.message)
               : 'Unhandled Promise Rejection',
           reason: event.reason,
           stack:
             reason && typeof reason === 'object' && 'stack' in reason
-              ? String((reason as { stack: unknown }).stack)
+              ? String(reason.stack)
               : undefined,
           promise: event.promise,
         };
@@ -59,24 +174,9 @@ export class GlobalErrorHandler implements ErrorHandler {
     window.addEventListener(
       'error',
       (event) => {
-        if (event.target !== window) {
+        if (event.target !== window && event.target instanceof HTMLElement) {
+          const target = event.target;
           this.ngZone.run(() => {
-            const target = event.target as HTMLElement;
-            const getResourceUrl = (el: HTMLElement): string => {
-              if (
-                'src' in el &&
-                typeof (el as { src: unknown }).src === 'string'
-              ) {
-                return (el as { src: string }).src;
-              }
-              if (
-                'href' in el &&
-                typeof (el as { href: unknown }).href === 'string'
-              ) {
-                return (el as { href: string }).href;
-              }
-              return 'unknown';
-            };
             const error = {
               message: 'Resource Loading Error',
               resourceType: target.tagName.toLowerCase() || 'unknown',
@@ -107,7 +207,7 @@ export class GlobalErrorHandler implements ErrorHandler {
                 eventError &&
                 typeof eventError === 'object' &&
                 'stack' in eventError
-                  ? String((eventError as { stack: unknown }).stack)
+                  ? String(eventError.stack)
                   : undefined,
               error: event.error,
             };
@@ -132,47 +232,17 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private extractActualError(error: unknown): unknown {
     if (error && typeof error === 'object') {
-      if ('rejection' in error) {
-        return (error as { rejection: unknown }).rejection;
+      if (hasRejection(error)) {
+        return error.rejection;
       }
-      if ('error' in error) {
-        return (error as { error: unknown }).error;
+      if (hasNestedError(error)) {
+        return error.error;
       }
     }
     return error;
   }
 
   private logError(error: unknown, errorType = 'Unknown'): void {
-    const getErrorMessage = (err: unknown): string => {
-      if (err && typeof err === 'object') {
-        if ('message' in err && typeof err.message === 'string') {
-          return err.message;
-        }
-        if ('reason' in err && typeof err.reason === 'string') {
-          return err.reason;
-        }
-      }
-      return String(err);
-    };
-
-    const getErrorStack = (err: unknown): string | undefined => {
-      if (err && typeof err === 'object') {
-        if ('stack' in err && typeof err.stack === 'string') {
-          return err.stack;
-        }
-        if (
-          'reason' in err &&
-          err.reason &&
-          typeof err.reason === 'object' &&
-          'stack' in err.reason &&
-          typeof err.reason.stack === 'string'
-        ) {
-          return (err.reason as { stack: string }).stack;
-        }
-      }
-      return undefined;
-    };
-
     const stack = getErrorStack(error);
     const context = this.getErrorContext(error);
     const errorInfo: ErrorInfo = {
@@ -191,99 +261,113 @@ export class GlobalErrorHandler implements ErrorHandler {
       errorInfo.errorType = errorType;
     }
 
-    console.group(`Global Error Handler - ${errorType}`);
+    console.error(`Global Error Handler - ${errorType}`);
     console.error('Error Info:', errorInfo);
     console.error('Original Error:', error);
-    console.groupEnd();
   }
 
   private notifyUser(error: unknown, errorType?: string): void {
-    let message = 'An unexpected error occurred.';
-    let originalError = error;
-    let actualErrorType = errorType;
+    const payload = this.resolveNotificationPayload(error, errorType);
+    this.showNotification(
+      payload.message,
+      'error',
+      payload.originalError,
+      payload.actualErrorType,
+    );
+  }
 
+  private resolveNotificationPayload(
+    error: unknown,
+    errorType?: string,
+  ): NotificationPayload {
     if (error instanceof HttpErrorResponse) {
-      message = this.getHttpErrorMessage(error);
-      originalError = error;
-      actualErrorType = `HTTP ${String(error.status)} Error`;
-    } else if (error instanceof Error) {
-      // Standard Error object - use the actual error message
-      message = error.message || this.getFriendlyErrorMessage(error.message);
-      originalError = error;
-      actualErrorType = error.constructor.name || errorType;
-    } else if (
-      error &&
-      typeof error === 'object' &&
-      'message' in error &&
-      typeof (error as { message: unknown }).message === 'string'
-    ) {
-      const errMessage = (error as { message: string }).message;
-      message = errMessage || this.getFriendlyErrorMessage(errMessage);
-      originalError = error;
-      actualErrorType = errorType ?? 'JavaScript Error';
-      } else if (
-        error &&
-        typeof error === 'object' &&
-        'reason' in error
-      ) {
-        const reason = (error as { reason: unknown }).reason;
-      let reasonMessage = 'Promise Rejection';
-      if (reason instanceof Error) {
-        reasonMessage = reason.message;
-        originalError = reason;
-      } else if (reason && typeof reason === 'object' && 'message' in reason) {
-        const msg = (reason as { message: unknown }).message;
-        reasonMessage =
-          typeof msg === 'string'
-            ? msg
-            : JSON.stringify(reason, null, 2);
-        originalError = reason;
-      } else if (reason !== null && reason !== undefined) {
-        if (typeof reason === 'string') {
-          reasonMessage = reason;
-        } else if (typeof reason === 'object') {
-          try {
-            reasonMessage = JSON.stringify(reason, null, 2);
-          } catch {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            reasonMessage = typeof reason === 'object' && reason !== null ? '[object Object]' : String(reason);
-          }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        } else if (reason !== null && reason !== undefined) {
-          if (typeof reason === 'string') {
-            reasonMessage = reason;
-          } else if (typeof reason === 'object') {
-            try {
-              reasonMessage = JSON.stringify(reason);
-            } catch {
-              reasonMessage = '[object Object]';
-            }
-          } else {
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            reasonMessage = String(reason);
-          }
-        }
-        originalError = reason;
-      }
-      message = reasonMessage || this.getFriendlyErrorMessage(reasonMessage);
-      actualErrorType = 'Promise Rejection';
-    } else if (
-      error &&
-      typeof error === 'object' &&
-      'resourceType' in error &&
-      typeof (error as { resourceType: unknown }).resourceType === 'string'
-    ) {
-      const resourceType = (error as { resourceType: string }).resourceType;
-      message = `Failed to load ${resourceType}. Please refresh the page.`;
-      originalError = new Error(message);
-      actualErrorType = 'Resource Loading Error';
-    } else if (typeof error === 'string') {
-      message = error;
-      originalError = new Error(error);
-      actualErrorType = errorType ?? 'String Error';
+      return {
+        message: this.getHttpErrorMessage(error),
+        originalError: error,
+        actualErrorType: `HTTP ${String(error.status)} Error`,
+      };
     }
 
-    this.showNotification(message, 'error', originalError, actualErrorType);
+    if (error instanceof Error) {
+      return {
+        message: error.message
+          ? error.message
+          : this.getFriendlyErrorMessage(error.message),
+        originalError: error,
+        actualErrorType: error.constructor.name || errorType,
+      };
+    }
+
+    if (error && typeof error === 'object') {
+      const objectPayload = this.resolveObjectNotificationPayload(
+        error,
+        errorType,
+      );
+      if (objectPayload) {
+        return objectPayload;
+      }
+    }
+
+    if (typeof error === 'string') {
+      return {
+        message: error,
+        originalError: new Error(error),
+        actualErrorType: errorType ?? 'String Error',
+      };
+    }
+
+    return {
+      message: 'An unexpected error occurred.',
+      originalError: error,
+      actualErrorType: errorType ?? 'Angular Error',
+    };
+  }
+
+  private resolveObjectNotificationPayload(
+    error: object,
+    errorType?: string,
+  ): NotificationPayload | undefined {
+    const errMessage = getStringProperty(error, 'message');
+    if (errMessage !== undefined) {
+      return {
+        message: errMessage
+          ? errMessage
+          : this.getFriendlyErrorMessage(errMessage),
+        originalError: error,
+        actualErrorType: errorType ?? 'JavaScript Error',
+      };
+    }
+
+    if ('reason' in error) {
+      const reason: unknown = Reflect.get(error, 'reason');
+      return this.resolvePromiseRejectionPayload(reason);
+    }
+
+    const resourceType = getStringProperty(error, 'resourceType');
+    if (resourceType) {
+      const message = `Failed to load ${resourceType}. Please refresh the page.`;
+      return {
+        message,
+        originalError: new Error(message),
+        actualErrorType: 'Resource Loading Error',
+      };
+    }
+
+    return undefined;
+  }
+
+  private resolvePromiseRejectionPayload(
+    reason: unknown,
+  ): NotificationPayload {
+    const { message: reasonMessage, originalError } =
+      formatReasonMessage(reason);
+    return {
+      message: reasonMessage
+        ? reasonMessage
+        : this.getFriendlyErrorMessage(reasonMessage),
+      originalError,
+      actualErrorType: 'Promise Rejection',
+    };
   }
 
   private getHttpErrorMessage(error: HttpErrorResponse): string {
@@ -342,67 +426,100 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private getErrorContext(error: unknown): string {
+    const httpContext = this.getHttpErrorContext(error);
+    if (httpContext) {
+      return httpContext;
+    }
+
+    const jsContext = this.getJavaScriptErrorContext(error);
+    if (jsContext) {
+      return jsContext;
+    }
+
+    const resourceContext = this.getResourceErrorContext(error);
+    if (resourceContext) {
+      return resourceContext;
+    }
+
+    const promiseContext = this.getPromiseRejectionContext(error);
+    if (promiseContext) {
+      return promiseContext;
+    }
+
+    const stackContext = this.getStackErrorContext(error);
+    if (stackContext) {
+      return stackContext;
+    }
+
+    return 'Global error context';
+  }
+
+  private getHttpErrorContext(error: unknown): string | undefined {
     if (error instanceof HttpErrorResponse) {
       return `HTTP Error - ${String(error.status)} ${error.url ?? 'unknown'}`;
     }
+    return undefined;
+  }
 
-    if (
-      error &&
-      typeof error === 'object' &&
-      'filename' in error &&
-      typeof (error as { filename: unknown }).filename === 'string'
-    ) {
-      const err = error as {
-        filename: string;
-        lineno?: number;
-        colno?: number;
-      };
-      return `JavaScript Error - ${err.filename}:${String(err.lineno ?? '?')}:${String(err.colno ?? '?')}`;
+  private getJavaScriptErrorContext(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object') {
+      return undefined;
     }
 
-    if (
-      error &&
-      typeof error === 'object' &&
-      'resourceType' in error &&
-      typeof (error as { resourceType: unknown }).resourceType === 'string'
-    ) {
-      const err = error as {
-        resourceType: string;
-        resourceUrl?: string;
-      };
-      return `Resource Loading Error - ${err.resourceType} at ${err.resourceUrl ?? 'unknown'}`;
+    const filename = getStringProperty(error, 'filename');
+    if (!filename) {
+      return undefined;
     }
 
-    if (
-      error &&
-      typeof error === 'object' &&
-      'reason' in error
-    ) {
-      const reason = (error as { reason: unknown }).reason;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (reason && typeof reason === 'object' && reason !== null && 'constructor' in reason) {
-        const constructor = reason.constructor;
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (typeof constructor === 'object' && constructor !== null && 'name' in constructor) {
-          const name = (constructor as { name: unknown }).name;
-          return `Promise Rejection - ${typeof name === 'string' ? name : 'Unknown'}`;
-        }
-      }
-      return 'Promise Rejection - Unknown';
+    const linenoValue: unknown = Reflect.has(error, 'lineno')
+      ? Reflect.get(error, 'lineno')
+      : undefined;
+    const colnoValue: unknown = Reflect.has(error, 'colno')
+      ? Reflect.get(error, 'colno')
+      : undefined;
+    const lineno = typeof linenoValue === 'number' ? String(linenoValue) : '?';
+    const colno = typeof colnoValue === 'number' ? String(colnoValue) : '?';
+    return `JavaScript Error - ${filename}:${lineno}:${colno}`;
+  }
+
+  private getResourceErrorContext(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object') {
+      return undefined;
     }
 
+    const resourceType = getStringProperty(error, 'resourceType');
+    if (!resourceType) {
+      return undefined;
+    }
+
+    const resourceUrl = getStringProperty(error, 'resourceUrl') ?? 'unknown';
+    return `Resource Loading Error - ${resourceType} at ${resourceUrl}`;
+  }
+
+  private getPromiseRejectionContext(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object' || !('reason' in error)) {
+      return undefined;
+    }
+
+    const reason: unknown = Reflect.get(error, 'reason');
+    if (reason && typeof reason === 'object') {
+      const constructorName = getConstructorName(reason);
+      return `Promise Rejection - ${constructorName}`;
+    }
+    return 'Promise Rejection - Unknown';
+  }
+
+  private getStackErrorContext(error: unknown): string | undefined {
     if (
       error &&
       typeof error === 'object' &&
       'stack' in error &&
-      typeof (error as { stack: unknown }).stack === 'string'
+      typeof error.stack === 'string'
     ) {
-      const stack = (error as { stack: string }).stack;
-      const stackLines = stack.split('\n');
+      const stackLines = error.stack.split('\n');
       return stackLines[1]?.trim() ?? 'Unknown context';
     }
-
-    return 'Global error context';
+    return undefined;
   }
 
   private showNotification(
@@ -433,44 +550,14 @@ export class GlobalErrorHandler implements ErrorHandler {
       }
     });
 
-    console.log(`ERROR CAUGHT: ${message}`);
+    console.warn(`ERROR CAUGHT: ${message}`);
   }
 
   private reportError(error: unknown): void {
-    const getErrorMessage = (err: unknown): string => {
-      if (err && typeof err === 'object') {
-        if ('message' in err && typeof err.message === 'string') {
-          return err.message;
-        }
-        if ('reason' in err && typeof err.reason === 'string') {
-          return err.reason;
-        }
-      }
-      return String(err);
-    };
-
-    const getErrorStack = (err: unknown): string | undefined => {
-      if (err && typeof err === 'object') {
-        if ('stack' in err && typeof err.stack === 'string') {
-          return err.stack;
-        }
-        if (
-          'reason' in err &&
-          err.reason &&
-          typeof err.reason === 'object' &&
-          'stack' in err.reason &&
-          typeof err.reason.stack === 'string'
-        ) {
-          return err.reason.stack;
-        }
-      }
-      return undefined;
-    };
-
     const getErrorType = (err: unknown): string => {
       if (err && typeof err === 'object' && 'errorType' in err) {
-        const errorType = (err as { errorType: unknown }).errorType;
-        return typeof errorType === 'string' ? errorType : 'Unknown';
+        const errorTypeValue = err.errorType;
+        return typeof errorTypeValue === 'string' ? errorTypeValue : 'Unknown';
       }
       return 'Unknown';
     };
@@ -495,7 +582,10 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
 
     if (!this.isProduction()) {
-      console.log('Error would be reported to monitoring service:', errorInfo);
+      console.warn(
+        'Error would be reported to monitoring service:',
+        errorInfo,
+      );
     }
   }
 

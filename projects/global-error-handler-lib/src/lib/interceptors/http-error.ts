@@ -75,15 +75,16 @@ function handleHttpError(
   const correlationId = request.headers.get(CORRELATION_ID_HEADER);
 
   // Log the error details
-  console.group('🌐 HTTP Error Interceptor');
+  const errorBody: unknown = error.error;
+
+  console.error('🌐 HTTP Error Interceptor');
   console.error('HTTP Error:', {
     status: error.status,
     url: error.url,
     message: error.message,
-    error: error.error as unknown,
+    error: errorBody,
     correlationId: correlationId ?? 'Not set',
   });
-  console.groupEnd();
 
   // Show notification for HTTP errors with call stack and status
   const message = getHttpErrorMessage(error);

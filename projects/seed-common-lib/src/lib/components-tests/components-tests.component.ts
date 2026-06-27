@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Field, form, disabled } from '@angular/forms/signals';
+import { FormField, form, disabled } from '@angular/forms/signals';
 import { SlideToggleComponent } from '../slide-toggle';
 
 interface SlideToggleFormValue {
@@ -19,7 +19,7 @@ interface SlideToggleFormValue {
   selector: 'lib-components-tests',
   imports: [
     CommonModule,
-    Field,
+    FormField,
     SlideToggleComponent,
   ],
   templateUrl: './components-tests.component.html',

@@ -3,7 +3,11 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withXhr,
+} from '@angular/common/http';
 import { provideErrorHandling } from '../../../global-error-handler-lib/src/public-api';
 import {
   correlationIdInterceptor,
@@ -17,6 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(
+      withXhr(),
       withInterceptors([correlationIdInterceptor, loadingInterceptor]),
     ),
     ...provideErrorHandling({

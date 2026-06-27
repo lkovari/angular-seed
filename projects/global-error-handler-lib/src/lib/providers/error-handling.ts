@@ -3,7 +3,11 @@ import {
   type Provider,
   type EnvironmentProviders,
 } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withXhr,
+} from '@angular/common/http';
 
 // Import our custom error handling services
 import { GlobalErrorHandler } from '../global-error-handler';
@@ -48,7 +52,9 @@ export function provideErrorHandling(
 
   // HTTP Error Interceptor
   if (finalConfig.enableHttpInterceptor) {
-    providers.push(provideHttpClient(withInterceptors([httpErrorInterceptor])));
+    providers.push(
+      provideHttpClient(withXhr(), withInterceptors([httpErrorInterceptor])),
+    );
   }
 
   // Error Notification Service (automatically provided via providedIn: 'root')
@@ -62,7 +68,8 @@ export function provideErrorHandling(
  * Includes global error handler and HTTP interceptor with default settings
  */
 export function provideBasicErrorHandling(): (
-  Provider | EnvironmentProviders
+  | Provider
+  | EnvironmentProviders
 )[] {
   return provideErrorHandling({
     enableGlobalHandler: true,

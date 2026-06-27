@@ -27,7 +27,7 @@
           <div class="toggle-wrapper">
             <!-- SignalForm: Field binding -->
             <lib-slide-toggle
-              [field]="slideToggleForm.toggle"
+              [formField]="slideToggleForm.toggle"
               [orientation]="orientationValue()"
               [spin]="spinValue()"
               (valueChanged)="onToggleValueChange($event)"

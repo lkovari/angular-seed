@@ -7,7 +7,7 @@ A modern Angular 21 seed project with comprehensive error handling, workspace ar
 
 ### Technology Stack
 
-- **Angular 21.0.1** - Latest Angular framework
+- **Angular 22.0.4** - Latest Angular framework
 - **TypeScript 5.9.3** - Strongly typed JavaScript
 - **pnpm** - Fast, disk space efficient package manager
 - **Tailwind CSS** - Utility-first CSS framework
@@ -28,18 +28,217 @@ A modern Angular 21 seed project with comprehensive error handling, workspace ar
 
 ### Workspace Structure
 
+```mermaid
+graph TB
+  subgraph workspace["angular-seed workspace"]
+    app["seed-app<br/>(application)"]
+    common["seed-common-lib<br/>(library)"]
+    errors["global-error-handler-lib<br/>(library)"]
+  end
+
+  app -->|"imports via path alias"| common
+  app -->|"imports via path alias"| errors
+
+  subgraph build["Build pipeline"]
+    commonBuild["ng-packagr → dist/seed-common-lib"]
+    errorsBuild["ng-packagr → dist/global-error-handler-lib"]
+    appBuild["ng build seed-app → dist/"]
+  end
+
+  common --> commonBuild
+  errors --> errorsBuild
+  commonBuild --> appBuild
+  errorsBuild --> appBuild
 ```
-angular-seed/
-├── seed-app/                    # Main application
-├── seed-common-lib/             # Shared common library
-└── global-error-handler-lib/    # Error handling library
-```
+
+Dev builds resolve libraries from source (`public-api.ts`); production builds consume compiled output in `dist/`.
 
 ### Project Components
 
 - **seed-app** - Main application with routing, layout, and feature modules
 - **seed-common-lib** - Shared components, services, and utilities
 - **global-error-handler-lib** - Comprehensive error handling system
+
+```mermaid
+graph LR
+  subgraph seedApp["seed-app"]
+    direction TB
+    bootstrap["main.ts → bootstrapApplication"]
+    config["app.config.ts"]
+    root["AppComponent"]
+    layout["MainLayoutComponent"]
+    features["features/<br/>home · not-found"]
+    shared["shared/<br/>header · footer · left-side-menu · adapters"]
+    routes["app.routes.ts"]
+  end
+
+  subgraph seedCommon["seed-common-lib"]
+    direction TB
+    loading["LoadingIndicatorService<br/>loadingInterceptor · LoadingSpinnerComponent"]
+    correlation["correlationIdInterceptor"]
+    ui["SignupSignin · SlideToggle<br/>ComponentsTests · AngularVersion"]
+  end
+
+  subgraph errorLib["global-error-handler-lib"]
+    direction TB
+    provider["provideErrorHandling()"]
+    handler["GlobalErrorHandler"]
+    httpErr["httpErrorInterceptor"]
+    notify["ErrorNotificationService"]
+    devTools["GenerateErrorsComponent"]
+  end
+
+  bootstrap --> config
+  config --> root
+  root --> layout
+  layout --> features
+  routes --> features
+  root --> devTools
+  config --> loading
+  config --> correlation
+  config --> provider
+  provider --> handler
+  provider --> httpErr
+  handler --> notify
+  httpErr --> notify
+  loading --> ui
+```
+
+### Application Bootstrap
+
+```mermaid
+sequenceDiagram
+  participant main as main.ts
+  participant boot as bootstrapApplication
+  participant cfg as app.config.ts
+  participant app as AppComponent
+
+  main->>boot: AppComponent + appConfig
+  boot->>cfg: resolve providers
+  Note over cfg: provideZonelessChangeDetection()
+  Note over cfg: provideRouter(routes)
+  Note over cfg: provideHttpClient(correlationId, loading)
+  Note over cfg: provideErrorHandling(global + http)
+  boot->>app: render standalone root
+  app->>app: MainLayout + lib overlays + modals
+```
+
+Zoneless change detection is enabled; `zone.js` is present only for the Vitest test environment.
+
+### Routing & Layout
+
+```mermaid
+flowchart TD
+  subgraph shell["App shell (always mounted)"]
+    AC["AppComponent"]
+    ML["MainLayoutComponent"]
+    H["HeaderComponent"]
+    LSM["LeftSideMenuComponent"]
+    F["FooterComponent"]
+    RO["RouterOutlet"]
+  end
+
+  subgraph routes["Lazy-loaded routes"]
+    home["/ → HomeComponent"]
+    tests["/components-tests → ComponentsTestsComponent"]
+    nf["/not-found → NotFoundComponent"]
+    wild["/** → redirect not-found"]
+  end
+
+  AC --> ML
+  ML --> H
+  ML --> LSM
+  ML --> F
+  ML --> RO
+  RO --> home
+  RO --> tests
+  RO --> nf
+  RO --> wild
+```
+
+Feature routes load on demand; the shell layout (header, sidebar, footer) stays mounted across navigation.
+
+### HTTP Interceptor Chain
+
+```mermaid
+flowchart LR
+  client["HttpClient request"]
+  corr["correlationIdInterceptor<br/>sets X-Correlation-ID"]
+  load["loadingInterceptor<br/>ref-count spinner"]
+  httpErr["httpErrorInterceptor<br/>catch + notify"]
+  backend["Backend / mock API"]
+
+  client --> corr --> load --> httpErr --> backend
+  backend --> httpErr
+  httpErr --> load
+  load --> corr
+  corr --> client
+```
+
+Outgoing requests pass through correlation ID and loading interceptors first; failed responses are handled by the HTTP error interceptor, which records them via `ErrorNotificationService`.
+
+### Error Handling Flow
+
+```mermaid
+flowchart TD
+  subgraph sources["Error sources"]
+    angular["Angular runtime errors"]
+    promise["unhandledrejection"]
+    windowErr["window error / resource load"]
+    httpFail["HTTP 4xx / 5xx / network"]
+    manual["GenerateErrorsComponent (dev)"]
+  end
+
+  subgraph handlers["Handlers"]
+    geh["GlobalErrorHandler<br/>(ErrorHandler)"]
+    hei["httpErrorInterceptor"]
+  end
+
+  subgraph store["Central store"]
+    ens["ErrorNotificationService<br/>signals: notifications · errorHistory"]
+  end
+
+  subgraph ui["UI feedback"]
+    indicator["Header error indicator"]
+    history["Error history modal"]
+    modal["Error testing modal (Ctrl/Cmd+Shift+E)"]
+  end
+
+  angular --> geh
+  promise --> geh
+  windowErr --> geh
+  httpFail --> hei
+  manual --> geh
+  manual --> httpFail
+  geh --> ens
+  hei --> ens
+  ens --> indicator
+  ens --> history
+  modal --> manual
+```
+
+`provideErrorHandling()` registers both the global `ErrorHandler` and the HTTP error interceptor; the app shell reacts to `errorHistorySignal` for the header badge and history modal.
+
+### Loading Indicator
+
+```mermaid
+flowchart TD
+  req["HTTP request starts"]
+  li["loadingInterceptor.showWaitSpinner()"]
+  svc["LoadingIndicatorService<br/>ref-count signal"]
+  adapter{"Custom adapter set?"}
+  default["Default DOM spinner"]
+  custom["CustomLoadingAdapter<br/>(optional)"]
+  done["request finalize → hideWaitSpinner()"]
+
+  req --> li --> svc
+  svc --> adapter
+  adapter -->|no| default
+  adapter -->|yes| custom
+  svc --> done
+```
+
+The service uses reference counting so overlapping requests share one spinner; an optional `LoadingIndicatorAdapter` can replace the default overlay.
 
 ## Features
 
@@ -129,7 +328,7 @@ export const appConfig: ApplicationConfig = {
 
 ### Signup/Signin Component
 
-**Purpose:** Modern form component demonstrating Angular v21 Signal Forms API patterns.
+**Purpose:** Modern form component demonstrating Angular v22 Signal Forms API patterns.
 
 **Implementation:**
 - Signal Forms API (`form()` function from `@angular/forms/signals`)
@@ -179,13 +378,13 @@ readonly signInForm = form(this.signInModel, signInSchema);
 
 ### Slide Toggle Component
 
-**Purpose:** Custom form control component demonstrating Angular 21 Signal Forms integration with `FormCheckboxControl` interface.
+**Purpose:** Custom form control component demonstrating Angular 22 Signal Forms integration with `FormCheckboxControl` interface.
 
 **Key Technology:** **Signal Forms API** - This component uses the modern Signal Forms approach, eliminating the need for `ControlValueAccessor`.
 
 **Why No ControlValueAccessor?**
 
-In Angular 21's Signal Forms API, custom form controls implement either:
+In Angular 22's Signal Forms API, custom form controls implement either:
 - `FormCheckboxControl` for checkbox/boolean-based controls
 - `FormValueControl<T>` for other value-based controls (text, number, select, etc.)
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, model, output } from '@angular/core';
-import { type FormCheckboxControl, type ValidationError, type DisabledReason, type WithOptionalField } from '@angular/forms/signals';
+import { type FormCheckboxControl, type ValidationError, type DisabledReason, type WithOptionalFieldTree } from '@angular/forms/signals';
 
 @Component({
   selector: 'lib-slide-toggle',
@@ -16,8 +16,8 @@ export class SlideToggleComponent implements FormCheckboxControl {
   readonly = input<boolean>(false);
   hidden = input<boolean>(false);
   invalid = input<boolean>(false);
-  errors = input<readonly WithOptionalField<ValidationError>[]>([]);
-  disabledReasons = input<readonly WithOptionalField<DisabledReason>[]>([]);
+  errors = input<readonly WithOptionalFieldTree<ValidationError>[]>([]);
+  disabledReasons = input<readonly WithOptionalFieldTree<DisabledReason>[]>([]);
 
   orientation = input<'horizontal' | 'vertical'>('horizontal');
   spin = input<boolean>(false);

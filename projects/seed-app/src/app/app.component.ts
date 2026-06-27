@@ -75,49 +75,41 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
-    // Check for Ctrl+Shift+E (or Cmd+Shift+E on Mac) - E for Errors
-    if (
-      (event.ctrlKey || event.metaKey) &&
-      event.shiftKey &&
-      event.key.toLowerCase() === 'e'
-    ) {
-      event.preventDefault();
+    if (this.handleModShiftShortcut(event, 'e')) {
       this.toggleErrorModal();
+      return;
     }
 
-    // Check for Ctrl+Shift+W (or Cmd+Shift+W on Mac) - W for Wait Spinner
-    if (
-      (event.ctrlKey || event.metaKey) &&
-      event.shiftKey &&
-      event.key.toLowerCase() === 'w'
-    ) {
-      event.preventDefault();
+    if (this.handleModShiftShortcut(event, 'w')) {
       this.openWaitSpinnerTest();
+      return;
     }
 
-    // Check for Ctrl+Shift+U (Control key on Mac, not Cmd) - U for Sign Up
-    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'u') {
-      event.preventDefault();
+    if (this.handleModShiftShortcut(event, 'u')) {
       this.openSignUpModal();
+      return;
     }
 
-    // Check for Ctrl+Shift+I (Control key on Mac, not Cmd) - I for Sign In
-    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') {
-      event.preventDefault();
+    if (this.handleModShiftShortcut(event, 'i')) {
       this.openSignInModal();
+      return;
     }
 
-    // Check for Ctrl+Shift+C (Control key on Mac, not Cmd) - C for Components Tests
-    if (
-      event.ctrlKey &&
-      !event.metaKey &&
-      event.shiftKey &&
-      (event.key.toLowerCase() === 'c' || event.code === 'KeyC')
-    ) {
-      event.preventDefault();
-      event.stopPropagation();
+    if (this.handleModShiftShortcut(event, 'c')) {
       this.openComponentsTests();
     }
+  }
+
+  private handleModShiftShortcut(event: KeyboardEvent, key: string): boolean {
+    if (
+      !(event.ctrlKey || event.metaKey) ||
+      !event.shiftKey ||
+      event.key.toLowerCase() !== key
+    ) {
+      return false;
+    }
+    event.preventDefault();
+    return true;
   }
 
   openWaitSpinnerTest(): void {

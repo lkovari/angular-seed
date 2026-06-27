@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-redundant-type-constituents -- ESLint rule file */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -- ESLint rule file */
 import type { TSESTree } from '@typescript-eslint/types';
 import type { RuleContext } from '@typescript-eslint/utils/ts-eslint';
 
@@ -49,7 +49,7 @@ export default {
   ] as Options,
   create(
     context: RuleContext<MessageIds, Options>,
-    [options = { allowedInFiles: [] }]: Options
+    [options]: Options
   ) {
     const sourceCode = context.sourceCode;
 

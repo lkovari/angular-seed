@@ -58,7 +58,7 @@ export default {
   ] as Options,
   create(
     context: RuleContext<MessageIds, Options>,
-    [options = { reportUsage: true, allowedInFiles: [] }]: Options
+    [options]: Options
   ) {
     interface SourceCode {
       parserServices?: {

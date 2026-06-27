@@ -9,6 +9,14 @@ import { ErrorNotificationService } from '../services/error-notification';
 
 import { GenerateErrorsComponent } from './generate-errors.component';
 
+function mockStderrWrite(): typeof process.stderr.write {
+  const mockFn = vi.fn();
+  return (...args: Parameters<typeof process.stderr.write>) => {
+    mockFn(...args);
+    return true;
+  };
+}
+
 describe('GenerateErrorsComponent', () => {
   let component: GenerateErrorsComponent;
   let fixture: ComponentFixture<GenerateErrorsComponent>;
@@ -81,7 +89,7 @@ describe('GenerateErrorsComponent', () => {
       });
 
       const originalStderrWrite = process.stderr.write.bind(process.stderr);
-      process.stderr.write = vi.fn() as typeof process.stderr.write;
+      process.stderr.write = mockStderrWrite();
 
       // Also handle Node.js unhandled rejections
       function noOpRejectionHandler(): void {
@@ -134,7 +142,7 @@ describe('GenerateErrorsComponent', () => {
       window.addEventListener('unhandledrejection', unhandledRejectionHandler);
 
       const originalStderrWrite = process.stderr.write.bind(process.stderr);
-      process.stderr.write = vi.fn() as typeof process.stderr.write;
+      process.stderr.write = mockStderrWrite();
 
       expect(() => {
         component.throwPromiseError();
@@ -174,7 +182,7 @@ describe('GenerateErrorsComponent', () => {
       window.addEventListener('error', errorHandler, true);
 
       const originalStderrWrite = process.stderr.write.bind(process.stderr);
-      process.stderr.write = vi.fn() as typeof process.stderr.write;
+      process.stderr.write = mockStderrWrite();
 
       // Also handle Node.js uncaught exceptions
       function noOpErrorHandler(): void {
@@ -232,13 +240,14 @@ describe('GenerateErrorsComponent', () => {
 
       await vi.waitFor(
         () => {
-          expect(consoleErrorSpy).toHaveBeenCalled();
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 500 Error caught'),
+            expect.anything(),
+          );
         },
         { timeout: 100 },
       );
 
-      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
-      expect(errorCall).toContain('HTTP 500 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
@@ -253,13 +262,14 @@ describe('GenerateErrorsComponent', () => {
 
       await vi.waitFor(
         () => {
-          expect(consoleErrorSpy).toHaveBeenCalled();
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 401 Error caught'),
+            expect.anything(),
+          );
         },
         { timeout: 100 },
       );
 
-      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
-      expect(errorCall).toContain('HTTP 401 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
@@ -274,13 +284,14 @@ describe('GenerateErrorsComponent', () => {
 
       await vi.waitFor(
         () => {
-          expect(consoleErrorSpy).toHaveBeenCalled();
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 402 Error caught'),
+            expect.anything(),
+          );
         },
         { timeout: 100 },
       );
 
-      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
-      expect(errorCall).toContain('HTTP 402 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
@@ -295,13 +306,14 @@ describe('GenerateErrorsComponent', () => {
 
       await vi.waitFor(
         () => {
-          expect(consoleErrorSpy).toHaveBeenCalled();
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('HTTP 403 Error caught'),
+            expect.anything(),
+          );
         },
         { timeout: 100 },
       );
 
-      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
-      expect(errorCall).toContain('HTTP 403 Error caught');
       consoleErrorSpy.mockRestore();
     });
 
@@ -316,13 +328,14 @@ describe('GenerateErrorsComponent', () => {
 
       await vi.waitFor(
         () => {
-          expect(consoleErrorSpy).toHaveBeenCalled();
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Network Error caught'),
+            expect.anything(),
+          );
         },
         { timeout: 100 },
       );
 
-      const errorCall = consoleErrorSpy.mock.calls[0]?.[0] as string;
-      expect(errorCall).toContain('Network Error caught');
       consoleErrorSpy.mockRestore();
     });
   });

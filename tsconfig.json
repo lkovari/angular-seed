@@ -22,6 +22,7 @@
     "incremental": true,
     "noEmitOnError": true,
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
 
     /* === Angular & decorators === */
     "experimentalDecorators": true,

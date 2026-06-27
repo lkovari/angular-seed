@@ -14,6 +14,19 @@ import { Router } from '@angular/router';
 import { httpErrorInterceptor } from './http-error';
 import { ErrorNotificationService } from '../services/error-notification';
 
+function createStorageMock(
+  removeItemSpy: ReturnType<typeof vi.fn>,
+): Storage {
+  return {
+    removeItem: removeItemSpy,
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(),
+  };
+}
+
 describe('httpErrorInterceptor', () => {
   let httpClient: HttpClient;
   let httpMock: HttpTestingController;
@@ -27,23 +40,9 @@ describe('httpErrorInterceptor', () => {
     localStorageRemoveItemSpy = vi.fn();
     sessionStorageRemoveItemSpy = vi.fn();
 
-    localStorageSpy = {
-      removeItem: localStorageRemoveItemSpy,
-      getItem: vi.fn(),
-      setItem: vi.fn(),
-      clear: vi.fn(),
-      length: 0,
-      key: vi.fn(),
-    } as unknown as Storage;
+    localStorageSpy = createStorageMock(localStorageRemoveItemSpy);
 
-    sessionStorageSpy = {
-      removeItem: sessionStorageRemoveItemSpy,
-      getItem: vi.fn(),
-      setItem: vi.fn(),
-      clear: vi.fn(),
-      length: 0,
-      key: vi.fn(),
-    } as unknown as Storage;
+    sessionStorageSpy = createStorageMock(sessionStorageRemoveItemSpy);
 
     Object.defineProperty(window, 'localStorage', {
       value: localStorageSpy,

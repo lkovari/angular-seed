@@ -9,14 +9,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  Field,
+  FormField,
   form,
 } from '@angular/forms/signals';
 import { signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
 
 @Component({
   selector: 'lib-signup-signin',
-  imports: [CommonModule, Field],
+  imports: [CommonModule, FormField],
   templateUrl: './signup-signin.component.html',
   styleUrl: './signup-signin.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

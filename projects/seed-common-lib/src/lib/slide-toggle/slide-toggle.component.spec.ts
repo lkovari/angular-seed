@@ -1,8 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
-import { type ValidationError, type DisabledReason, type WithOptionalField } from '@angular/forms/signals';
+import { type ValidationError, type DisabledReason, type WithOptionalFieldTree } from '@angular/forms/signals';
 
 import { SlideToggleComponent } from './slide-toggle.component';
+
+function createInputChangeEvent(checked: boolean): Event {
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = checked;
+  const event = new Event('change');
+  Object.defineProperty(event, 'target', { value: input, writable: false });
+  return event;
+}
+
+function getNativeElement(fixture: ComponentFixture<SlideToggleComponent>): HTMLElement {
+  const element: unknown = fixture.nativeElement;
+  if (!(element instanceof HTMLElement)) {
+    throw new Error('Expected nativeElement to be HTMLElement');
+  }
+  return element;
+}
+
+function getSlideToggleInput(compiled: HTMLElement): HTMLInputElement | null {
+  const input = compiled.querySelector('[data-test-id="slide-toggle-input"]');
+  return input instanceof HTMLInputElement ? input : null;
+}
 
 describe('SlideToggleComponent', () => {
   let component: SlideToggleComponent;
@@ -74,12 +96,7 @@ describe('SlideToggleComponent', () => {
     });
 
     it('should set touched when checked changes via onToggleChange', () => {
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-      component.onToggleChange(event as unknown as Event);
+      component.onToggleChange(createInputChangeEvent(true));
       expect(component.touched()).toBe(true);
     });
   });
@@ -173,12 +190,7 @@ describe('SlideToggleComponent', () => {
         emittedValue = value;
       });
 
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-      component.onSpinChange(event as unknown as Event);
+      component.onSpinChange(createInputChangeEvent(true));
       expect(emittedValue).toBe(true);
       subscription.unsubscribe();
     });
@@ -267,13 +279,7 @@ describe('SlideToggleComponent', () => {
 
   describe('onToggleChange Event Handler', () => {
     it('should update checked from event target', () => {
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-
-      component.onToggleChange(event as unknown as Event);
+      component.onToggleChange(createInputChangeEvent(true));
       expect(component.checked()).toBe(true);
       expect(component.touched()).toBe(true);
     });
@@ -283,13 +289,7 @@ describe('SlideToggleComponent', () => {
       fixture.detectChanges();
       const initialChecked = component.checked();
 
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-
-      component.onToggleChange(event as unknown as Event);
+      component.onToggleChange(createInputChangeEvent(true));
       expect(component.checked()).toBe(initialChecked);
     });
 
@@ -298,13 +298,7 @@ describe('SlideToggleComponent', () => {
       fixture.detectChanges();
       const initialChecked = component.checked();
 
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-
-      component.onToggleChange(event as unknown as Event);
+      component.onToggleChange(createInputChangeEvent(true));
       expect(component.checked()).toBe(initialChecked);
     });
   });
@@ -334,12 +328,7 @@ describe('SlideToggleComponent', () => {
         emittedValue = value;
       });
 
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: { checked: true },
-        writable: false,
-      });
-      component.onDisabledChange(event as unknown as Event);
+      component.onDisabledChange(createInputChangeEvent(true));
       expect(emittedValue).toBe(true);
       subscription.unsubscribe();
     });
@@ -347,7 +336,7 @@ describe('SlideToggleComponent', () => {
 
   describe('Template Rendering', () => {
     it('should render slide toggle input', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
+      const compiled = getNativeElement(fixture);
       const input = compiled.querySelector('[data-test-id="slide-toggle-input"]');
       expect(input).toBeTruthy();
     });
@@ -356,27 +345,27 @@ describe('SlideToggleComponent', () => {
       component.checked.set(true);
       fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const input = compiled.querySelector('[data-test-id="slide-toggle-input"]');
+      const compiled = getNativeElement(fixture);
+      const input = getSlideToggleInput(compiled);
       expect(input).toBeTruthy();
-      expect((input as HTMLInputElement).checked).toBe(true);
+      expect(input?.checked).toBe(true);
     });
 
     it('should apply disabled attribute when disabled', () => {
       fixture.componentRef.setInput('disabled', true);
       fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
-      const input = compiled.querySelector('[data-test-id="slide-toggle-input"]');
+      const compiled = getNativeElement(fixture);
+      const input = getSlideToggleInput(compiled);
       expect(input).toBeTruthy();
-      expect((input as HTMLInputElement).disabled).toBe(true);
+      expect(input?.disabled).toBe(true);
     });
 
     it('should apply vertical class when orientation is vertical', () => {
       fixture.componentRef.setInput('orientation', 'vertical');
       fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
+      const compiled = getNativeElement(fixture);
       const layout = compiled.querySelector('.slide-toggle-layout');
       expect(layout?.classList.contains('vertical')).toBe(true);
     });
@@ -385,7 +374,7 @@ describe('SlideToggleComponent', () => {
       fixture.componentRef.setInput('disabled', true);
       fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
+      const compiled = getNativeElement(fixture);
       const layout = compiled.querySelector('.slide-toggle-layout');
       expect(layout?.classList.contains('disabled')).toBe(true);
     });
@@ -394,7 +383,7 @@ describe('SlideToggleComponent', () => {
       fixture.componentRef.setInput('spin', true);
       fixture.detectChanges();
 
-      const compiled = fixture.nativeElement as HTMLElement;
+      const compiled = getNativeElement(fixture);
       const layout = compiled.querySelector('.slide-toggle-layout');
       expect(layout?.classList.contains('spin')).toBe(true);
     });
@@ -460,14 +449,14 @@ describe('SlideToggleComponent', () => {
     });
 
     it('should accept errors input', () => {
-      const errors: readonly WithOptionalField<ValidationError>[] = [];
+      const errors: readonly WithOptionalFieldTree<ValidationError>[] = [];
       fixture.componentRef.setInput('errors', errors);
       fixture.detectChanges();
       expect(component.errors()).toEqual(errors);
     });
 
     it('should accept disabledReasons input', () => {
-      const reasons: readonly WithOptionalField<DisabledReason>[] = [];
+      const reasons: readonly WithOptionalFieldTree<DisabledReason>[] = [];
       fixture.componentRef.setInput('disabledReasons', reasons);
       fixture.detectChanges();
       expect(component.disabledReasons()).toEqual(reasons);

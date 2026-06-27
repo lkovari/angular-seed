@@ -6,8 +6,8 @@ export interface ErrorNotification {
   message: string;
   type: 'error' | 'warning' | 'info' | 'success';
   timestamp: Date;
-  route?: string; // Angular route path when error occurred
-  httpStatus?: number; // HTTP status code for HTTP errors
+  route?: string;
+  httpStatus?: number;
   autoHide?: boolean;
   duration?: number;
   callStack?: string[];
@@ -21,6 +21,36 @@ export interface ErrorNotification {
     label: string;
     handler: () => void;
   };
+}
+
+function getConstructorName(originalError: object): string {
+  if (
+    'constructor' in originalError &&
+    typeof originalError.constructor === 'object' &&
+    'name' in originalError.constructor
+  ) {
+    const name: unknown = Reflect.get(originalError.constructor, 'name');
+    return typeof name === 'string' ? name : 'Unknown';
+  }
+  return 'Unknown';
+}
+
+function getHttpStatusFromError(originalError: object): number | undefined {
+  if ('status' in originalError && typeof originalError.status === 'number') {
+    return originalError.status;
+  }
+  if ('error' in originalError) {
+    const nestedError = originalError.error;
+    if (
+      nestedError &&
+      typeof nestedError === 'object' &&
+      'status' in nestedError &&
+      typeof nestedError.status === 'number'
+    ) {
+      return nestedError.status;
+    }
+  }
+  return undefined;
 }
 
 @Injectable({
@@ -46,64 +76,12 @@ export class ErrorNotificationService {
     errorType?: string,
     duration = 5000,
   ): string {
-    let callStack: string[];
-    if (
-      originalError &&
-      typeof originalError === 'object' &&
-      'stack' in originalError &&
-      typeof (originalError as { stack: unknown }).stack === 'string'
-    ) {
-      callStack = this.extractCallStack(originalError);
-    } else {
-      const stackError = new Error();
-      callStack = this.extractCallStack(stackError);
-    }
-
-    const errorContext = {
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent:
-        typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-      errorType:
-        errorType ??
-        (originalError &&
-        typeof originalError === 'object' &&
-        'constructor' in originalError &&
-        typeof originalError.constructor === 'object' &&
-        'name' in originalError.constructor
-          ? String((originalError.constructor as { name: unknown }).name)
-          : 'Unknown'),
-      originalError: originalError,
-    };
-
-    let httpStatus: number | undefined;
-    if (
-      originalError &&
-      typeof originalError === 'object' &&
-      'status' in originalError
-    ) {
-      const status = (originalError as { status: unknown }).status;
-      if (typeof status === 'number') {
-        httpStatus = status;
-      }
-    }
-    if (
-      !httpStatus &&
-      originalError &&
-      typeof originalError === 'object' &&
-      'error' in originalError
-    ) {
-      const error = (originalError as { error: unknown }).error;
-      if (error && typeof error === 'object' && 'status' in error) {
-        const status = (error as { status: unknown }).status;
-        if (typeof status === 'number') {
-          httpStatus = status;
-        }
-      }
-    }
-
+    const callStack = this.resolveCallStack(originalError);
+    const errorContext = this.buildErrorContext(originalError, errorType);
+    const httpStatus = this.resolveHttpStatus(originalError);
     const route = this.getCurrentRoute();
 
-    console.log(`ERROR WITH STACK: ${message}`, {
+    console.warn(`ERROR WITH STACK: ${message}`, {
       callStack,
       errorContext,
       route,
@@ -125,8 +103,46 @@ export class ErrorNotificationService {
     );
   }
 
+  private resolveCallStack(originalError?: unknown): string[] {
+    if (
+      originalError &&
+      typeof originalError === 'object' &&
+      'stack' in originalError &&
+      typeof originalError.stack === 'string'
+    ) {
+      return this.extractCallStack(originalError);
+    }
+    return this.extractCallStack(new Error());
+  }
+
+  private buildErrorContext(
+    originalError: unknown,
+    errorType?: string,
+  ): ErrorNotification['errorContext'] {
+    const resolvedErrorType =
+      errorType ??
+      (originalError && typeof originalError === 'object'
+        ? getConstructorName(originalError)
+        : 'Unknown');
+
+    return {
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+      userAgent:
+        typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      errorType: resolvedErrorType,
+      originalError: originalError,
+    };
+  }
+
+  private resolveHttpStatus(originalError?: unknown): number | undefined {
+    if (originalError && typeof originalError === 'object') {
+      return getHttpStatusFromError(originalError);
+    }
+    return undefined;
+  }
+
   showError(message: string, duration = 5000): string {
-    console.log(`ERROR CAUGHT: ${message}`);
+    console.warn(`ERROR CAUGHT: ${message}`);
 
     const error = new Error(message);
     const callStack = this.extractCallStack(error);
@@ -243,12 +259,10 @@ export class ErrorNotificationService {
 
     if (
       typeof error === 'object' &&
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      error !== null &&
       'stack' in error &&
-      typeof (error as { stack: unknown }).stack === 'string'
+      typeof error.stack === 'string'
     ) {
-      return this.parseStackTrace((error as { stack: string }).stack, false);
+      return this.parseStackTrace(error.stack, false);
     }
 
     if (typeof error === 'string') {
