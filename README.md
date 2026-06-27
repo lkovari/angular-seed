@@ -1,19 +1,20 @@
 # AngularSeed
 
-A modern Angular 21 seed project with comprehensive error handling, workspace architecture, and best practices.
+A modern Angular 22 seed project with vertical slice architecture, comprehensive error handling, workspace libraries, and strict TypeScript/ESLint tooling.
+
+> Planned enhancements are tracked in [NICETOHAVE.md](./NICETOHAVE.md).
 
 ## Overview
 
 ### Technology Stack
 
-- **Angular 21.0.1** - Latest Angular framework
-- **TypeScript 5.9.3** - Strongly typed JavaScript
+- **Angular 22.0.4** - Latest Angular framework
+- **TypeScript ~6.0.3** - Strongly typed JavaScript
 - **pnpm** - Fast, disk space efficient package manager
-- **Tailwind CSS** - Utility-first CSS framework
+- **Tailwind CSS 3** - Utility-first CSS framework (PostCSS via `@tailwindcss/postcss`)
 - **SCSS** - CSS preprocessor
-- **Vite** - Fast development server and build tool
-- **Vitest** - Modern, fast unit testing framework
-- **ESLint** - Code linting and quality enforcement
+- **Vitest 4 + @analogjs/vite-plugin-angular** - Unit tests run through Vite; the dev server uses `ng serve` (`@angular/build`)
+- **ESLint 9** - Flat-config linting with custom rules in `tools/eslint-rules/`
 
 ### Modern Angular Features
 
@@ -25,20 +26,377 @@ A modern Angular 21 seed project with comprehensive error handling, workspace ar
 
 ## Architecture
 
+### Vertical Slice Architecture
+
+This project uses **vertical slice architecture (VSA)**: code is organized by **user-facing capability** (use case), not by technical layer. Each slice under `features/` owns everything needed to deliver one feature end-to-end — routes, page components, data services, models, navigation entries, guards, and tests — co-located in a single folder.
+
+**Contrast with horizontal (layered) architecture**, where all services live in `services/`, all components in `components/`, and all models in `models/`. In that style, a single feature change touches many unrelated top-level folders.
+
+| Criterion | Layered / horizontal | Vertical slices (this seed) |
+|-----------|---------------------|----------------------------|
+| Change locality | One feature spans 4+ top-level folders | One feature = one folder under `features/` |
+| Onboarding | Learn a global folder map first | Open `features/home/` — everything is there |
+| Lazy loading | Routes scattered in a central file | Each slice exports its own `*.routes.ts` |
+| Team scaling | Merge conflicts across shared folders | Teams own slices with minimal overlap |
+| Feature removal | Hard to delete cleanly | Delete the slice folder + registry entries |
+| Libraries | Tend to become junk drawers | Libs stay **infrastructure-only** |
+
+**When NOT to use a slice:** code used by two or more features with no single owner belongs in `shared/` (app-level) or a workspace library (cross-app infrastructure).
+
 ### Workspace Structure
 
+```mermaid
+graph TB
+  subgraph workspace["angular-seed workspace"]
+    app["seed-app<br/>(application · vertical slices)"]
+    common["seed-common-lib<br/>(infrastructure only)"]
+    errors["global-error-handler-lib<br/>(infrastructure only)"]
+  end
+
+  app -->|"HTTP interceptors · loading"| common
+  app -->|"error handler · notifications"| errors
+
+  subgraph build["Build pipeline"]
+    commonBuild["ng-packagr → dist/seed-common-lib"]
+    errorsBuild["ng-packagr → dist/global-error-handler-lib"]
+    appBuild["ng build seed-app → dist/"]
+  end
+
+  common --> commonBuild
+  errors --> errorsBuild
+  commonBuild --> appBuild
+  errorsBuild --> appBuild
 ```
-angular-seed/
-├── seed-app/                    # Main application
-├── seed-common-lib/             # Shared common library
-└── global-error-handler-lib/    # Error handling library
-```
+
+Dev builds resolve libraries from source (`public-api.ts`); production builds consume compiled output in `dist/`.
 
 ### Project Components
 
-- **seed-app** - Main application with routing, layout, and feature modules
-- **seed-common-lib** - Shared components, services, and utilities
-- **global-error-handler-lib** - Comprehensive error handling system
+- **seed-app** — Main application with vertical slices (`home`, `feature-a`, `feature-b`, `auth`, `dev-tools`, `not-found`), app shell under `core/`, and cross-feature adapters under `shared/`
+- **seed-common-lib** — Infrastructure only: loading indicator and correlation ID interceptors (public API in `src/public-api.ts`)
+- **global-error-handler-lib** — Infrastructure only: global error handler, HTTP error interceptor, notification service, and `provideErrorHandling()` (public API in `src/public-api.ts`)
+
+```mermaid
+graph LR
+  subgraph seedApp["seed-app"]
+    direction TB
+    bootstrap["main.ts → bootstrapApplication"]
+    config["app.config.ts"]
+    root["AppComponent"]
+    core["core/<br/>shell · navigation"]
+    features["features/<br/>home · feature-a · auth · dev-tools · not-found"]
+    sharedApp["shared/<br/>adapters"]
+    routes["app.routes.ts<br/>composes slice routes"]
+  end
+
+  subgraph seedCommon["seed-common-lib (infrastructure)"]
+    direction TB
+    loading["LoadingIndicatorService<br/>loadingInterceptor · LoadingSpinnerComponent"]
+    correlation["correlationIdInterceptor"]
+  end
+
+  subgraph errorLib["global-error-handler-lib (infrastructure)"]
+    direction TB
+    provider["provideErrorHandling()"]
+    handler["GlobalErrorHandler"]
+    httpErr["httpErrorInterceptor"]
+    notify["ErrorNotificationService"]
+  end
+
+  bootstrap --> config
+  config --> root
+  root --> core
+  core --> features
+  routes --> features
+  config --> loading
+  config --> correlation
+  config --> provider
+  provider --> handler
+  provider --> httpErr
+  handler --> notify
+  httpErr --> notify
+```
+
+### Slice Anatomy
+
+Each feature slice follows the same internal structure. The `home` slice is the reference implementation:
+
+```mermaid
+graph TB
+  subgraph homeSlice["features/home/"]
+    routes["home.routes.ts<br/>HOME_ROUTES export"]
+    nav["home.navigation.ts<br/>HOME_NAV_ITEM export"]
+    pages["pages/home.component.ts"]
+    data["data/home-api.service.ts"]
+    index["index.ts<br/>public slice API"]
+  end
+
+  appRoutes["app.routes.ts"] -->|"spread HOME_ROUTES"| routes
+  navRegistry["core/navigation/navigation.registry.ts"] -->|"imports HOME_NAV_ITEM"| nav
+  pages --> data
+  routes -->|"loadComponent"| pages
+```
+
+**App folder layout:**
+
+```
+projects/seed-app/src/app/
+├── app.component.ts              # thin shell
+├── app.config.ts
+├── app.routes.ts                 # composes exported slice routes
+├── core/
+│   ├── shell/                    # main-layout, header, footer, left-side-menu, angular-version
+│   └── navigation/               # NavigationItem type + APP_NAV_ITEMS registry
+├── features/
+│   ├── home/                     # reference slice (pages, data, routes, navigation)
+│   ├── feature-a/
+│   ├── feature-b/
+│   ├── auth/                     # signup/signin modal (AUTH_ROUTES empty; routes planned)
+│   ├── dev-tools/                # error testing modals + routed /components-tests
+│   └── not-found/
+└── shared/
+    └── adapters/                 # app-specific loading adapter
+```
+
+**Path aliases** (see `projects/seed-app/tsconfig.app.json`): `@app/core/*`, `@app/features/*`, `@app/shared/*`. Libraries resolve from source in dev and from `dist/` in production builds.
+
+### Application Bootstrap
+
+```mermaid
+sequenceDiagram
+  participant main as main.ts
+  participant boot as bootstrapApplication
+  participant cfg as app.config.ts
+  participant app as AppComponent
+
+  main->>boot: AppComponent + appConfig
+  boot->>cfg: resolve providers
+  Note over cfg: provideZonelessChangeDetection()
+  Note over cfg: provideRouter(composed slice routes)
+  Note over cfg: provideHttpClient(correlationId, loading)
+  Note over cfg: provideErrorHandling(global + http)
+  boot->>app: render standalone root
+  app->>app: MainLayout + loading spinner + dev-tool modals
+```
+
+Zoneless change detection is enabled; `zone.js` is present only for the Vitest test environment.
+
+### Routing and Layout
+
+```mermaid
+flowchart TD
+  subgraph shell["App shell (always mounted)"]
+    AC["AppComponent"]
+    ML["MainLayoutComponent"]
+    H["HeaderComponent"]
+    LSM["LeftSideMenuComponent"]
+    F["FooterComponent"]
+    RO["RouterOutlet"]
+  end
+
+  subgraph compose["app.routes.ts composes"]
+    homeR["HOME_ROUTES"]
+    faR["FEATURE_A_ROUTES"]
+    fbR["FEATURE_B_ROUTES"]
+    devR["DEV_TOOLS_ROUTES"]
+    nfR["NOT_FOUND_ROUTES"]
+  end
+
+  subgraph lazyPages["Lazy-loaded pages"]
+    home["/ → HomeComponent"]
+    fa["/feature-a → FeatureAComponent"]
+    fb["/feature-b → FeatureBComponent"]
+    tests["/components-tests → ComponentsTestsComponent"]
+    nf["/not-found → NotFoundComponent"]
+    wild["/** → redirect not-found"]
+  end
+
+  AC --> ML
+  ML --> H
+  ML --> LSM
+  ML --> F
+  ML --> RO
+  compose --> lazyPages
+  RO --> lazyPages
+```
+
+Feature routes load on demand; the shell layout (header, sidebar, footer) stays mounted across navigation. Sidebar items come from `core/navigation/navigation.registry.ts`, not hardcoded menu arrays.
+
+**Routed vs modal features:** Only `home`, `feature-a`, `feature-b`, `dev-tools/components-tests`, and `not-found` have URL routes. Auth (`SignupSigninComponent`) and most dev-tools panels (`GenerateErrorsComponent`, `WaitSpinnerTestComponent`, etc.) are mounted in `AppComponent` and opened via keyboard shortcuts — they are not in the sidebar registry.
+
+### Feature Routes
+
+Each slice exports its own routes; `app.routes.ts` only spreads them together:
+
+```typescript
+export const routes: Routes = [
+  ...HOME_ROUTES,
+  ...FEATURE_A_ROUTES,
+  ...FEATURE_B_ROUTES,
+  ...DEV_TOOLS_ROUTES,
+  ...NOT_FOUND_ROUTES,
+  { path: '**', redirectTo: 'not-found' },
+];
+```
+
+```mermaid
+flowchart LR
+  subgraph navRegistry["navigation.registry.ts"]
+    homeNav["HOME_NAV_ITEM"]
+    faNav["FEATURE_A_NAV_ITEM"]
+    fbNav["FEATURE_B_NAV_ITEM"]
+  end
+
+  subgraph sliceRoutes["Slice route files"]
+    homeRoutes["home.routes.ts"]
+    faRoutes["feature-a.routes.ts"]
+    fbRoutes["feature-b.routes.ts"]
+  end
+
+  subgraph slicePages["pages/"]
+    homePage["home.component.ts"]
+    faPage["feature-a.component.ts"]
+    fbPage["feature-b.component.ts"]
+  end
+
+  homeNav --> homeRoutes --> homePage
+  faNav --> faRoutes --> faPage
+  fbNav --> fbRoutes --> fbPage
+```
+
+| Route | Component | Slice location |
+|-------|-----------|----------------|
+| `/` | `HomeComponent` | `features/home/pages/` |
+| `/feature-a` | `FeatureAComponent` | `features/feature-a/pages/` |
+| `/feature-b` | `FeatureBComponent` | `features/feature-b/pages/` |
+| `/components-tests` | `ComponentsTestsComponent` | `features/dev-tools/components/` |
+| `/not-found` | `NotFoundComponent` | `features/not-found/pages/` |
+
+All page components are standalone, use `ChangeDetectionStrategy.OnPush`, and are lazy-loaded via `loadComponent` within their slice.
+
+Navigation items use PrimeIcons-style class names (`pi pi-home`, etc.). Add [PrimeIcons](https://primeng.org/icons) to the app if you want those icons to render; otherwise the labels still work without them.
+
+The home page demonstrates slice-local data access: `HomeApiService` fetches the workspace `README.md` (copied into the build output via `angular.json` assets).
+
+### Implementing a New Feature
+
+Follow these steps when adding a capability (example name: **Feature C**):
+
+1. **Create the slice folder** — `features/feature-c/` with subfolders as needed: `pages/`, `data/`, `models/`, `state/`
+2. **Add the page component** — `pages/feature-c.component.ts` (+ `.html`, `.scss`, `.spec.ts`)
+3. **Add a data service** (if HTTP or state is needed) — `data/feature-c-api.service.ts`
+4. **Export slice routes** — `feature-c.routes.ts`:
+
+```typescript
+export const FEATURE_C_ROUTES: Routes = [
+  {
+    path: 'feature-c',
+    loadComponent: () =>
+      import('./pages/feature-c.component').then((m) => m.FeatureCComponent),
+  },
+];
+```
+
+5. **Export navigation** (if the feature appears in the sidebar) — `feature-c.navigation.ts`:
+
+```typescript
+export const FEATURE_C_NAV_ITEM: NavigationItem = {
+  label: 'Feature C',
+  icon: 'pi pi-list',
+  routerLink: '/feature-c',
+};
+```
+
+6. **Register routes** — add `...FEATURE_C_ROUTES` to `app.routes.ts`
+7. **Register navigation** — import `FEATURE_C_NAV_ITEM` in `core/navigation/navigation.registry.ts`
+8. **Add guards/resolvers** co-located in the slice when needed (see `NICETOHAVE.md` Phase 3)
+9. **Export public API** — optional `index.ts` re-exporting routes, navigation, and components
+10. **Verify** — run `pnpm test:seed-app` and `pnpm lint`
+11. **Extract to `shared/`** only when a second feature needs the same code (duplicate once, extract on second use)
+
+Future infrastructure from `NICETOHAVE.md` (auth guards, API layer, signals store) should land **inside the relevant slice**, not in global horizontal folders.
+
+### HTTP Interceptor Chain
+
+```mermaid
+flowchart LR
+  client["HttpClient request"]
+  corr["correlationIdInterceptor<br/>sets X-Correlation-ID"]
+  load["loadingInterceptor<br/>ref-count spinner"]
+  httpErr["httpErrorInterceptor<br/>catch + notify"]
+  backend["Backend / mock API"]
+
+  client --> corr --> load --> httpErr --> backend
+  backend --> httpErr
+  httpErr --> load
+  load --> corr
+  corr --> client
+```
+
+Outgoing requests pass through correlation ID and loading interceptors first; failed responses are handled by the HTTP error interceptor, which records them via `ErrorNotificationService`.
+
+### Error Handling Flow
+
+```mermaid
+flowchart TD
+  subgraph sources["Error sources"]
+    angular["Angular runtime errors"]
+    promise["unhandledrejection"]
+    windowErr["window error / resource load"]
+    httpFail["HTTP 4xx / 5xx / network"]
+    manual["GenerateErrorsComponent<br/>(dev-tools slice)"]
+  end
+
+  subgraph handlers["Handlers"]
+    geh["GlobalErrorHandler<br/>(ErrorHandler)"]
+    hei["httpErrorInterceptor"]
+  end
+
+  subgraph store["Central store"]
+    ens["ErrorNotificationService<br/>signals: notifications · errorHistory"]
+  end
+
+  subgraph ui["UI feedback"]
+    indicator["Header error indicator"]
+    history["Error history modal"]
+    modal["Error testing modal (Ctrl/Cmd+Shift+E)"]
+  end
+
+  angular --> geh
+  promise --> geh
+  windowErr --> geh
+  httpFail --> hei
+  manual --> geh
+  manual --> httpFail
+  geh --> ens
+  hei --> ens
+  ens --> indicator
+  ens --> history
+  modal --> manual
+```
+
+`provideErrorHandling()` registers both the global `ErrorHandler` and the HTTP error interceptor; the app shell reacts to `errorHistorySignal` for the header badge and history modal.
+
+### Loading Indicator
+
+```mermaid
+flowchart TD
+  req["HTTP request starts"]
+  li["loadingInterceptor.showWaitSpinner()"]
+  svc["LoadingIndicatorService<br/>ref-count signal"]
+  adapter{"Custom adapter set?"}
+  default["Default DOM spinner"]
+  custom["CustomLoadingAdapter<br/>(optional)"]
+  done["request finalize → hideWaitSpinner()"]
+
+  req --> li --> svc
+  svc --> adapter
+  adapter -->|no| default
+  adapter -->|yes| custom
+  svc --> done
+```
+
+The service uses reference counting so overlapping requests share one spinner; an optional `LoadingIndicatorAdapter` can replace the default overlay.
 
 ## Features
 
@@ -52,7 +410,7 @@ angular-seed/
 - Signal-based error notification service
 - Error history tracking with metadata (route, timestamp, call stack, HTTP status)
 - Call stack parsing and filtering
-- Mock HTTP service for testing without external dependencies
+- Mock HTTP service for testing without external dependencies (in `features/dev-tools/data/`)
 
 **Error Types:**
 - Angular errors
@@ -128,7 +486,9 @@ export const appConfig: ApplicationConfig = {
 
 ### Signup/Signin Component
 
-**Purpose:** Modern form component demonstrating Angular v21 Signal Forms API patterns.
+**Purpose:** Modern form component demonstrating Angular v22 Signal Forms API patterns.
+
+**Access:** Modal in `AppComponent` (Ctrl/Cmd+Shift+U for signup, Ctrl/Cmd+Shift+I for signin). `AUTH_ROUTES` in `features/auth/auth.routes.ts` is currently empty — dedicated auth routes are planned in `NICETOHAVE.md`.
 
 **Implementation:**
 - Signal Forms API (`form()` function from `@angular/forms/signals`)
@@ -144,7 +504,7 @@ export const appConfig: ApplicationConfig = {
 
 The component uses a clean separation of concerns with separate interfaces, initial data, and validation schemas for SignIn and SignUp:
 
-**Location:** `projects/seed-common-lib/src/lib/models/signup-signin.ts`
+**Location:** `projects/seed-app/src/app/features/auth/models/signup-signin.ts`
 
 **SignIn:**
 - `SignIn` interface - Type definition for sign-in form data
@@ -159,13 +519,13 @@ The component uses a clean separation of concerns with separate interfaces, init
 **Example:**
 ```typescript
 // Models are imported from the models file
-import { signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
+import { signInItialData, signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
 
 // Component uses the imported models and schemas
 readonly signUpModel = signal<SignUp>(signUpInitialData);
 readonly signUpForm = form(this.signUpModel, signUpSchema);
 
-readonly signInModel = signal<SignIn>(signUpInitialData);
+readonly signInModel = signal<SignIn>(signInItialData);
 readonly signInForm = form(this.signInModel, signInSchema);
 ```
 
@@ -178,13 +538,13 @@ readonly signInForm = form(this.signInModel, signInSchema);
 
 ### Slide Toggle Component
 
-**Purpose:** Custom form control component demonstrating Angular 21 Signal Forms integration with `FormCheckboxControl` interface.
+**Purpose:** Custom form control component demonstrating Angular 22 Signal Forms integration with `FormCheckboxControl` interface.
 
 **Key Technology:** **Signal Forms API** - This component uses the modern Signal Forms approach, eliminating the need for `ControlValueAccessor`.
 
 **Why No ControlValueAccessor?**
 
-In Angular 21's Signal Forms API, custom form controls implement either:
+In Angular 22's Signal Forms API, custom form controls implement either:
 - `FormCheckboxControl` for checkbox/boolean-based controls
 - `FormValueControl<T>` for other value-based controls (text, number, select, etc.)
 
@@ -203,12 +563,12 @@ Both interfaces replace `ControlValueAccessor` and provide:
 - Signal inputs for form state: `disabled`, `readonly`, `hidden`, `invalid`, `errors`, `disabledReasons`
 - Signal inputs for component-specific props: `orientation`, `spin`, `knobColor`, etc.
 - `ChangeDetectionStrategy.OnPush` for optimal performance
-- Standalone component (default in Angular 21)
+- Standalone component (default in Angular 22)
 
 **Example:**
 ```typescript
 @Component({
-  selector: 'lib-slide-toggle',
+  selector: 'app-slide-toggle',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SlideToggleComponent implements FormCheckboxControl {
@@ -236,11 +596,11 @@ export class SlideToggleComponent implements FormCheckboxControl {
 
 **Usage with Signal Forms:**
 ```html
-<lib-slide-toggle
+<app-slide-toggle
   [field]="myForm.toggle"
   [orientation]="'horizontal'"
   [spin]="false"
-></lib-slide-toggle>
+></app-slide-toggle>
 ```
 
 The `[field]` binding automatically:
@@ -252,6 +612,10 @@ The `[field]` binding automatically:
 ### Components Test Component
 
 **Purpose:** Interactive testing and demonstration component for the slide-toggle component with full Signal Forms integration.
+
+**Location:** `projects/seed-app/src/app/features/dev-tools/components/components-tests/`
+
+**Access:** Routed at `/components-tests`, or opened as a modal via Ctrl/Cmd+Shift+C from `AppComponent`.
 
 **Implementation:**
 - Signal Forms API with `form()` function
@@ -270,7 +634,7 @@ The `[field]` binding automatically:
 **Example:**
 ```typescript
 @Component({
-  selector: 'lib-components-tests',
+  selector: 'app-components-tests',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComponentsTestsComponent {
@@ -323,6 +687,18 @@ export class ComponentsTestsComponent {
   ```
 
 Both interfaces eliminate the need for `ControlValueAccessor` and provide the same benefits: automatic form integration, type safety, and signal-based reactivity.
+
+### Dev-tools Slice
+
+**Purpose:** Local development utilities for exercising error handling, loading indicators, and Signal Forms components.
+
+| Component | Access | Role |
+|-----------|--------|------|
+| `GenerateErrorsComponent` | Ctrl/Cmd+Shift+E modal | Triggers JS, HTTP, and notification errors for manual testing |
+| `WaitSpinnerTestComponent` | Ctrl/Cmd+Shift+W modal | Exercises the loading indicator interceptor |
+| `ComponentsTestsComponent` | `/components-tests` route or Ctrl/Cmd+Shift+C modal | Slide-toggle Signal Forms demo |
+| `SlideToggleComponent` | Used inside components-tests | Custom `FormCheckboxControl` example |
+| `MockHttpService` | Imported by generate-errors tests | Mock HTTP responses (`features/dev-tools/data/`) |
 
 ## Configuration
 
@@ -428,13 +804,10 @@ Both interfaces eliminate the need for `ControlValueAccessor` and provide the sa
 **JavaScript Files Rules:**
 - `no-unused-vars` - Warns on unused variables in `.js`, `.jsx`, `.cjs`, `.mjs` files (allows `_` prefix)
 
-**Deprecated Detection Rules:**
-- `@typescript-eslint/no-deprecated` - Built-in TypeScript ESLint rule that detects `@deprecated` JSDoc tags (currently disabled to avoid duplicates)
-- `custom/detect-deprecated` - Custom rule with enhanced features:
-  - Custom error messages with `{{name}}` and `{{reason}}` placeholders
-  - File exclusions via `allowedInFiles` option
-  - Toggle usage reporting via `reportUsage` option
-  - See `tools/eslint-rules/README.md` for full details and comparison
+**Custom Rules (see `tools/eslint-rules/README.md` for full details):**
+- `@typescript-eslint/no-deprecated` - Built-in rule that detects `@deprecated` JSDoc tags (currently disabled to avoid duplicates)
+- `custom/detect-deprecated` - Custom rule for deprecated detection with custom messages, `allowedInFiles`, and `reportUsage` options
+- `custom/detect-type-assertion` - Custom rule that warns on TypeScript type assertion (casting) usage (`value as Type`, `<Type>value`); options: `allowedInFiles`, `customMessage` with `{{typeText}}`
 
 **Disabled Rules:**
 
@@ -451,8 +824,8 @@ Rules are disabled only when necessary, with inline comments explaining why:
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- pnpm (v8 or higher) - [Install pnpm](https://pnpm.io/installation)
+- **Node.js** — use the version in [`.nvmrc`](./.nvmrc) (`24.15.0` at time of writing). Angular CLI 22 requires Node `v22.22.3+`, `v24.15.0+`, or `v26.0.0+`.
+- **pnpm** (v8 or higher) — [Install pnpm](https://pnpm.io/installation)
 
 ### Quick Start
 
@@ -483,14 +856,18 @@ pnpm run build:global-error-handler-lib
 
 ### Test Commands
 
+Tests use **Vitest 4** with **`@analogjs/vite-plugin-angular`** (JIT), **jsdom**, and **`vitest.setup.ts`** (loads `zone.js` for Angular TestBed). See `vitest.config.ts` and `tsconfig.vitest.json`. Coverage output: `./coverage/`.
+
 ```bash
 # Run all tests
+pnpm test              # alias for test:all
 pnpm run test:all
 
 # Run with coverage
 pnpm run test:coverage
 
 # Run with UI
+pnpm run test:watch
 pnpm run test:ui
 
 # Run tests for specific project
@@ -509,7 +886,21 @@ pnpm run lint:all
 pnpm run lint:seed-app
 pnpm run lint:seed-common-lib
 pnpm run lint:global-error-handler-lib
+
+# Check type assertion (cast) usage across all .ts files
+pnpm run lint:type-assertions
 ```
+
+### Deployment
+
+Production builds use base href `/angular-seed/` for GitHub Pages:
+
+```bash
+pnpm run build:all     # build libs + app
+pnpm run gitdeploy     # publish dist/ via gh-pages
+```
+
+There is no Netlify configuration in this repo; deployment is oriented around **gh-pages**.
 
 ## Guidelines
 
@@ -517,7 +908,7 @@ pnpm run lint:global-error-handler-lib
 
 When creating new components, services, pipes, or directives:
 
-1. **Standalone Components** - No NgModules, use direct imports (default in Angular 21)
+1. **Standalone Components** - No NgModules, use direct imports (default in Angular 22)
 2. **OnPush Change Detection** - Always use `ChangeDetectionStrategy.OnPush`
 3. **Modern Control Flow** - Use `@if`, `@for`, `@switch` instead of structural directives
 4. **Zoneless Change Detection** - App uses `provideZonelessChangeDetection()`
@@ -544,12 +935,12 @@ When creating new components, services, pipes, or directives:
 Signal Forms are marked with `// SignalForm` comments throughout the codebase. Here are the locations:
 
 **Form Definitions (TypeScript):**
-- `projects/seed-common-lib/src/lib/components-tests/components-tests.component.ts` - `slideToggleForm` (line 40)
-- `projects/seed-common-lib/src/lib/signup-signin/signup-signin.component.ts` - `signUpForm` (line 38), `signInForm` (line 63)
+- `projects/seed-app/src/app/features/dev-tools/components/components-tests/components-tests.component.ts` - `slideToggleForm`
+- `projects/seed-app/src/app/features/auth/components/signup-signin/signup-signin.component.ts` - `signUpForm`, `signInForm`
 
 **Field Bindings (Templates):**
-- `projects/seed-common-lib/src/lib/components-tests/components-tests.component.html` - `[field]="slideToggleForm.toggle"` (line 29)
-- `projects/seed-common-lib/src/lib/signup-signin/signup-signin.component.html` - Multiple `[field]` bindings:
+- `projects/seed-app/src/app/features/dev-tools/components/components-tests/components-tests.component.html` - `[field]="slideToggleForm.toggle"`
+- `projects/seed-app/src/app/features/auth/components/signup-signin/signup-signin.component.html` - Multiple `[field]` bindings:
   - `[field]="signUpForm.email"` (line 22)
   - `[field]="signUpForm.password"` (line 37)
   - `[field]="signUpForm.confirmPassword"` (line 53)
@@ -557,7 +948,7 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
   - `[field]="signInForm.password"` (line 127)
 
 **FormCheckboxControl Implementation:**
-- `projects/seed-common-lib/src/lib/slide-toggle/slide-toggle.component.ts` - `SlideToggleComponent` implements `FormCheckboxControl` (line 10)
+- `projects/seed-app/src/app/features/dev-tools/components/slide-toggle/slide-toggle.component.ts` - `SlideToggleComponent` implements `FormCheckboxControl`
 
 ### Keyboard Shortcuts
 
@@ -573,3 +964,14 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 - [Angular Signals Documentation](https://angular.dev/guide/signals)
 - [Angular Standalone Components](https://angular.dev/guide/components/importing)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+
+## Known issues and planned work
+
+**Lint status:** ESLint reports **0 errors** across the workspace. Fifteen **intentional warnings** remain in `tools/eslint-rules/example-deprecated.ts` and `tools/eslint-rules/detect-type-assertion.ts` — these files exist to validate custom rules and are excluded from cleanup.
+
+**Planned seed features** (auth guards, API layer, i18n, etc.) are listed in [NICETOHAVE.md](./NICETOHAVE.md).
+
+**Maintenance notes:**
+- `seed-common-lib` and `global-error-handler-lib` may still contain legacy source under `src/lib/` that is no longer exported from `public-api.ts`; dev-tools UI and mock HTTP live in the `features/dev-tools/` slice.
+- When `provideErrorHandling({ enableHttpInterceptor: true })` is used, the error-handling provider registers its own `provideHttpClient` — be mindful of duplicate HTTP client setup when extending `app.config.ts`.
