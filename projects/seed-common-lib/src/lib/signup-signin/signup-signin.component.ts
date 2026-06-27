@@ -7,16 +7,19 @@ import {
   signal,
   type OnDestroy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
+import { FormField, form } from '@angular/forms/signals';
 import {
-  FormField,
-  form,
-} from '@angular/forms/signals';
-import { signInSchema, signUpInitialData, signUpSchema, type SignIn, type SignUp } from '../models/signup-signin';
+  signInSchema,
+  signUpInitialData,
+  signUpSchema,
+  type SignIn,
+  type SignUp,
+} from '../models/signup-signin';
 
 @Component({
   selector: 'lib-signup-signin',
-  imports: [CommonModule, FormField],
+  imports: [FormField],
   templateUrl: './signup-signin.component.html',
   styleUrl: './signup-signin.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,7 +72,7 @@ export class SignupSigninComponent implements OnDestroy {
   submitSignUp(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (!this.signUpForm().valid()) {
       return;
     }
@@ -96,7 +99,7 @@ export class SignupSigninComponent implements OnDestroy {
   submitSignIn(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (!this.signInForm().valid()) {
       return;
     }

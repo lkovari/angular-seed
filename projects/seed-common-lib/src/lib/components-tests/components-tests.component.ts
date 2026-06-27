@@ -5,7 +5,7 @@ import {
   signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { FormField, form, disabled } from '@angular/forms/signals';
 import { SlideToggleComponent } from '../slide-toggle';
 
@@ -17,11 +17,7 @@ interface SlideToggleFormValue {
 
 @Component({
   selector: 'lib-components-tests',
-  imports: [
-    CommonModule,
-    FormField,
-    SlideToggleComponent,
-  ],
+  imports: [FormField, SlideToggleComponent, JsonPipe],
   templateUrl: './components-tests.component.html',
   styleUrl: './components-tests.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,7 +58,7 @@ export class ComponentsTestsComponent {
 
   constructor() {
     this.updateSlideToggleStatus();
-    
+
     effect(() => {
       this.slideToggleModel();
       this.updateSlideToggleStatus();
@@ -82,16 +78,16 @@ export class ComponentsTestsComponent {
   }
 
   onToggleValueChange(value: boolean): void {
-    this.slideToggleModel.update(model => ({ ...model, toggle: value }));
+    this.slideToggleModel.update((model) => ({ ...model, toggle: value }));
     this.updateSlideToggleStatus();
   }
 
   onOrientationChange(orientation: 'horizontal' | 'vertical'): void {
-    this.slideToggleModel.update(model => ({ ...model, orientation }));
+    this.slideToggleModel.update((model) => ({ ...model, orientation }));
   }
 
   onSpinChange(spin: boolean): void {
-    this.slideToggleModel.update(model => ({ ...model, spin }));
+    this.slideToggleModel.update((model) => ({ ...model, spin }));
     this.updateSlideToggleStatus();
   }
 
@@ -107,4 +103,3 @@ export class ComponentsTestsComponent {
     this.showModal.set(false);
   }
 }
-

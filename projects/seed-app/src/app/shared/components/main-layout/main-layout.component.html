@@ -5,12 +5,11 @@
       [showErrorIndicator]="showErrorIndicator()"
       [errorCount]="errorCount()"
       (errorIndicatorClick)="errorIndicatorClick.emit()"
-    >
-    </app-header>
+    />
   </header>
   @if (!isMobileView()) {
     <aside>
-      <app-left-side-menu [menuItems]="menuItems"></app-left-side-menu>
+      <app-left-side-menu [menuItems]="menuItems" />
     </aside>
   } @else {
     <div
@@ -22,14 +21,14 @@
         <app-left-side-menu
           [menuItems]="menuItems"
           (menuItemSelected)="closeNav()"
-        ></app-left-side-menu>
+        />
       </div>
     </div>
   }
   <main>
-    <router-outlet></router-outlet>
+    <router-outlet />
   </main>
   <footer class="border-t border-gray-300 dark:border-gray-600">
-    <app-footer></app-footer>
+    <app-footer />
   </footer>
 </div>

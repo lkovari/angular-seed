@@ -34,7 +34,7 @@
               (orientationChanged)="onOrientationChange($event)"
               (spinChanged)="onSpinChange($event)"
               (disabledChanged)="onDisabledChange($event)"
-            ></lib-slide-toggle>
+            />
           </div>
         </div>
 
@@ -47,11 +47,11 @@
             <pre class="detail-value">{{ formValue() | json }}</pre>
           </div>
           <div class="detail-item">
-            <strong>SlideToggle Component Status:</strong> {{ slideToggleStatus() }}
+            <strong>SlideToggle Component Status:</strong>
+            {{ slideToggleStatus() }}
           </div>
         </div>
       </div>
     </div>
   </div>
 }
-
