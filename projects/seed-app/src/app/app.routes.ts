@@ -8,6 +8,20 @@ export const routes: Routes = [
     //canActivate: [authGuard]
   },
   {
+    path: 'feature-a',
+    loadComponent: () =>
+      import('./features/feature-a/feature-a.component').then(
+        (m) => m.FeatureAComponent,
+      ),
+  },
+  {
+    path: 'feature-b',
+    loadComponent: () =>
+      import('./features/feature-b/feature-b.component').then(
+        (m) => m.FeatureBComponent,
+      ),
+  },
+  {
     path: 'components-tests',
     loadComponent: () =>
       import('../../../seed-common-lib/src/public-api').then(
