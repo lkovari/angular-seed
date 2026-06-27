@@ -55,7 +55,7 @@ Dev builds resolve libraries from source (`public-api.ts`); production builds co
 
 ### Project Components
 
-- **seed-app** - Main application with routing, layout, and feature modules
+- **seed-app** - Main application with routing, layout, and feature modules (`home`, `feature-a`, `feature-b`, `not-found`)
 - **seed-common-lib** - Shared components, services, and utilities
 - **global-error-handler-lib** - Comprehensive error handling system
 
@@ -67,7 +67,7 @@ graph LR
     config["app.config.ts"]
     root["AppComponent"]
     layout["MainLayoutComponent"]
-    features["features/<br/>home · not-found"]
+    features["features/<br/>home · feature-a · feature-b · not-found"]
     shared["shared/<br/>header · footer · left-side-menu · adapters"]
     routes["app.routes.ts"]
   end
@@ -140,6 +140,8 @@ flowchart TD
 
   subgraph routes["Lazy-loaded routes"]
     home["/ → HomeComponent"]
+    fa["/feature-a → FeatureAComponent"]
+    fb["/feature-b → FeatureBComponent"]
     tests["/components-tests → ComponentsTestsComponent"]
     nf["/not-found → NotFoundComponent"]
     wild["/** → redirect not-found"]
@@ -151,12 +153,50 @@ flowchart TD
   ML --> F
   ML --> RO
   RO --> home
+  RO --> fa
+  RO --> fb
   RO --> tests
   RO --> nf
   RO --> wild
 ```
 
 Feature routes load on demand; the shell layout (header, sidebar, footer) stays mounted across navigation.
+
+### Feature Routes
+
+Lazy-loaded feature components under `projects/seed-app/src/app/features/` serve as navigation targets for the sidebar menu in `MainLayoutComponent`.
+
+```mermaid
+flowchart LR
+  subgraph menu["LeftSideMenu (MainLayoutComponent)"]
+    homeLink["Home → /"]
+    faLink["Feature A → /feature-a"]
+    fbLink["Feature B → /feature-b"]
+  end
+
+  subgraph router["app.routes.ts (loadComponent)"]
+    homeRoute["HomeComponent"]
+    faRoute["FeatureAComponent"]
+    fbRoute["FeatureBComponent"]
+  end
+
+  subgraph files["features/"]
+    homeFile["home/"]
+    faFile["feature-a/"]
+    fbFile["feature-b/"]
+  end
+
+  homeLink --> homeRoute --> homeFile
+  faLink --> faRoute --> faFile
+  fbLink --> fbRoute --> fbFile
+```
+
+| Route | Component | Location |
+|-------|-----------|----------|
+| `/feature-a` | `FeatureAComponent` | `features/feature-a/` |
+| `/feature-b` | `FeatureBComponent` | `features/feature-b/` |
+
+Both components are standalone, use `ChangeDetectionStrategy.OnPush`, and follow the same lazy-loading pattern as other feature routes.
 
 ### HTTP Interceptor Chain
 
