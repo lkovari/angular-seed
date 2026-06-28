@@ -8,7 +8,7 @@ export function getNestedTranslationValue(
   let current: TranslationValue | undefined = dictionary;
 
   for (const segment of segments) {
-    if (typeof current !== 'object' || current === null) {
+    if (typeof current !== 'object') {
       return undefined;
     }
     current = current[segment];

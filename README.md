@@ -11,7 +11,7 @@ A modern Angular 22 seed project with vertical slice architecture, comprehensive
 - **Angular 22.0.4** - Latest Angular framework
 - **TypeScript ~6.0.3** - Strongly typed JavaScript
 - **pnpm** - Fast, disk space efficient package manager
-- **Tailwind CSS 3** - Utility-first CSS framework (PostCSS via `@tailwindcss/postcss`)
+- **Tailwind CSS 4** - Utility-first CSS framework (PostCSS via `@tailwindcss/postcss`)
 - **SCSS** - CSS preprocessor
 - **Vitest 4 + @analogjs/vite-plugin-angular** - Unit tests run through Vite; the dev server uses `ng serve` (`@angular/build`)
 - **ESLint 9** - Flat-config linting with custom rules in `tools/eslint-rules/`

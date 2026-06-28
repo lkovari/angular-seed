@@ -17,8 +17,8 @@ describe('LanguageSelectorComponent', () => {
 
   function setSelectValue(value: string): void {
     fixture.detectChanges();
-    const select = fixture.nativeElement.querySelector('select');
-    if (!(select instanceof HTMLSelectElement)) {
+    const select = component.localeSelect()?.nativeElement;
+    if (!select) {
       throw new Error('Expected locale select element');
     }
     select.value = value;

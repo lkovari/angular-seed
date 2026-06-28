@@ -47,7 +47,7 @@
               }
             ],
             "styles": [
-              "projects/seed-app/src/styles.scss"
+              "projects/seed-app/src/styles.css"
             ],
             "scripts": []
           },

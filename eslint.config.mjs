@@ -99,6 +99,10 @@ export default [
       '@angular-eslint/prefer-standalone': 'error',
 
       /* TS best practices */
+      '@typescript-eslint/no-extraneous-class': [
+        'error',
+        { allowWithDecorator: true },
+      ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
