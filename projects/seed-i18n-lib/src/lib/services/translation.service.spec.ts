@@ -1,4 +1,3 @@
-import { APP_BASE_HREF } from '@angular/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -115,7 +114,11 @@ describe('TranslationService', () => {
     expect(service.translate('navigation.home')).toBe('Home');
   });
 
-  it('should prefix locale asset URL with APP_BASE_HREF', async () => {
+  it('should prefix locale asset URL with base href from DOM', async () => {
+    const baseElement = document.createElement('base');
+    baseElement.href = '/angular-seed/';
+    document.head.appendChild(baseElement);
+
     TestBed.resetTestingModule();
     localStorage.clear();
 
@@ -123,7 +126,6 @@ describe('TranslationService', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: APP_BASE_HREF, useValue: '/angular-seed/' },
         {
           provide: I18N_CONFIG,
           useValue: {
@@ -137,12 +139,18 @@ describe('TranslationService', () => {
     const scopedService = TestBed.inject(TranslationService);
     const scopedHttpMock = TestBed.inject(HttpTestingController);
 
-    const initPromise = scopedService.initialize();
-    const request = scopedHttpMock.expectOne('/angular-seed/assets/i18n/en.json');
-    request.flush({ navigation: { home: 'Home' } });
-    await initPromise;
+    try {
+      const initPromise = scopedService.initialize();
+      const request = scopedHttpMock.expectOne(
+        '/angular-seed/assets/i18n/en.json',
+      );
+      request.flush({ navigation: { home: 'Home' } });
+      await initPromise;
 
-    expect(scopedService.translate('navigation.home')).toBe('Home');
-    scopedHttpMock.verify();
+      expect(scopedService.translate('navigation.home')).toBe('Home');
+      scopedHttpMock.verify();
+    } finally {
+      baseElement.remove();
+    }
   });
 });

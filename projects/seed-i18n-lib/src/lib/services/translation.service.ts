@@ -1,4 +1,4 @@
-import { APP_BASE_HREF } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -15,7 +15,7 @@ import { interpolate } from '../utils/interpolate';
 export class TranslationService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(I18N_CONFIG);
-  private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
+  private readonly platformLocation = inject(PlatformLocation);
   private readonly localeCache = new Map<SupportedLocale, TranslationDictionary>();
   private fallbackDictionary: TranslationDictionary = {};
 
@@ -101,12 +101,19 @@ export class TranslationService {
     }
 
     if (assetPath.startsWith('/')) {
-      const base =
-        this.baseHref === '/' ? '' : this.baseHref.replace(/\/$/, '');
-      return `${base}${assetPath}/${fileName}`;
+      return `${this.applicationBasePrefix()}${assetPath}/${fileName}`;
     }
 
     return `${assetPath}/${fileName}`;
+  }
+
+  private applicationBasePrefix(): string {
+    const fromDom =
+      typeof document !== 'undefined'
+        ? document.querySelector('base')?.getAttribute('href')
+        : null;
+    const baseHref = fromDom ?? this.platformLocation.getBaseHrefFromDOM();
+    return baseHref === '/' ? '' : baseHref.replace(/\/$/, '');
   }
 
   private applyActiveLocale(locale: SupportedLocale): void {
