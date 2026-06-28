@@ -13,6 +13,7 @@ import {
   correlationIdInterceptor,
   loadingInterceptor,
 } from '../../../seed-common-lib/src/public-api';
+import { provideI18n } from '../../../seed-i18n-lib/src/public-api';
 
 import { routes } from './app.routes';
 
@@ -24,6 +25,10 @@ export const appConfig: ApplicationConfig = {
       withXhr(),
       withInterceptors([correlationIdInterceptor, loadingInterceptor]),
     ),
+    ...provideI18n({
+      defaultLocale: 'en',
+      supportedLocales: ['en', 'hu', 'de'],
+    }),
     ...provideErrorHandling({
       enableGlobalHandler: true,
       enableHttpInterceptor: true,

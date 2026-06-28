@@ -7,7 +7,7 @@
         <button
           id="hamburger"
           class="btn btn-link text-xl"
-          aria-label="Toggle Sidebar"
+          [attr.aria-label]="'shell.toggleSidebar' | translate"
           (click)="toggleSidebar()"
         >
           &#9776;
@@ -16,7 +16,7 @@
     </div>
 
     <div class="text-lg font-semibold whitespace-nowrap">
-      LKővári's seed app
+      {{ 'shell.appTitle' | translate }}
     </div>
 
     <div class="flex items-center gap-3 pr-2">

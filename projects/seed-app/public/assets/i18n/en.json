@@ -1,0 +1,39 @@
+{
+  "languageSelector": {
+    "title": "Select Language",
+    "label": "Language",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "close": "Close",
+    "locales": {
+      "en": "English",
+      "hu": "Hungarian",
+      "de": "German"
+    }
+  },
+  "shell": {
+    "appTitle": "LKővári's seed app",
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "navigation": {
+    "home": "Home",
+    "featureA": "Feature A",
+    "featureB": "Feature B"
+  },
+  "features": {
+    "home": {
+      "welcome": "Welcome to the LKővári's seed app",
+      "loadingReadme": "Loading README...",
+      "readmeLoadFailed": "Failed to load README.md"
+    },
+    "featureA": {
+      "title": "Feature A"
+    },
+    "featureB": {
+      "title": "Feature B"
+    },
+    "notFound": {
+      "title": "Invalid Route Path."
+    }
+  }
+}

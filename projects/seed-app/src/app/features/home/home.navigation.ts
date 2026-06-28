@@ -1,7 +1,7 @@
 import { type NavigationItem } from '../../core/navigation/navigation.types';
 
 export const HOME_NAV_ITEM: NavigationItem = {
-  label: 'Home',
+  labelKey: 'navigation.home',
   icon: 'pi pi-home',
   routerLink: '/',
 };

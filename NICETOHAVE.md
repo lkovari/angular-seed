@@ -30,7 +30,7 @@
 ## Phase 3: User Experience
 
 9. Forms & Validation Utilities
-10. i18n Support
+10. ~~i18n Support~~ (Completed — see `seed-i18n-lib` and `public/assets/i18n/`)
 11. Common UI Components
 12. Enhanced Routing (Guards, Resolvers)
 

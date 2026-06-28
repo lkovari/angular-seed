@@ -75,6 +75,7 @@ Dev builds resolve libraries from source (`public-api.ts`); production builds co
 - **seed-app** — Main application with vertical slices (`home`, `feature-a`, `feature-b`, `auth`, `dev-tools`, `not-found`), app shell under `core/`, and cross-feature adapters under `shared/`
 - **seed-common-lib** — Infrastructure only: loading indicator and correlation ID interceptors (public API in `src/public-api.ts`)
 - **global-error-handler-lib** — Infrastructure only: global error handler, HTTP error interceptor, notification service, and `provideErrorHandling()` (public API in `src/public-api.ts`)
+- **seed-i18n-lib** — Infrastructure only: signal-based runtime i18n, JSON locale files, `TranslatePipe`, language selector dialog, and `provideI18n()` (public API in `src/public-api.ts`)
 
 ```mermaid
 graph LR
@@ -301,7 +302,7 @@ export const FEATURE_C_ROUTES: Routes = [
 
 ```typescript
 export const FEATURE_C_NAV_ITEM: NavigationItem = {
-  label: 'Feature C',
+  labelKey: 'navigation.featureC',
   icon: 'pi pi-list',
   routerLink: '/feature-c',
 };
@@ -950,6 +951,33 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 **FormCheckboxControl Implementation:**
 - `projects/seed-app/src/app/features/dev-tools/components/slide-toggle/slide-toggle.component.ts` - `SlideToggleComponent` implements `FormCheckboxControl`
 
+### Internationalization (i18n)
+
+Runtime i18n is provided by **`seed-i18n-lib`**. Locale files live in `projects/seed-app/public/assets/i18n/` as editable JSON (`en.json`, `hu.json`, `de.json`).
+
+**Setup** — already wired in `app.config.ts`:
+
+```typescript
+...provideI18n({
+  defaultLocale: 'en',
+  supportedLocales: ['en', 'hu', 'de'],
+}),
+```
+
+**Templates** — import `TranslatePipe` and use dot-notation keys:
+
+```html
+<h1>{{ 'features.home.welcome' | translate }}</h1>
+```
+
+**Navigation slices** — use `labelKey` in `*.navigation.ts` (e.g. `labelKey: 'navigation.home'`).
+
+**TypeScript** — inject `TranslationService` and call `translate('key', { param: value })`.
+
+**Vertical slice convention** — add keys under `features.<sliceName>` and `navigation.*` in all three JSON files.
+
+**Tests** — use `provideI18nTesting()` instead of `provideI18n()` to avoid app initializer side effects.
+
 ### Keyboard Shortcuts
 
 - **Ctrl+Shift+E** / **Cmd+Shift+E** - Open error testing modal
@@ -957,6 +985,7 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 - **Ctrl+Shift+U** / **Cmd+Shift+U** - Open signup modal
 - **Ctrl+Shift+I** / **Cmd+Shift+I** - Open signin modal
 - **Ctrl+Shift+C** / **Cmd+Shift+C** - Open components test component to show slide toggle component to demonstrate how it work
+- **Ctrl+Shift+L** / **Cmd+Shift+L** - Open language selector dialog (English, Hungarian, German)
 
 ### Resources
 
@@ -970,7 +999,7 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 
 **Lint status:** ESLint reports **0 errors** across the workspace. Fifteen **intentional warnings** remain in `tools/eslint-rules/example-deprecated.ts` and `tools/eslint-rules/detect-type-assertion.ts` — these files exist to validate custom rules and are excluded from cleanup.
 
-**Planned seed features** (auth guards, API layer, i18n, etc.) are listed in [NICETOHAVE.md](./NICETOHAVE.md).
+**Planned seed features** (auth guards, API layer, etc.) are listed in [NICETOHAVE.md](./NICETOHAVE.md).
 
 **Maintenance notes:**
 - `seed-common-lib` and `global-error-handler-lib` may still contain legacy source under `src/lib/` that is no longer exported from `public-api.ts`; dev-tools UI and mock HTTP live in the `features/dev-tools/` slice.

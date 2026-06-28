@@ -1,0 +1,39 @@
+{
+  "languageSelector": {
+    "title": "Sprache auswählen",
+    "label": "Sprache",
+    "apply": "Anwenden",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "locales": {
+      "en": "Englisch",
+      "hu": "Ungarisch",
+      "de": "Deutsch"
+    }
+  },
+  "shell": {
+    "appTitle": "LKővári Seed-App",
+    "toggleSidebar": "Seitenleiste umschalten"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "featureA": "Feature A",
+    "featureB": "Feature B"
+  },
+  "features": {
+    "home": {
+      "welcome": "Willkommen in der LKővári Seed-App",
+      "loadingReadme": "README wird geladen...",
+      "readmeLoadFailed": "README.md konnte nicht geladen werden"
+    },
+    "featureA": {
+      "title": "Feature A"
+    },
+    "featureB": {
+      "title": "Feature B"
+    },
+    "notFound": {
+      "title": "Ungültiger Routenpfad."
+    }
+  }
+}

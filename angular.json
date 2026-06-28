@@ -162,6 +162,43 @@
           "defaultConfiguration": "production"
         }
       }
+    },
+    "seed-i18n-lib": {
+      "projectType": "library",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/seed-i18n-lib",
+      "sourceRoot": "projects/seed-i18n-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "**/*.ts",
+              "**/*.html"
+            ]
+          }
+        },
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/seed-i18n-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/seed-i18n-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/seed-i18n-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
     }
   },
   "schematics": {

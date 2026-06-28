@@ -59,6 +59,10 @@ export default defineConfig({
         __dirname,
         './projects/seed-common-lib/src/public-api.ts',
       ),
+      'seed-i18n-lib': resolve(
+        __dirname,
+        './projects/seed-i18n-lib/src/public-api.ts',
+      ),
       '@app/core': resolve(__dirname, './projects/seed-app/src/app/core'),
       '@app/features': resolve(
         __dirname,

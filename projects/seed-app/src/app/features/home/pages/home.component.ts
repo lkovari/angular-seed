@@ -5,17 +5,24 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  TranslatePipe,
+  TranslationService,
+} from '../../../../../../seed-i18n-lib/src/public-api';
 import { HomeApiService } from '../data/home-api.service';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
   private homeApi = inject(HomeApiService);
-  readmeContent = signal<string>('Loading README...');
+  private translationService = inject(TranslationService);
+  readmeContent = signal<string>(
+    this.translationService.translate('features.home.loadingReadme'),
+  );
 
   constructor() {
     this.homeApi
@@ -27,7 +34,9 @@ export class HomeComponent {
         },
         error: (err) => {
           console.error('Failed to load README.md:', err);
-          this.readmeContent.set('Failed to load README.md');
+          this.readmeContent.set(
+            this.translationService.translate('features.home.readmeLoadFailed'),
+          );
         },
       });
   }

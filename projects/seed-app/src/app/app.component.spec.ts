@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { provideI18nTesting } from '../../../seed-i18n-lib/src/public-api';
+import { TranslationService } from '../../../seed-i18n-lib/src/public-api';
 import { AppComponent } from './app.component';
 
 function createShortcutEvent(
@@ -20,11 +26,26 @@ function createShortcutEvent(
 
 describe('AppComponent', () => {
   beforeEach(async () => {
+    localStorage.clear();
+
     TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideHttpClient(), provideRouter([])],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideI18nTesting(),
+      ],
     });
     await TestBed.compileComponents();
+
+    const translationService = TestBed.inject(TranslationService);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const initPromise = translationService.initialize();
+    httpMock.expectOne('/assets/i18n/en.json').flush({
+      languageSelector: { title: 'Select Language' },
+    });
+    await initPromise;
   });
 
   it('should create the app', () => {
@@ -92,6 +113,17 @@ describe('AppComponent', () => {
     app.handleKeyboardEvent(createShortcutEvent('c', { metaKey: true }));
 
     expect(openComponentsTests).toHaveBeenCalledOnce();
+  });
+
+  it('should open language selector with Cmd+Shift+L', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const app = fixture.componentInstance;
+    const openLanguageSelector = vi.spyOn(app, 'openLanguageSelector');
+
+    app.handleKeyboardEvent(createShortcutEvent('l', { metaKey: true }));
+
+    expect(openLanguageSelector).toHaveBeenCalledOnce();
   });
 
   it('should open modals with Ctrl+Shift shortcuts on non-Mac keyboards', () => {

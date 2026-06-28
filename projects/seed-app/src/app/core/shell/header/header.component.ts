@@ -5,10 +5,11 @@ import {
   input,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
 
 @Component({
   selector: 'app-header',
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './header.component.scss',

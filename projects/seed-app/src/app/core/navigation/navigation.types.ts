@@ -1,6 +1,6 @@
 export interface NavigationItem {
   id?: string;
-  label: string;
+  labelKey: string;
   icon?: string;
   url?: string;
   routerLink?: string | string[];

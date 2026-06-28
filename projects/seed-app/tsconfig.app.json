@@ -10,6 +10,7 @@
         "../global-error-handler-lib/src/public-api.ts"
       ],
       "seed-common-lib": ["../seed-common-lib/src/public-api.ts"],
+      "seed-i18n-lib": ["../seed-i18n-lib/src/public-api.ts"],
       "@app/core/*": ["src/app/core/*"],
       "@app/features/*": ["src/app/features/*"],
       "@app/shared/*": ["src/app/shared/*"]

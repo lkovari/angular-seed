@@ -18,6 +18,9 @@ import {
   GenerateErrorsComponent,
 } from './features/dev-tools';
 import { SignupSigninComponent } from './features/auth';
+import {
+  LanguageSelectorComponent,
+} from '../../../seed-i18n-lib/src/public-api';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +31,7 @@ import { SignupSigninComponent } from './features/auth';
     WaitSpinnerTestComponent,
     SignupSigninComponent,
     ComponentsTestsComponent,
+    LanguageSelectorComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -39,6 +43,7 @@ export class AppComponent implements OnDestroy {
   waitSpinnerTest = viewChild(WaitSpinnerTestComponent);
   signupSignin = viewChild(SignupSigninComponent);
   componentsTests = viewChild(ComponentsTestsComponent);
+  languageSelector = viewChild(LanguageSelectorComponent);
 
   title = 'seed-app';
   showErrorModal = signal(false);
@@ -90,6 +95,11 @@ export class AppComponent implements OnDestroy {
       return;
     }
 
+    if (this.handleModShiftShortcut(event, 'l')) {
+      this.openLanguageSelector();
+      return;
+    }
+
     if (this.handleModShiftShortcut(event, 'c')) {
       this.openComponentsTests();
     }
@@ -134,6 +144,13 @@ export class AppComponent implements OnDestroy {
       component.openModal();
     } else {
       console.warn('ComponentsTestsComponent not found');
+    }
+  }
+
+  openLanguageSelector(): void {
+    const component = this.languageSelector();
+    if (component) {
+      component.openModal();
     }
   }
 

@@ -9,7 +9,7 @@
             (click)="menuItemSelected.emit()"
           >
             <i [class]="menuItem.icon"></i>
-            <span class="whitespace-nowrap">{{ menuItem.label }}</span>
+            <span class="whitespace-nowrap">{{ menuItem.labelKey | translate }}</span>
           </a>
         </li>
       }
