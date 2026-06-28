@@ -14,7 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-wait-spinner-test',
   templateUrl: './wait-spinner-test.component.html',
-  styleUrl: './wait-spinner-test.component.scss',
+  styleUrl: './wait-spinner-test.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WaitSpinnerTestComponent implements OnDestroy {

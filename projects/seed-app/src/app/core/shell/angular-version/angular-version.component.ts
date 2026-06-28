@@ -5,7 +5,7 @@ import * as angular from '@angular/forms';
   selector: 'app-angular-version',
   imports: [],
   templateUrl: './angular-version.component.html',
-  styleUrl: './angular-version.component.scss',
+  styleUrl: './angular-version.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AngularVersionComponent {

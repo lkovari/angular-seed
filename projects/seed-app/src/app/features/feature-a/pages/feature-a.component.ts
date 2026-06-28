@@ -5,7 +5,7 @@ import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
   selector: 'app-feature-a',
   imports: [TranslatePipe],
   templateUrl: './feature-a.component.html',
-  styleUrl: './feature-a.component.scss',
+  styleUrl: './feature-a.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeatureAComponent {}

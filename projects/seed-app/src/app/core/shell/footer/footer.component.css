@@ -1,7 +1,7 @@
 .footer-container {
   position: relative;
   overflow: hidden;
-  background-color: rgba(234, 236, 245, 0.822);
+  background-color: color-mix(in srgb, #eaeef5 82%, transparent);
 }
 
 .demo-animation {
@@ -12,10 +12,10 @@
   font-size: 1.2rem;
   color: #716ad4;
   z-index: 1;
-  animation: revealThenMove 12s linear infinite;
+  animation: reveal-then-move 12s linear infinite;
 }
 
-@keyframes revealThenMove {
+@keyframes reveal-then-move {
   0% {
     left: -130%;
     clip-path: inset(0 0 0 100%);

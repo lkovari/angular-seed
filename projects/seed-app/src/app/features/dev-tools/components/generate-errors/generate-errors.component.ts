@@ -13,7 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'app-generate-errors',
   imports: [],
   templateUrl: './generate-errors.component.html',
-  styleUrl: './generate-errors.component.scss',
+  styleUrl: './generate-errors.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GenerateErrorsComponent {

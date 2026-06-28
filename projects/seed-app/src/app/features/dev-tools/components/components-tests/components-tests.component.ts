@@ -19,7 +19,7 @@ interface SlideToggleFormValue {
   selector: 'app-components-tests',
   imports: [FormField, SlideToggleComponent, JsonPipe],
   templateUrl: './components-tests.component.html',
-  styleUrl: './components-tests.component.scss',
+  styleUrl: './components-tests.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComponentsTestsComponent {

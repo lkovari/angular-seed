@@ -4,7 +4,7 @@ import { type FormCheckboxControl, type ValidationError, type DisabledReason, ty
 @Component({
   selector: 'app-slide-toggle',
   templateUrl: './slide-toggle.component.html',
-  styleUrl: './slide-toggle.component.scss',
+  styleUrl: './slide-toggle.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
   // SignalForm - FormCheckboxControl or FormValueControl implementation (replaces ControlValueAccessor)

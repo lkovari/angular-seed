@@ -23,7 +23,7 @@ import { FooterComponent } from '../footer/footer.component';
     FooterComponent,
   ],
   templateUrl: './main-layout.component.html',
-  styleUrl: './main-layout.component.scss',
+  styleUrl: './main-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent implements OnDestroy {

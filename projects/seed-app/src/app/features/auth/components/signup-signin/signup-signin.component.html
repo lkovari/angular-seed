@@ -27,24 +27,17 @@
 
       <div class="modal-body">
         <form novalidate autocomplete="off">
-          <div class="form-group mb-2">
-            <div class="form-control ommit-border">
-              <label class="row" for="signUpEmail"
-                >Email<span class="text-danger">*</span></label
-              >
-
-              <!-- SignalForm: Field binding -->
+          <div class="form-group">
+            <div class="form-field">
               <input
                 id="signUpEmail"
-                class="form-control row"
                 type="email"
-                placeholder="Type your email"
+                placeholder=" "
                 [formField]="signUpForm.email"
-                [class.is-invalid]="
-                  signUpForm.email().touched() && signUpForm.email().invalid()
-                "
               />
-
+              <label for="signUpEmail"
+                >Email<span class="text-danger">*</span></label
+              >
               <span class="invalid-feedback">
                 @if (
                   signUpForm.email().touched() && signUpForm.email().invalid()
@@ -54,24 +47,16 @@
               </span>
             </div>
 
-            <div class="form-control ommit-border">
-              <label class="row" for="signUpPassword"
-                >Password<span class="text-danger">*</span></label
-              >
-
-              <!-- SignalForm: Field binding -->
+            <div class="form-field">
               <input
                 id="signUpPassword"
-                class="form-control row"
                 type="password"
-                placeholder="Type a password"
+                placeholder=" "
                 [formField]="signUpForm.password"
-                [class.is-invalid]="
-                  signUpForm.password().touched() &&
-                  signUpForm.password().invalid()
-                "
               />
-
+              <label for="signUpPassword"
+                >Password<span class="text-danger">*</span></label
+              >
               <span class="invalid-feedback">
                 @if (
                   signUpForm.password().touched() &&
@@ -82,24 +67,16 @@
               </span>
             </div>
 
-            <div class="form-control ommit-border">
-              <label class="row" for="signUpConfirmPassword"
-                >Confirm Password<span class="text-danger">*</span></label
-              >
-
-              <!-- SignalForm: Field binding -->
+            <div class="form-field">
               <input
                 id="signUpConfirmPassword"
-                class="form-control row"
                 type="password"
-                placeholder="Type a confirm password"
+                placeholder=" "
                 [formField]="signUpForm.confirmPassword"
-                [class.is-invalid]="
-                  signUpForm.confirmPassword().touched() &&
-                  signUpForm.confirmPassword().invalid()
-                "
               />
-
+              <label for="signUpConfirmPassword"
+                >Confirm Password<span class="text-danger">*</span></label
+              >
               <span class="invalid-feedback">
                 @if (
                   signUpForm.confirmPassword().touched() &&
@@ -180,24 +157,17 @@
 
       <div class="modal-body">
         <form novalidate autocomplete="off">
-          <div class="form-group mb-2">
-            <div class="form-control ommit-border">
-              <label class="row" for="signInEmail"
-                >Email<span class="text-danger">*</span></label
-              >
-
-              <!-- SignalForm: Field binding -->
+          <div class="form-group">
+            <div class="form-field">
               <input
                 id="signInEmail"
-                class="form-control row"
                 type="email"
-                placeholder="Type your email"
+                placeholder=" "
                 [formField]="signInForm.email"
-                [class.is-invalid]="
-                  signInForm.email().touched() && signInForm.email().invalid()
-                "
               />
-
+              <label for="signInEmail"
+                >Email<span class="text-danger">*</span></label
+              >
               <span class="invalid-feedback">
                 @if (
                   signInForm.email().touched() && signInForm.email().invalid()
@@ -207,24 +177,16 @@
               </span>
             </div>
 
-            <div class="form-control ommit-border">
-              <label class="row" for="signInPassword"
-                >Password<span class="text-danger">*</span></label
-              >
-
-              <!-- SignalForm: Field binding -->
+            <div class="form-field">
               <input
                 id="signInPassword"
-                class="form-control row"
                 type="password"
-                placeholder="Type your password"
+                placeholder=" "
                 [formField]="signInForm.password"
-                [class.is-invalid]="
-                  signInForm.password().touched() &&
-                  signInForm.password().invalid()
-                "
               />
-
+              <label for="signInPassword"
+                >Password<span class="text-danger">*</span></label
+              >
               <span class="invalid-feedback">
                 @if (
                   signInForm.password().touched() &&

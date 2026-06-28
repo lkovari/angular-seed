@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
   imports: [DatePipe, TranslatePipe],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './header.component.scss',
+  styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   lastUpdateDate = new Date('06/27/2026 07:48 PM');

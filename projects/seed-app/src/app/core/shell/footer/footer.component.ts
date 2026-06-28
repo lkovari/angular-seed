@@ -10,7 +10,7 @@ import { AngularVersionComponent } from '../angular-version/angular-version.comp
   selector: 'app-footer',
   imports: [AngularVersionComponent],
   templateUrl: './footer.component.html',
-  styleUrl: './footer.component.scss',
+  styleUrl: './footer.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FooterComponent implements OnDestroy {

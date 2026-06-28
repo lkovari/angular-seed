@@ -1,0 +1,38 @@
+.submitted-data {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: var(--radius-modal);
+
+  & h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0c4a6e;
+  }
+
+  & .data-item {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #075985;
+    overflow-wrap: break-word;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    & strong {
+      color: #0c4a6e;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.show-invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-danger);
+}

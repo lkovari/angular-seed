@@ -5,7 +5,7 @@ import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
   selector: 'app-not-found',
   imports: [TranslatePipe],
   templateUrl: './not-found.component.html',
-  styleUrl: './not-found.component.scss',
+  styleUrl: './not-found.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotFoundComponent {}

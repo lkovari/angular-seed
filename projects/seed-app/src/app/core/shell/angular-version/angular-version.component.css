@@ -4,7 +4,6 @@
   color: #c207c9;
   text-align: center;
   z-index: 1001;
-  background-color: rgba(234, 236, 245, 0.822);
+  background-color: color-mix(in srgb, #eaeef5 82%, transparent);
   width: 10rem;
 }
-

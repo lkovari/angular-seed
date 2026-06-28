@@ -13,7 +13,7 @@ import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
   imports: [RouterLink, TranslatePipe],
   templateUrl: './left-side-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './left-side-menu.component.scss',
+  styleUrl: './left-side-menu.component.css',
 })
 export class LeftSideMenuComponent {
   menuItems = input<NavigationItem[]>([]);

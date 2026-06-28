@@ -21,22 +21,15 @@
 
 <!-- Error Testing Modal -->
 @if (showErrorModal()) {
-  <div
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 animate-fade-in"
-    (click)="closeErrorModal()"
-  >
+  <div class="modal-overlay animate-fade-in" (click)="closeErrorModal()">
     <div
-      class="bg-white rounded-md shadow-lg max-w-[600px] w-full max-h-[70vh] flex flex-col animate-slide-up"
+      class="modal-container modal-container--lg animate-slide-up"
       (click)="$event.stopPropagation()"
     >
-      <div
-        class="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-200"
-      >
-        <h2 class="text-sm font-semibold text-gray-800 m-0">
-          Error Testing Panel
-        </h2>
+      <div class="modal-header">
+        <h2>Error Testing Panel</h2>
         <button
-          class="bg-transparent border-none cursor-pointer p-1 rounded hover:bg-gray-100 active:bg-gray-200 transition-all"
+          class="close-btn"
           (click)="closeErrorModal()"
           aria-label="Close"
         >
@@ -50,36 +43,27 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="text-gray-500"
           >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-      <div class="overflow-y-auto flex-1 p-0">
+      <div class="modal-body !p-0">
         <app-generate-errors />
       </div>
     </div>
   </div>
 }
 
-<!-- Error History Modal -->
 @if (showErrorHistoryModal()) {
-  <div
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 animate-fade-in"
-    (click)="closeErrorHistoryModal()"
-  >
+  <div class="modal-overlay animate-fade-in" (click)="closeErrorHistoryModal()">
     <div
-      class="bg-white rounded-md shadow-lg max-w-[900px] w-full max-h-[80vh] flex flex-col animate-slide-up"
+      class="modal-container modal-container--xl animate-slide-up"
       (click)="$event.stopPropagation()"
     >
-      <div
-        class="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-200"
-      >
-        <h2 class="text-sm font-semibold text-gray-800 m-0">
-          Error History ({{ errorHistory().length }})
-        </h2>
+      <div class="modal-header">
+        <h2>Error History ({{ errorHistory().length }})</h2>
         <div class="flex gap-2">
           <button
             class="bg-red-500 text-white border-none px-3 py-1.5 rounded text-xs font-medium cursor-pointer hover:bg-red-600 active:bg-red-700 transition-all"
@@ -88,7 +72,7 @@
             Clear All
           </button>
           <button
-            class="bg-transparent border-none cursor-pointer p-1 rounded hover:bg-gray-100 active:bg-gray-200 transition-all"
+            class="close-btn"
             (click)="closeErrorHistoryModal()"
             aria-label="Close"
           >
@@ -102,7 +86,6 @@
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="text-gray-500"
             >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -110,7 +93,7 @@
           </button>
         </div>
       </div>
-      <div class="overflow-y-auto flex-1 p-4">
+      <div class="modal-body">
         @if (errorHistory().length === 0) {
           <div class="text-center py-12 px-4 text-gray-500">
             <p class="text-sm m-0">No errors recorded</p>
@@ -119,7 +102,7 @@
           <div class="flex flex-col gap-3">
             @for (error of formattedErrorHistory(); track error.id) {
               <div
-                class="bg-gray-50 border border-gray-200 rounded-md p-3 text-xs"
+                class="error-history-item bg-gray-50 border border-gray-200 rounded-md p-3 text-xs"
               >
                 <div class="mb-2">
                   <div class="flex items-center gap-2">

@@ -21,7 +21,7 @@ import {
   selector: 'app-signup-signin',
   imports: [FormField],
   templateUrl: './signup-signin.component.html',
-  styleUrl: './signup-signin.component.scss',
+  styleUrl: './signup-signin.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignupSigninComponent implements OnDestroy {

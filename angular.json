@@ -7,7 +7,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "css"
         }
       },
       "root": "projects/seed-app",
@@ -34,7 +34,7 @@
             "browser": "projects/seed-app/src/main.ts",
             "polyfills": [],
             "tsConfig": "projects/seed-app/tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
@@ -96,7 +96,7 @@
       "projectType": "library",
       "schematics": {
         "@schematics/angular:component": {
-            "style": "scss"
+            "style": "css"
         }
       },
       "root": "projects/seed-common-lib",
@@ -133,7 +133,7 @@
       "projectType": "library",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "css"
         }
       },
       "root": "projects/global-error-handler-lib",
@@ -167,7 +167,7 @@
       "projectType": "library",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "css"
         }
       },
       "root": "projects/seed-i18n-lib",

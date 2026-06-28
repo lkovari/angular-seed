@@ -1,6 +1,6 @@
 @if (showModal()) {
   <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-container modal-container--md" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Components Test</h3>
         <button class="close-btn" (click)="closeModal()" aria-label="Close">

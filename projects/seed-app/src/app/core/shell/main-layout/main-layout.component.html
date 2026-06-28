@@ -15,7 +15,7 @@
     <div
       id="navi"
       class="overlay"
-      [style.width]="sidebarVisible() ? '100%' : '0%'"
+      [class.overlay--open]="sidebarVisible()"
     >
       <div class="overlay-content">
         <app-left-side-menu
