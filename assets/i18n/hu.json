@@ -1,0 +1,55 @@
+{
+  "themeSettings": {
+    "title": "Téma beállítások",
+    "themeLabel": "Téma",
+    "autoSchedule": "Automatikus világos/sötét napkelte és napnyugta alapján",
+    "colorModeLabel": "Színmód",
+    "light": "Világos",
+    "dark": "Sötét",
+    "apply": "Alkalmaz",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "themes": {
+      "azure": "Azure",
+      "meadow": "Meadow",
+      "magenta-dream": "Magenta Dream"
+    }
+  },
+  "languageSelector": {
+    "title": "Nyelv kiválasztása",
+    "label": "Nyelv",
+    "apply": "Alkalmaz",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "locales": {
+      "en": "Angol",
+      "hu": "Magyar",
+      "de": "Német"
+    }
+  },
+  "shell": {
+    "appTitle": "LKővári seed alkalmazás",
+    "toggleSidebar": "Oldalsáv váltása"
+  },
+  "navigation": {
+    "home": "Kezdőlap",
+    "featureA": "A funkció",
+    "featureB": "B funkció"
+  },
+  "features": {
+    "home": {
+      "welcome": "Üdvözöljük az LKővári seed alkalmazásban",
+      "loadingReadme": "README betöltése...",
+      "readmeLoadFailed": "A README.md betöltése sikertelen"
+    },
+    "featureA": {
+      "title": "A funkció"
+    },
+    "featureB": {
+      "title": "B funkció"
+    },
+    "notFound": {
+      "title": "Érvénytelen útvonal."
+    }
+  }
+}

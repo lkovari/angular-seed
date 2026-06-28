@@ -11,7 +11,7 @@ A modern Angular 22 seed project with vertical slice architecture, comprehensive
 - **Angular 22.0.4** - Latest Angular framework
 - **TypeScript ~6.0.3** - Strongly typed JavaScript
 - **pnpm** - Fast, disk space efficient package manager
-- **Tailwind CSS 3** - Utility-first CSS framework (PostCSS via `@tailwindcss/postcss`)
+- **Tailwind CSS 4** - Utility-first CSS framework (PostCSS via `@tailwindcss/postcss`)
 - **SCSS** - CSS preprocessor
 - **Vitest 4 + @analogjs/vite-plugin-angular** - Unit tests run through Vite; the dev server uses `ng serve` (`@angular/build`)
 - **ESLint 9** - Flat-config linting with custom rules in `tools/eslint-rules/`
@@ -75,6 +75,8 @@ Dev builds resolve libraries from source (`public-api.ts`); production builds co
 - **seed-app** — Main application with vertical slices (`home`, `feature-a`, `feature-b`, `auth`, `dev-tools`, `not-found`), app shell under `core/`, and cross-feature adapters under `shared/`
 - **seed-common-lib** — Infrastructure only: loading indicator and correlation ID interceptors (public API in `src/public-api.ts`)
 - **global-error-handler-lib** — Infrastructure only: global error handler, HTTP error interceptor, notification service, and `provideErrorHandling()` (public API in `src/public-api.ts`)
+- **seed-i18n-lib** — Infrastructure only: signal-based runtime i18n, JSON locale files, `TranslatePipe`, language selector dialog, and `provideI18n()` (public API in `src/public-api.ts`)
+- **seed-theme-lib** — Infrastructure only: pastel design tokens, `ThemeService`, sunrise/sunset auto color mode, theme settings dialog, and `provideTheme()` (public API in `src/public-api.ts`)
 
 ```mermaid
 graph LR
@@ -103,6 +105,22 @@ graph LR
     notify["ErrorNotificationService"]
   end
 
+  subgraph i18nLib["seed-i18n-lib (infrastructure)"]
+    direction TB
+    i18nProvider["provideI18n()"]
+    translationSvc["TranslationService"]
+    translatePipe["TranslatePipe"]
+    langSelector["LanguageSelectorComponent"]
+  end
+
+  subgraph themeLib["seed-theme-lib (infrastructure)"]
+    direction TB
+    themeProvider["provideTheme()"]
+    themeSvc["ThemeService"]
+    scheduleSvc["ColorScheduleService"]
+    themeSettings["ThemeSettingsComponent"]
+  end
+
   bootstrap --> config
   config --> root
   root --> core
@@ -111,10 +129,19 @@ graph LR
   config --> loading
   config --> correlation
   config --> provider
+  config --> i18nProvider
+  config --> themeProvider
   provider --> handler
   provider --> httpErr
   handler --> notify
   httpErr --> notify
+  i18nProvider --> translationSvc
+  translationSvc --> translatePipe
+  root --> langSelector
+  root --> themeSettings
+  themeProvider --> themeSvc
+  themeSvc --> scheduleSvc
+  sharedApp --> themeSettings
 ```
 
 ### Slice Anatomy
@@ -301,7 +328,7 @@ export const FEATURE_C_ROUTES: Routes = [
 
 ```typescript
 export const FEATURE_C_NAV_ITEM: NavigationItem = {
-  label: 'Feature C',
+  labelKey: 'navigation.featureC',
   icon: 'pi pi-list',
   routerLink: '/feature-c',
 };
@@ -950,6 +977,293 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 **FormCheckboxControl Implementation:**
 - `projects/seed-app/src/app/features/dev-tools/components/slide-toggle/slide-toggle.component.ts` - `SlideToggleComponent` implements `FormCheckboxControl`
 
+### Internationalization (i18n)
+
+Runtime i18n is provided by **`seed-i18n-lib`** — an infrastructure library (same tier as `seed-common-lib`). It loads JSON locale files at runtime, keeps the active dictionary in signals, and exposes a `TranslatePipe` for templates plus a language-selector modal opened with **Ctrl/Cmd+Shift+L**.
+
+#### Architecture
+
+```mermaid
+graph TB
+  subgraph app ["seed-app"]
+    config["app.config.ts<br/>provideI18n()"]
+    assets["public/assets/i18n/<br/>en.json · hu.json · de.json"]
+    slices["features/* templates<br/>TranslatePipe"]
+    nav["*.navigation.ts<br/>labelKey"]
+    root["AppComponent<br/>LanguageSelectorComponent"]
+  end
+
+  subgraph lib ["seed-i18n-lib"]
+    provider["provideI18n()"]
+    svc["TranslationService"]
+    pipe["TranslatePipe"]
+    selector["LanguageSelectorComponent"]
+    cache["in-memory locale cache"]
+  end
+
+  config --> provider
+  provider --> svc
+  assets -->|"HTTP GET /assets/i18n/{locale}.json"| svc
+  svc --> cache
+  svc --> pipe
+  slices --> pipe
+  nav --> pipe
+  root --> selector
+  selector --> svc
+```
+
+#### Runtime flow
+
+```mermaid
+sequenceDiagram
+  participant Boot as App bootstrap
+  participant Init as provideI18n initializer
+  participant Svc as TranslationService
+  participant HTTP as HttpClient
+  participant LS as localStorage
+  participant UI as Templates / Pipe
+
+  Boot->>Init: initialize()
+  Init->>LS: read seed-app.locale
+  Init->>HTTP: GET /assets/i18n/en.json (fallback)
+  Init->>HTTP: GET /assets/i18n/{locale}.json (if different)
+  Init->>Svc: activeLocale · translations signals
+  UI->>Svc: translate(key) via TranslatePipe
+  Svc-->>UI: active locale string (fallback to en)
+  Note over UI,Svc: User opens language selector (Shift+Cmd+L)
+  UI->>Svc: setLocale(hu)
+  Svc->>HTTP: GET /assets/i18n/hu.json (if not cached)
+  Svc->>LS: persist seed-app.locale
+  Svc-->>UI: localeRevision bumps → pipe re-renders
+```
+
+#### How it works
+
+1. **`provideI18n()`** registers `I18N_CONFIG` and an app initializer that calls `TranslationService.initialize()`.
+2. **`TranslationService`** loads the fallback locale (`en`) first, then the stored or default locale. Dictionaries are cached in memory after the first fetch.
+3. **`translate(key, params?)`** resolves dot-notation keys (e.g. `features.home.welcome`) against the active dictionary, falls back to English, then returns the key in dev if missing.
+4. **`TranslatePipe`** is intentionally impure (`pure: false`) — it reads `activeLocale`, `translations`, and `localeRevision` so templates update when the locale changes under zoneless change detection.
+5. **`LanguageSelectorComponent`** is mounted in `AppComponent`, not routed. It drafts a locale, then calls `setLocale()` on Apply.
+
+#### Library layout
+
+```
+projects/seed-i18n-lib/src/lib/
+├── models/           # I18nConfig, SupportedLocale, translation types
+├── services/         # TranslationService
+├── pipes/            # TranslatePipe
+├── providers/        # provideI18n()
+├── components/       # LanguageSelectorComponent
+└── testing/          # provideI18nTesting()
+```
+
+Locale files live in [`projects/seed-app/public/assets/i18n/`](projects/seed-app/public/assets/i18n/) as editable JSON (`en.json`, `hu.json`, `de.json`).
+
+#### Setup
+
+Already wired in [`app.config.ts`](projects/seed-app/src/app/app.config.ts):
+
+```typescript
+...provideI18n({
+  defaultLocale: 'en',
+  supportedLocales: ['en', 'hu', 'de'],
+}),
+```
+
+| Config key | Default | Purpose |
+|------------|---------|---------|
+| `defaultLocale` | `en` | Used when nothing is stored |
+| `supportedLocales` | `en`, `hu`, `de` | Allowed locales |
+| `assetsPath` | `/assets/i18n` | Base URL for JSON files |
+| `storageKey` | `seed-app.locale` | `localStorage` persistence key |
+| `fallbackLocale` | `en` | Dictionary used when a key is missing |
+
+#### Usage in vertical slices
+
+**Templates** — import `TranslatePipe` and use dot-notation keys:
+
+```html
+<h1>{{ 'features.home.welcome' | translate }}</h1>
+```
+
+**Navigation slices** — store a key, not literal text, in `*.navigation.ts`:
+
+```typescript
+labelKey: 'navigation.home'
+```
+
+**TypeScript** — inject `TranslationService`:
+
+```typescript
+this.translationService.translate('features.home.welcome', { name: 'Ada' });
+```
+
+**Key convention** — add keys under `features.<sliceName>` and `navigation.*` in **all** locale JSON files. Infrastructure keys (e.g. `themeSettings.*`, `languageSelector.*`) also live in the app assets folder.
+
+#### Tests
+
+Use `provideI18nTesting()` instead of `provideI18n()` to supply config without running the app initializer.
+
+### Theming (`seed-theme-lib`)
+
+Runtime theming is provided by **`seed-theme-lib`**. Three pastel palettes (`azure`, `meadow`, `magenta-dream`) each have light and dark variants. Design tokens are global CSS custom properties; the active theme and color mode are applied as `data-theme` and `data-color-mode` on `<html>`. Settings are edited in a modal opened with **Ctrl/Cmd+Shift+S**.
+
+#### Architecture
+
+```mermaid
+graph TB
+  subgraph app ["seed-app"]
+    config["app.config.ts<br/>provideTheme() · provideThemeTranslate()"]
+    styles["styles.css<br/>imports token CSS"]
+    index["index.html<br/>FOUC guard script"]
+    slices["features/* · core/shell<br/>var(--color-*) · bg-surface"]
+    adapter["shared/adapters/theme-translate.adapter.ts"]
+    root["AppComponent<br/>ThemeSettingsComponent"]
+  end
+
+  subgraph lib ["seed-theme-lib"]
+    provider["provideTheme()"]
+    themeSvc["ThemeService"]
+    scheduleSvc["ColorScheduleService"]
+    tokens["tokens/base.css · themes.css"]
+    settings["ThemeSettingsComponent"]
+    translateToken["THEME_TRANSLATE token"]
+  end
+
+  config --> provider
+  provider --> themeSvc
+  themeSvc --> scheduleSvc
+  tokens --> styles
+  styles --> slices
+  index -->|"sets data-* before bootstrap"| slices
+  themeSvc -->|"data-theme · data-color-mode"| index
+  root --> settings
+  settings --> themeSvc
+  adapter --> translateToken
+  settings --> translateToken
+```
+
+#### Runtime flow
+
+```mermaid
+sequenceDiagram
+  participant HTML as index.html inline script
+  participant Boot as App bootstrap
+  participant Init as provideTheme initializer
+  participant Theme as ThemeService
+  participant Sched as ColorScheduleService
+  participant CSS as CSS token selectors
+  participant Modal as ThemeSettingsComponent
+
+  HTML->>HTML: read localStorage → set data-theme / data-color-mode
+  Boot->>Init: initialize()
+  Init->>Theme: hydrate from localStorage
+  Theme->>CSS: effect syncs data-theme · data-color-mode on html
+  alt auto color mode ON
+    Theme->>Sched: startWatcher()
+    Sched->>Sched: suncalc sunrise/sunset for timezone
+    Sched-->>Theme: scheduledColorMode signal
+  else auto color mode OFF
+    Theme->>Theme: effectiveColorMode = manualColorMode
+  end
+  CSS-->>CSS: [data-theme][data-color-mode] sets --color-* vars
+  Note over Modal,Theme: User opens settings (Shift+Cmd+S)
+  Modal->>Theme: applySettings({ theme, autoColorMode, manualColorMode })
+  Theme->>Theme: persist to localStorage
+  Theme->>CSS: effect updates html attributes
+```
+
+#### Color mode decision
+
+```mermaid
+flowchart TD
+  start["effectiveColorMode"] --> auto{autoColorMode?}
+  auto -->|yes| sched["ColorScheduleService.scheduledColorMode"]
+  auto -->|no| manual["manualColorMode light or dark"]
+  sched --> tz["Resolve browser timezone"]
+  tz --> coords{known coordinates?}
+  coords -->|yes| sun["suncalc getTimes → sunrise / sunset"]
+  coords -->|no| fallback["06:00–20:00 local"]
+  sun --> between{now between sunrise and sunset?}
+  between -->|yes| light["light"]
+  between -->|no| dark["dark"]
+  fallback --> hour{hour in 06:00–20:00?}
+  hour -->|yes| light
+  hour -->|no| dark
+  manual --> applied["data-color-mode on html"]
+  light --> applied
+  dark --> applied
+```
+
+#### How it works
+
+1. **Design tokens** — [`projects/seed-theme-lib/src/lib/tokens/`](projects/seed-theme-lib/src/lib/tokens/) defines semantic variables (`--color-surface`, `--color-accent`, `--gradient-aside`, etc.) per theme × color mode. [`styles.css`](projects/seed-app/src/styles.css) imports these files and maps them into Tailwind `@theme` utilities (`bg-surface`, `text-text`, `border-border`).
+2. **`ThemeService`** — signal state for `activeTheme`, `autoColorMode`, `manualColorMode`, and computed `effectiveColorMode`. An `effect` writes `document.documentElement.dataset.theme` and `dataset.colorMode`. Preferences persist in `localStorage` (`seed-app.theme`, `seed-app.theme.autoColorMode`, `seed-app.theme.manualColorMode`). Legacy stored theme `blossom` is migrated to `azure`.
+3. **`ColorScheduleService`** — when auto mode is on, maps the browser timezone to approximate coordinates, uses **suncalc** for today's sunrise/sunset, and polls every 60s (plus on `visibilitychange`). Unknown timezones fall back to 06:00–20:00 local time for light mode.
+4. **FOUC guard** — a small inline script in [`index.html`](projects/seed-app/src/index.html) reads `localStorage` and sets `data-theme` / `data-color-mode` before Angular boots.
+5. **`ThemeSettingsComponent`** — mounted in `AppComponent`. Drafts theme (dropdown), auto-schedule (slide toggle), and manual light/dark (segmented control when auto is off); Apply calls `ThemeService.applySettings()`.
+6. **i18n bridge** — the theme lib does not depend on `seed-i18n-lib` at build time. [`provideThemeTranslate()`](projects/seed-app/src/app/shared/adapters/theme-translate.adapter.ts) wires `THEME_TRANSLATE` to `TranslationService.translate()` for `themeSettings.*` keys.
+
+#### Themes
+
+| ID | Character | Header | Sidebar |
+|----|-----------|--------|---------|
+| `azure` | Default — pastel blue | `--color-surface-brand-strong` | `--gradient-aside` (soft blue gradient) |
+| `meadow` | Pastel green | brand-strong green | soft sage gradient |
+| `magenta-dream` | Magenta-based pastel | brand-strong magenta | pink-lavender gradient |
+
+Each theme defines a full light and dark token set. The shell header uses the strong brand color; the sidebar uses the aside gradient with normal text color — intentionally different surfaces.
+
+#### Library layout
+
+```
+projects/seed-theme-lib/src/lib/
+├── models/           # ThemeId, ColorMode, ThemeConfig, THEME_TRANSLATE
+├── tokens/           # base.css, themes.css
+├── services/         # ThemeService, ColorScheduleService
+├── providers/        # provideTheme()
+├── components/       # ThemeSettingsComponent
+└── testing/          # provideThemeTesting()
+```
+
+#### Setup
+
+In [`app.config.ts`](projects/seed-app/src/app/app.config.ts):
+
+```typescript
+...provideI18n({
+  defaultLocale: 'en',
+  supportedLocales: ['en', 'hu', 'de'],
+}),
+...provideTheme({
+  defaultTheme: 'azure',
+  supportedThemes: ['azure', 'meadow', 'magenta-dream'],
+}),
+provideThemeTranslate(),
+```
+
+#### Usage in vertical slices
+
+Consume semantic tokens — never hardcode theme colors in feature CSS:
+
+```css
+.card {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+```
+
+```html
+<div class="bg-surface text-text border-border">...</div>
+```
+
+Do **not** add per-slice `:root` blocks or `prefers-color-scheme` rules. Theming is global infrastructure.
+
+#### Tests
+
+Use `provideThemeTesting()` instead of `provideTheme()` to supply config and a pass-through `THEME_TRANSLATE` without running the app initializer.
+
 ### Keyboard Shortcuts
 
 - **Ctrl+Shift+E** / **Cmd+Shift+E** - Open error testing modal
@@ -957,6 +1271,8 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 - **Ctrl+Shift+U** / **Cmd+Shift+U** - Open signup modal
 - **Ctrl+Shift+I** / **Cmd+Shift+I** - Open signin modal
 - **Ctrl+Shift+C** / **Cmd+Shift+C** - Open components test component to show slide toggle component to demonstrate how it work
+- **Ctrl+Shift+L** / **Cmd+Shift+L** - Open language selector dialog (English, Hungarian, German)
+- **Ctrl+Shift+S** / **Cmd+Shift+S** - Open theme settings dialog (pastel themes, auto light/dark schedule)
 
 ### Resources
 
@@ -970,7 +1286,7 @@ Signal Forms are marked with `// SignalForm` comments throughout the codebase. H
 
 **Lint status:** ESLint reports **0 errors** across the workspace. Fifteen **intentional warnings** remain in `tools/eslint-rules/example-deprecated.ts` and `tools/eslint-rules/detect-type-assertion.ts` — these files exist to validate custom rules and are excluded from cleanup.
 
-**Planned seed features** (auth guards, API layer, i18n, etc.) are listed in [NICETOHAVE.md](./NICETOHAVE.md).
+**Planned seed features** (auth guards, API layer, etc.) are listed in [NICETOHAVE.md](./NICETOHAVE.md).
 
 **Maintenance notes:**
 - `seed-common-lib` and `global-error-handler-lib` may still contain legacy source under `src/lib/` that is no longer exported from `public-api.ts`; dev-tools UI and mock HTTP live in the `features/dev-tools/` slice.
