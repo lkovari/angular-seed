@@ -21,6 +21,9 @@ import { SignupSigninComponent } from './features/auth';
 import {
   LanguageSelectorComponent,
 } from '../../../seed-i18n-lib/src/public-api';
+import {
+  ThemeSettingsComponent,
+} from '../../../seed-theme-lib/src/public-api';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +35,7 @@ import {
     SignupSigninComponent,
     ComponentsTestsComponent,
     LanguageSelectorComponent,
+    ThemeSettingsComponent,
   ],
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +47,7 @@ export class AppComponent implements OnDestroy {
   signupSignin = viewChild(SignupSigninComponent);
   componentsTests = viewChild(ComponentsTestsComponent);
   languageSelector = viewChild(LanguageSelectorComponent);
+  themeSettings = viewChild(ThemeSettingsComponent);
 
   title = 'seed-app';
   showErrorModal = signal(false);
@@ -99,6 +104,11 @@ export class AppComponent implements OnDestroy {
       return;
     }
 
+    if (this.handleModShiftShortcut(event, 's')) {
+      this.openThemeSettings();
+      return;
+    }
+
     if (this.handleModShiftShortcut(event, 'c')) {
       this.openComponentsTests();
     }
@@ -148,6 +158,13 @@ export class AppComponent implements OnDestroy {
 
   openLanguageSelector(): void {
     const component = this.languageSelector();
+    if (component) {
+      component.openModal();
+    }
+  }
+
+  openThemeSettings(): void {
+    const component = this.themeSettings();
     if (component) {
       component.openModal();
     }

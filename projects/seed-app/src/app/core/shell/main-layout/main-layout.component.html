@@ -1,4 +1,4 @@
-<div class="layout-container">
+<div class="layout-container" [class.layout-container--mobile]="isMobileView()">
   <header class="bg-surface-brand-strong text-neutral-inverted">
     <app-header
       (sidebarVisibleChange)="toggleSidebar()"
@@ -28,7 +28,7 @@
   <main>
     <router-outlet />
   </main>
-  <footer class="border-t border-gray-300 dark:border-gray-600">
+  <footer class="border-t border-border">
     <app-footer />
   </footer>
 </div>

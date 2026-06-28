@@ -6,17 +6,17 @@
 @source "../../../**/*.{html,ts}";
 
 @theme {
-  --color-surface-brand-strong: #1e40af;
-  --color-surface-brand: #2563eb;
-  --color-neutral-inverted: #ffffff;
-  --color-neutral-muted: #6b7280;
-  --color-danger: #dc2626;
-  --color-success: #16a34a;
-  --color-warning: #f97316;
-  --color-warning-hover: #ea580c;
-  --color-border: #d1d5db;
-  --color-surface: #ffffff;
-  --color-text: #1f2937;
-  --color-accent: #3b82f6;
-  --color-accent-hover: #2563eb;
+  --color-surface-brand-strong: #5b8fd4;
+  --color-surface-brand: #7eb3e8;
+  --color-neutral-inverted: #f5f9ff;
+  --color-neutral-muted: #7a94b8;
+  --color-danger: #e07070;
+  --color-success: #7cb88a;
+  --color-warning: #e8b86d;
+  --color-warning-hover: #d9a456;
+  --color-border: #d4e4f8;
+  --color-surface: #f5f9ff;
+  --color-text: #354a5e;
+  --color-accent: #93c5fd;
+  --color-accent-hover: #7eb3e8;
 }

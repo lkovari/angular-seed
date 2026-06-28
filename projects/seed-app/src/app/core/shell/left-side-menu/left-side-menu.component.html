@@ -1,19 +1,16 @@
-<div class="bg-surface-brand-strong text-neutral-inverted flex flex-row p-5">
-  <nav class="flex flex-col items-start w-full">
-    <ul class="w-full">
-      @for (menuItem of menuItems(); track $index) {
-        <li class="my-2 w-full">
-          <a
-            class="flex items-center space-x-4 w-full cursor-pointer"
-            [routerLink]="menuItem.routerLink"
-            (click)="menuItemSelected.emit()"
-          >
-            <i [class]="menuItem.icon"></i>
-            <span class="whitespace-nowrap">{{ menuItem.labelKey | translate }}</span>
-          </a>
-        </li>
-      }
-    </ul>
-  </nav>
-  <div class="border-l border-gray-300 dark:border-gray-600 h-full ml-4"></div>
-</div>
+<nav class="sidebar-menu flex flex-col items-start w-full p-5 h-full">
+  <ul class="w-full">
+    @for (menuItem of menuItems(); track $index) {
+      <li class="my-2 w-full">
+        <a
+          class="flex items-center space-x-4 w-full cursor-pointer"
+          [routerLink]="menuItem.routerLink"
+          (click)="menuItemSelected.emit()"
+        >
+          <i [class]="menuItem.icon"></i>
+          <span class="whitespace-nowrap">{{ menuItem.labelKey | translate }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

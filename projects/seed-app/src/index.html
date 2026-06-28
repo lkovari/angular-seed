@@ -1,11 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="azure" data-color-mode="light">
   <head>
     <meta charset="utf-8" />
     <title>SeedApp</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('seed-app.theme');
+          var auto = localStorage.getItem('seed-app.theme.autoColorMode');
+          var manual = localStorage.getItem('seed-app.theme.manualColorMode');
+          var supported = ['azure', 'meadow', 'magenta-dream'];
+          if (theme === 'blossom') {
+            theme = 'azure';
+          }
+          if (theme && supported.indexOf(theme) !== -1) {
+            document.documentElement.dataset.theme = theme;
+          }
+          var colorMode = 'light';
+          if (auto === 'false' && (manual === 'light' || manual === 'dark')) {
+            colorMode = manual;
+          }
+          document.documentElement.dataset.colorMode = colorMode;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>

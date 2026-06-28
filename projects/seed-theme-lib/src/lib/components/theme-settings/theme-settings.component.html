@@ -1,0 +1,108 @@
+@if (showModal()) {
+  <div
+    class="modal-overlay animate-fade-in"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="translate('themeSettings.title')"
+    (click)="closeModal()"
+  >
+    <div
+      class="modal-container modal-container--md animate-slide-up"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2>{{ translate('themeSettings.title') }}</h2>
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeModal()"
+          [attr.aria-label]="translate('themeSettings.close')"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="theme-field">
+            <span class="theme-field__label">{{
+              translate('themeSettings.themeLabel')
+            }}</span>
+            <select
+              class="theme-select"
+              (change)="onThemeChange($event)"
+            >
+              @for (theme of supportedThemes; track theme) {
+                <option [value]="theme" [selected]="draftTheme() === theme">
+                  {{ translate(themeLabelKey(theme)) }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <div class="theme-toggle-row">
+            <span class="theme-toggle-label">{{
+              translate('themeSettings.autoSchedule')
+            }}</span>
+            <label class="theme-slide-toggle">
+              <input
+                type="checkbox"
+                role="switch"
+                [checked]="draftAutoColorMode()"
+                (change)="onAutoColorModeChange($event)"
+              />
+              <span class="theme-slide-toggle__slider"></span>
+            </label>
+          </div>
+
+          @if (!draftAutoColorMode()) {
+            <fieldset class="theme-fieldset">
+              <legend class="theme-legend">
+                {{ translate('themeSettings.colorModeLabel') }}
+              </legend>
+              <div class="color-mode-segmented">
+                <button
+                  type="button"
+                  class="color-mode-btn"
+                  [class.color-mode-btn--active]="draftManualColorMode() === 'light'"
+                  (click)="selectManualColorMode('light')"
+                >
+                  {{ translate('themeSettings.light') }}
+                </button>
+                <button
+                  type="button"
+                  class="color-mode-btn"
+                  [class.color-mode-btn--active]="draftManualColorMode() === 'dark'"
+                  (click)="selectManualColorMode('dark')"
+                >
+                  {{ translate('themeSettings.dark') }}
+                </button>
+              </div>
+            </fieldset>
+          }
+        </div>
+
+        <div class="theme-actions">
+          <button type="button" class="theme-btn theme-btn--secondary" (click)="closeModal()">
+            {{ translate('themeSettings.cancel') }}
+          </button>
+          <button type="button" class="theme-btn theme-btn--primary" (click)="applySettings()">
+            {{ translate('themeSettings.apply') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

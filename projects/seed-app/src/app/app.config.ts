@@ -14,6 +14,8 @@ import {
   loadingInterceptor,
 } from '../../../seed-common-lib/src/public-api';
 import { provideI18n } from '../../../seed-i18n-lib/src/public-api';
+import { provideTheme } from '../../../seed-theme-lib/src/public-api';
+import { provideThemeTranslate } from './shared/adapters/theme-translate.adapter';
 
 import { routes } from './app.routes';
 
@@ -29,6 +31,11 @@ export const appConfig: ApplicationConfig = {
       defaultLocale: 'en',
       supportedLocales: ['en', 'hu', 'de'],
     }),
+    ...provideTheme({
+      defaultTheme: 'azure',
+      supportedThemes: ['azure', 'meadow', 'magenta-dream'],
+    }),
+    provideThemeTranslate(),
     ...provideErrorHandling({
       enableGlobalHandler: true,
       enableHttpInterceptor: true,

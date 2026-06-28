@@ -45,6 +45,9 @@
       ],
       "seed-i18n-lib": [
         "./dist/seed-i18n-lib"
+      ],
+      "seed-theme-lib": [
+        "./dist/seed-theme-lib"
       ]
     },
 
@@ -74,6 +77,12 @@
     },
     {
       "path": "./projects/seed-i18n-lib/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/seed-theme-lib/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/seed-theme-lib/tsconfig.spec.json"
     },
     {
       "path": "./projects/seed-app/tsconfig.spec.json"

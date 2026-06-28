@@ -1,4 +1,20 @@
 {
+  "themeSettings": {
+    "title": "Téma beállítások",
+    "themeLabel": "Téma",
+    "autoSchedule": "Automatikus világos/sötét napkelte és napnyugta alapján",
+    "colorModeLabel": "Színmód",
+    "light": "Világos",
+    "dark": "Sötét",
+    "apply": "Alkalmaz",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "themes": {
+      "azure": "Azure",
+      "meadow": "Meadow",
+      "magenta-dream": "Magenta Dream"
+    }
+  },
   "languageSelector": {
     "title": "Nyelv kiválasztása",
     "label": "Nyelv",

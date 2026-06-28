@@ -199,6 +199,43 @@
           "defaultConfiguration": "production"
         }
       }
+    },
+    "seed-theme-lib": {
+      "projectType": "library",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "css"
+        }
+      },
+      "root": "projects/seed-theme-lib",
+      "sourceRoot": "projects/seed-theme-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "**/*.ts",
+              "**/*.html"
+            ]
+          }
+        },
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/seed-theme-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/seed-theme-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/seed-theme-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
     }
   },
   "schematics": {

@@ -1,0 +1,5 @@
+:root {
+  --layout-sidebar-width: 12rem;
+  --modal-backdrop-blur: 10px;
+  --radius-modal: 0.375rem;
+}

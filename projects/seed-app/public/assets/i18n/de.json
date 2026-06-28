@@ -1,4 +1,20 @@
 {
+  "themeSettings": {
+    "title": "Design-Einstellungen",
+    "themeLabel": "Design",
+    "autoSchedule": "Automatisch hell/dunkel nach Sonnenauf- und -untergang",
+    "colorModeLabel": "Farbmodus",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "apply": "Anwenden",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "themes": {
+      "azure": "Azure",
+      "meadow": "Meadow",
+      "magenta-dream": "Magenta Dream"
+    }
+  },
   "languageSelector": {
     "title": "Sprache auswählen",
     "label": "Sprache",
