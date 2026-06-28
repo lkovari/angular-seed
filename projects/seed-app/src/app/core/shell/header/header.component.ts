@@ -15,7 +15,7 @@ import { TranslatePipe } from '../../../../../../seed-i18n-lib/src/public-api';
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
-  lastUpdateDate = new Date('06/2782026 03:25 PM');
+  lastUpdateDate = new Date('2026-06-28T15:25:00');
   sidebarVisibleChange = output();
 
   // Inputs from parent
