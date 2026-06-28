@@ -1,3 +1,4 @@
+import { APP_BASE_HREF } from '@angular/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -112,5 +113,36 @@ describe('TranslationService', () => {
     await service.setLocale('en');
     expect(service.activeLocale()).toBe('en');
     expect(service.translate('navigation.home')).toBe('Home');
+  });
+
+  it('should prefix locale asset URL with APP_BASE_HREF', async () => {
+    TestBed.resetTestingModule();
+    localStorage.clear();
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: APP_BASE_HREF, useValue: '/angular-seed/' },
+        {
+          provide: I18N_CONFIG,
+          useValue: {
+            ...DEFAULT_I18N_CONFIG,
+            assetsPath: '/assets/i18n',
+          },
+        },
+      ],
+    });
+
+    const scopedService = TestBed.inject(TranslationService);
+    const scopedHttpMock = TestBed.inject(HttpTestingController);
+
+    const initPromise = scopedService.initialize();
+    const request = scopedHttpMock.expectOne('/angular-seed/assets/i18n/en.json');
+    request.flush({ navigation: { home: 'Home' } });
+    await initPromise;
+
+    expect(scopedService.translate('navigation.home')).toBe('Home');
+    scopedHttpMock.verify();
   });
 });

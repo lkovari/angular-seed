@@ -1,3 +1,4 @@
+import { APP_BASE_HREF } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -14,6 +15,7 @@ import { interpolate } from '../utils/interpolate';
 export class TranslationService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(I18N_CONFIG);
+  private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
   private readonly localeCache = new Map<SupportedLocale, TranslationDictionary>();
   private fallbackDictionary: TranslationDictionary = {};
 
@@ -80,11 +82,31 @@ export class TranslationService {
       return;
     }
 
-    const url = `${this.config.assetsPath}/${locale}.json`;
+    const url = this.localeAssetUrl(locale);
     const dictionary = await firstValueFrom(
       this.http.get<TranslationDictionary>(url),
     );
     this.localeCache.set(locale, dictionary);
+  }
+
+  private localeAssetUrl(locale: SupportedLocale): string {
+    const assetPath = this.config.assetsPath.replace(/\/$/, '');
+    const fileName = `${locale}.json`;
+
+    if (
+      assetPath.startsWith('http://') ||
+      assetPath.startsWith('https://')
+    ) {
+      return `${assetPath}/${fileName}`;
+    }
+
+    if (assetPath.startsWith('/')) {
+      const base =
+        this.baseHref === '/' ? '' : this.baseHref.replace(/\/$/, '');
+      return `${base}${assetPath}/${fileName}`;
+    }
+
+    return `${assetPath}/${fileName}`;
   }
 
   private applyActiveLocale(locale: SupportedLocale): void {
